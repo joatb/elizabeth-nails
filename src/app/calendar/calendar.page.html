@@ -1,0 +1,14 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      Calendario
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="info" fill="solid">Cerrar sesión</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding" [fullscreen]="true">
+  <full-calendar [options]="calendarOptions" [events]="eventsPromise | async"></full-calendar>
+</ion-content>
