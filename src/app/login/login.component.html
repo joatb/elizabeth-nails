@@ -1,0 +1,15 @@
+<div>
+
+  <div>
+    <input type="email" placeholder="Email" [(ngModel)]="email" />
+    <input type="password" placeholder="Password" [(ngModel)]="password" />
+
+    <button (click)="login(email, password)">
+      Login
+    </button>
+
+    <button (click)="logout()">
+      Logout
+    </button>
+  </div>
+</div>
