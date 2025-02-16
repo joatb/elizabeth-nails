@@ -1,15 +1,16 @@
 <div>
-
   <div>
-    <input type="email" placeholder="Email" [(ngModel)]="email" />
-    <input type="password" placeholder="Password" [(ngModel)]="password" />
+    <ion-input type="email" placeholder="Email" helperText="Introduzca el correo electrónico"
+    errorText="Correo no valido" autocomplete="email" [(ngModel)]="email" (keyup.enter)="login(email, password)">
+      <ion-icon slot="start" name="person" aria-hidden="true"></ion-icon>
+    </ion-input>
+    <ion-input type="password" autocomplete="off" placeholder="Contraseña" [(ngModel)]="password" helperText="Introduzca su contraseña" (keyup.enter)="login(email, password)">
+      <ion-icon slot="start" name="lock-closed" aria-hidden="true"></ion-icon>
+      <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+    </ion-input>
 
-    <button (click)="login(email, password)">
-      Login
-    </button>
-
-    <button (click)="logout()">
-      Logout
-    </button>
+    <ion-button (click)="login(email, password)">
+      Iniciar Sesión
+    </ion-button>
   </div>
 </div>

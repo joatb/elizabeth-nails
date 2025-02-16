@@ -1,0 +1,19 @@
+<ion-header [translucent]="true">
+    <ion-toolbar color="primary">
+        <ion-title>
+            {{title}}
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <form (ngSubmit)="submit()" [formGroup]="form">
+        <div class="input-group">
+            <ion-card>
+                <ion-item>
+                    <ion-input aria-label="Nombre" type="text" placeholder="Nombre" formControlName="name"></ion-input>
+                </ion-item>
+            </ion-card>
+        </div>
+        <ion-button type="submit" expand="block" [disabled]="!form.valid">Crear</ion-button>
+    </form>
+</ion-content>

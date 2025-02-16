@@ -3,8 +3,11 @@
     <ion-title>
       Calendario
     </ion-title>
-    <ion-buttons slot="end">
-      <ion-button color="info" fill="solid">Cerrar sesión</ion-button>
+    <ion-buttons slot="end" style="gap: 1rem;">
+      <ion-button (click)="authService.logout()" color="info" fill="solid">Cerrar sesión</ion-button>
+      <ion-button (click)="authService.logout()" fill="clear">
+        <ion-icon name="ellipsis-vertical"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>

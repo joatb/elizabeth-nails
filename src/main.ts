@@ -5,7 +5,7 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { addIcons } from 'ionicons';
-import { addOutline, chevronUpCircle } from 'ionicons/icons';
+import { addOutline, chevronUpCircle, ellipsisVertical, ellipsisVerticalOutline, eye, lockClosed, person } from 'ionicons/icons';
 
 
 bootstrapApplication(AppComponent, {
@@ -23,5 +23,9 @@ addIcons({
 
 addIcons({
   chevronUpCircle,
-  addOutline
+  addOutline,
+  eye,
+  lockClosed,
+  person,
+  ellipsisVertical
 })
