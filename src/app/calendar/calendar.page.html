@@ -3,15 +3,30 @@
     <ion-title>
       Calendario
     </ion-title>
-    <ion-buttons slot="end" style="gap: 1rem;">
-      <ion-button (click)="authService.logout()" color="info" fill="solid">Cerrar sesión</ion-button>
-      <ion-button (click)="authService.logout()" fill="clear">
-        <ion-icon name="ellipsis-vertical"></ion-icon>
+    <ion-buttons slot="end" style="gap: .5rem;">
+      <ion-button (click)="authService.logout()" color="info" fill="solid">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
+      <ion-button id="openModal" color="info" fill="solid">Configurar horario</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" [fullscreen]="true">
+<ion-content class="ion-padding" [fullscreen]="true" style="max-height: 100vh;">
   <full-calendar [options]="calendarOptions" [events]="eventsPromise | async"></full-calendar>
+  <ion-modal #modal trigger="openModal" (willPresent)="onWillPresent()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Horarios</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modalClose()"> Cerrar </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-nav #nav></ion-nav>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

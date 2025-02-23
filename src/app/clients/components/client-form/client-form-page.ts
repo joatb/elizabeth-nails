@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SharedModule } from '../../../modules/shared.module';
 import { ClientsProvider } from '../../../providers/clients.provider';
-
+import { ModalController } from '@ionic/angular/standalone';
 
 
 @Component({
@@ -18,7 +18,7 @@ export class ClientFormPage implements OnInit {
   
   constructor(
     private fb: FormBuilder,
-    private clientProvider: ClientsProvider
+    private modalCtrl: ModalController
   ) {}
 
   ngOnInit() {
@@ -29,7 +29,7 @@ export class ClientFormPage implements OnInit {
 
   async submit() {
     if(this.form.valid) {
-      await this.clientProvider.createClient(this.form.value);
+      this.modalCtrl.dismiss(this.form.value);
     }
   }
 }

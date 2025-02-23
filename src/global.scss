@@ -41,13 +41,22 @@
 @import '@ionic/angular/css/palettes/dark.system.css';
 
 
+@import "theme/full-calendar.scss";
+
+
 ion-toolbar {
     --opacity: 0.5;
 }
 
 ion-header {
+    box-shadow: none!important;
+    filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
+    -webkit-filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
     ion-toolbar {
         padding: 0 .5rem;
+    }
+    ion-title {
+        font-weight: 600;
     }
 }
 

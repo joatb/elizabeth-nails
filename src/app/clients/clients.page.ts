@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular'; // Angular Data Grid Component
 import type { ColDef, ICellRendererParams } from 'ag-grid-community'; // Column Definition Type Interface
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
@@ -26,12 +26,20 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 @Component({
   standalone: true,
-  template: `<ion-button (click)="buttonClicked()">Nueva cita</ion-button>
+  template: `
+    <div *ngFor="let button of buttons">
+      <ion-button [color]="button.color ? button.color : 'primary'" (click)="buttonClicked(button.action)">
+        <ion-icon *ngIf="button.icon && !button.label" slot="icon-only" [name]="button.icon"></ion-icon>
+        <ion-icon *ngIf="button.icon && button.label" slot="start" [name]="button.icon"></ion-icon>
+        {{button.label}}
+      </ion-button>
+    </div>
   `,
   imports: [SharedModule]
 })
-export class CustomButtonComponent implements ICellRendererAngularComp {
-  private params!: ICellRendererParams;
+class CustomButtonComponent implements ICellRendererAngularComp {
+  private params!: ICellRendererParams & { buttons: Array<{ label?: string, icon?: string, color?: string, action: string }>, reload: () => void };
+  public buttons: Array<{ label?: string, icon?: string, color?: string, action: string }> = [];
 
   constructor(
     private clientsProvider: ClientsProvider,
@@ -40,20 +48,25 @@ export class CustomButtonComponent implements ICellRendererAngularComp {
 
   }
 
-  agInit(params: ICellRendererParams): void {
+  agInit(params: ICellRendererParams & { buttons: Array<{ label?: string, icon?: string, color?: string, action: string }>, reload: () => void }): void {
     this.params = params;
+    this.buttons = params.buttons || [];
   }
   refresh(params: ICellRendererParams) {
     return true;
   }
-  buttonClicked() {
-    alert(`Clicked: ${this.params.data.name}`);
+  buttonClicked(action: string) {
+    if (action === 'delete') {
+      this.delete();
+    } else {
+      alert(`Clicked: ${this.params.data.name}`);
+    }
   }
 
   async delete(){
     const alert = await this.alertCtrl.create({
-        header: 'Cerrar Sesión',
-        message: 'Quiere cerrar la sesión?',
+        header: 'Eliminar cliente',
+        message: 'Quieres eliminar este cliente?',
         buttons: [
             {
                 text: 'Cancelar',
@@ -64,6 +77,7 @@ export class CustomButtonComponent implements ICellRendererAngularComp {
                 role: 'confirm',
                 handler: async () => {
                   await this.clientsProvider.deleteClient(this.params.data.id);
+                  this.params.reload();
                 },
             },
         ],
@@ -94,7 +108,18 @@ export class ClientsPage implements OnInit{
     { field: "last_notification", headerName: "Fecha última notificación", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "appointments", headerName: "Total de citas", flex: 1, autoHeight: true },
-    { field: "Whatsapp", headerName: "", cellRenderer: CustomButtonComponent, flex: 1, autoHeight: true },
+    { 
+      field: "actions", 
+      headerName: "", 
+      cellRenderer: CustomButtonComponent,
+      cellRendererParams: {
+        buttons: [
+          { icon: 'trash-outline', color: 'danger', action: 'delete' }
+        ],
+        reload: () => this.reload()
+      },
+      flex: 1, 
+      autoHeight: true },
   ];
 
   localeText = localeText;
@@ -105,10 +130,12 @@ export class ClientsPage implements OnInit{
     private clientsProvider: ClientsProvider,
     private modalCtrl: ModalController,
     private toastCtrl: ToastController,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.clients = await this.clientsProvider.listClients();
+    this.rowData = [];
 
     this.clients.documents.forEach(client => {
       this.rowData.push({
@@ -122,18 +149,24 @@ export class ClientsPage implements OnInit{
     });
 
     this.agGrid.api?.setGridOption('rowData', this.rowData);
+    this.cdr.detectChanges(); // Forzar la detección de cambios
   }
 
-  addClient() {
-    this.modalCtrl.create({
+  async addClient() {
+    const modal = await this.modalCtrl.create({
       component: ClientFormPage,
       componentProps: {
         title: 'Nuevo Cliente',
         client: null
       }
-    }).then(modal => {
-      modal.present();
-    })
+    });
+
+    await modal.present();
+
+    modal.onDidDismiss().then(async (event) => {
+      await this.clientsProvider.createClient(event.data);
+      this.reload();
+    });
   }
 
   async editClient(event: any) {
@@ -154,5 +187,16 @@ export class ClientsPage implements OnInit{
 
       toast.present();
     }
+  }
+
+  async reload() {
+    this.ngOnInit();
+
+    const toast = await this.toastCtrl.create({
+      message: "Se ha actualizado la tabla",
+      duration: 2500,
+    });
+
+    toast.present();
   }
 }

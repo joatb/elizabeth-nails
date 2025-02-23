@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
@@ -6,12 +6,14 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import { SharedModule } from '../modules/shared.module';
-import { AuthService } from '../services/auth.service';
-import { SchedulesProvider } from '../providers/schedules.provider';
-import { Models } from 'appwrite';
 import { ActionSheetController } from '@ionic/angular';
+import { IonNav, IonModal } from '@ionic/angular/standalone';
+import { Models } from 'appwrite';
 import { dateFormatter } from '../../shared/date-formatter/date-formatter';
+import { SharedModule } from '../modules/shared.module';
+import { SchedulesProvider } from '../providers/schedules.provider';
+import { AuthService } from '../services/auth.service';
+import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
 
 @Component({
   selector: 'app-calendar',
@@ -21,15 +23,21 @@ import { dateFormatter } from '../../shared/date-formatter/date-formatter';
 })
 export class CalendarPage implements OnInit{
 
+  component = 'CalendarPage';
   schedules: Models.DocumentList<Models.Document> | null = null;
   calendarOptions?: CalendarOptions;
 
   eventsPromise?: Promise<EventInput[]>;
 
+  showModalBackButton: boolean = false;
+
+  @ViewChild('nav') private nav!: IonNav;
+  @ViewChild('modal') private modal!: IonModal;
+
   constructor(
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
   ) {
     this.calendarOptions = {
       timeZone: 'Europe/Madrid',
@@ -40,7 +48,7 @@ export class CalendarPage implements OnInit{
       headerToolbar: {
         start: 'title', // will normally be on the left. if RTL, will be on the right
         center: '',
-        end: 'prev,next dayGridMonth,timeGridDay' // will normally be on the right. if RTL, will be on the left
+        end: 'prev,next dayGridMonth,timeGridDay', // will normally be on the right. if RTL, will be on the left
       },
       nowIndicator: true,
       plugins: [timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin],
@@ -73,6 +81,21 @@ export class CalendarPage implements OnInit{
 
   async ngOnInit() {
     this.schedules = await this.schedulesPvd.listSchedules();
+  }
+
+  async onWillPresent() {
+    this.nav.setRoot(CalendarScheduleComponent, {nav: this.nav});
+    const canGoBack = await this.nav.canGoBack();
+    this.showModalBackButton = canGoBack;
+  }
+
+  async modalClose() {
+    const canGoBack = await this.nav.canGoBack();
+    if(canGoBack) {
+      this.nav.pop();
+    } else {
+      this.modal.dismiss();
+    }
   }
 
   async handleDateClick(arg: any) {

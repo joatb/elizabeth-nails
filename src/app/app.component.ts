@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ErrorHandler } from '@angular/core';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { SharedModule } from './modules/shared.module';
+import { GlobalErrorHandler } from '../core/global-error-handler/global-error-handler.service';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +8,6 @@ import { SharedModule } from './modules/shared.module';
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  constructor() {}
+  constructor() {
+  }
 }
