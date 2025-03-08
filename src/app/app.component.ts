@@ -1,6 +1,5 @@
-import { Component, ErrorHandler } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { GlobalErrorHandler } from '../core/global-error-handler/global-error-handler.service';
+import { Component } from '@angular/core';
+import { AnimationController, IonApp, IonRouterOutlet, AnimationBuilder } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +7,7 @@ import { GlobalErrorHandler } from '../core/global-error-handler/global-error-ha
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
+
   constructor() {
   }
 }

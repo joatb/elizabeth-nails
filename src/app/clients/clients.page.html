@@ -1,10 +1,12 @@
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>
       Clientes
     </ion-title>
     <ion-buttons slot="end">
-      <ion-button color="info" fill="solid">Cerrar sesión</ion-button>
+      <ion-button (click)="authService.logout()" color="none" fill="solid">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>

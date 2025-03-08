@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
-import { AlertController, ToastController, IonNav } from '@ionic/angular/standalone';
+import { AlertController, IonNav } from '@ionic/angular/standalone';
 import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular';
 import { AllCommunityModule, ColDef, ICellRendererParams, ModuleRegistry } from 'ag-grid-community';
 import { Models } from 'appwrite';
@@ -7,6 +7,7 @@ import { localeText } from '../../../../locale/ag-grid.locale';
 import { getDayString } from '../../../../shared/date-formatter/date-formatter';
 import { SharedModule } from '../../../modules/shared.module';
 import { SchedulesProvider } from '../../../providers/schedules.provider';
+import { AlertService } from '../../../services/alert.service';
 import { AuthService } from '../../../services/auth.service';
 import { CalendarScheduleFormComponent } from '../calendar-schedule-form/calendar-schedule-form.component';
 
@@ -120,7 +121,7 @@ export class CalendarScheduleComponent {
   constructor(
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
-    private toastCtrl: ToastController,
+    private alertService: AlertService,
     private cdr: ChangeDetectorRef,
   ) {
       
@@ -142,19 +143,18 @@ export class CalendarScheduleComponent {
     this.cdr.detectChanges(); // Forzar la detección de cambios
   }
 
+  async ionViewDidEnter() {
+    this.ngOnInit();
+  }
+
 
   addSchedule(){
-    this.nav.push(CalendarScheduleFormComponent);
+    this.nav.push(CalendarScheduleFormComponent, {nav: this.nav});
   }
 
   async reload() {
     this.ngOnInit();
 
-    const toast = await this.toastCtrl.create({
-      message: "Se ha actualizado la tabla",
-      duration: 2500,
-    });
-
-    toast.present();
+    await this.alertService.presentToast("Se ha actualizado la tabla", 2500);
   }
 }

@@ -54,6 +54,9 @@ ion-header {
     -webkit-filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
     ion-toolbar {
         padding: 0 .5rem;
+        background: var(--ion-color-primary);  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #ffdde1, var(--ion-color-primary));  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #ffdde1, var(--ion-color-primary)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     }
     ion-title {
         font-weight: 600;
@@ -66,4 +69,58 @@ ion-header {
     --max-width: 100%;
     --max-height: 100%;
     --border-radius: 0;
+}
+
+// ion-toast
+ion-toast.custom-toast {
+    --background: var(--ion-color-secondary);
+    --box-shadow: 3px 3px 10px 0 rgba(0, 0, 0, 0.2);
+    --color: var(--ion-color-secondary-contrast);
+}
+
+ion-toast.custom-toast::part(button) {
+    border-left: 1px solid #d2d2d2;
+    color: var(--ion-color-secondary-contrast);
+    font-size: 15px;
+}
+
+
+ion-button {
+    background-image: linear-gradient(to right, var(--ion-color-primary) 0%, #F7BB97  51%, var(--ion-color-primary)  100%)
+}
+
+ion-button {
+   text-align: center;
+   text-transform: uppercase;
+   transition: 0.5s;
+   background-size: 200% auto;
+   color: white;            
+   box-shadow: 0 0 20px #eee;
+   border-radius: 4px;
+ }
+
+ ion-button:hover {
+   background-position: right center; /* change the direction of the change here */
+   color: #fff;
+   text-decoration: none;
+ }
+
+ ion-fab-button::part(native){
+    background-image: linear-gradient(to right, var(--ion-color-primary) 0%, #F7BB97  51%, var(--ion-color-primary)  100%)
+ }
+
+ ion-fab-button::part(native) {
+    text-align: center;
+    text-transform: uppercase;
+    transition: 0.5s;
+    background-size: 200% auto;
+    color: white;            
+    box-shadow: 0 0 20px #eee;
+    display: block;
+ }
+
+ ion-fab-button::part(native):hover {
+    background-position: right center; /* change the direction of the change here */
+    color: #fff;
+    text-decoration: none;
   }

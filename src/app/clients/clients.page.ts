@@ -10,7 +10,8 @@ import { dateFormatter } from '../../shared/date-formatter/date-formatter';
 import { AlertController } from '@ionic/angular/standalone';
 import { ModalController } from '@ionic/angular/standalone';
 import { ClientFormPage } from './components/client-form/client-form-page';
-import { ToastController } from '@ionic/angular/standalone';
+import { AlertService } from '../services/alert.service';
+import { AuthService } from '../services/auth.service';
 
 interface ClientsRowData  {
   id: string;
@@ -127,9 +128,10 @@ export class ClientsPage implements OnInit{
   private clients: Models.DocumentList<Models.Document> | null = null;
 
   constructor(
+    protected authService: AuthService,
     private clientsProvider: ClientsProvider,
     private modalCtrl: ModalController,
-    private toastCtrl: ToastController,
+    private alertService: AlertService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -172,31 +174,15 @@ export class ClientsPage implements OnInit{
   async editClient(event: any) {
     try {
       await this.clientsProvider.updateClient(event.data.id, {name: event.data.name});
-      const toast = await this.toastCtrl.create({
-        message: "Cliente actualizado",
-        duration: 2500,
-      });
-
-      toast.present();
+      await this.alertService.presentToast('Cliente actualizado', 2500);
     } catch (error) {
       event.api.undoCellEditing();
-      const toast = await this.toastCtrl.create({
-        message: "Error al actualizar el cliente",
-        duration: 2500,
-      });
-
-      toast.present();
+      await this.alertService.presentToast('Error al actualizar el cliente', 2500);
     }
   }
 
   async reload() {
     this.ngOnInit();
-
-    const toast = await this.toastCtrl.create({
-      message: "Se ha actualizado la tabla",
-      duration: 2500,
-    });
-
-    toast.present();
+    await this.alertService.presentToast('Se ha actualizado la tabla', 2500);
   }
 }

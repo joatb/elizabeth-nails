@@ -10,6 +10,10 @@ export class SchedulesProvider {
     private collection: string = '67b1bb1d0025dd7894e0';
 
     constructor(private dbService: DBService) { }
+
+    createSchedule(schedule: any) {
+        return this.dbService.createDocument(this.database, this.collection, schedule);
+    }
     
     listSchedules() {
         return this.dbService.listDocuments(this.database, this.collection);

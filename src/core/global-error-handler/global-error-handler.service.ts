@@ -1,10 +1,10 @@
 // filepath: /home/jtorrents/DEV/_personal/elizabeth-nails/elizabeth-nails-app/src/app/interceptors/global-error-handler.ts
 import { ErrorHandler, Injectable, NgZone } from '@angular/core';
-import { ToastController } from '@ionic/angular';
+import { AlertService } from '../../app/services/alert.service';
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  constructor(private toastCtrl: ToastController, private ngZone: NgZone) {}
+  constructor(private alertService: AlertService, private ngZone: NgZone) {}
 
   handleError(error: any): void {
     let errorMessage = 'An unknown error occurred!';
@@ -25,12 +25,6 @@ export class GlobalErrorHandler implements ErrorHandler {
   }
 
   private async showErrorToast(message: string) {
-    const toast = await this.toastCtrl.create({
-      message,
-      duration: 3000,
-      position: 'top',
-      color: 'danger'
-    });
-    toast.present();
+    await this.alertService.presentErrorToast(message, 3000);
   }
 }

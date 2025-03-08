@@ -4,7 +4,7 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 
 import { ErrorHandler } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, trashOutline } from 'ionicons/icons';
+import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, saveOutline, trashOutline } from 'ionicons/icons';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { GlobalErrorHandler } from './core/global-error-handler/global-error-handler.service';
@@ -32,5 +32,6 @@ addIcons({
   person,
   ellipsisVertical,
   trashOutline,
-  logOutOutline
+  logOutOutline,
+  saveOutline
 })
