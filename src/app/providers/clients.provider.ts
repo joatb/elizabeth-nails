@@ -11,6 +11,9 @@ export class ClientsProvider {
 
     constructor(private dbService: DBService) { }
     
+    getClient(clientId: string) {
+        return this.dbService.getDocument(this.database, this.collection, clientId);
+    }
     listClients() {
         return this.dbService.listDocuments(this.database, this.collection);
     }

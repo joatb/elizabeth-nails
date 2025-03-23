@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { AlertController } from '@ionic/angular/standalone';
-import { Client, Databases, ID } from "appwrite";
+import { Client, Databases, ID, Query } from "appwrite";
 import { environment } from "../../environments/environment";
 
 @Injectable({
@@ -10,6 +10,7 @@ import { environment } from "../../environments/environment";
 export class DBService {
     private client: Client;
     private databases: Databases
+    private limit: number = 2500;
 
     constructor(private router: Router, private alertCtrl: AlertController) {
         this.client = new Client()
@@ -23,7 +24,12 @@ export class DBService {
         return this.databases.createDocument(databaseId, collectionId, ID.unique(), data);
     }
 
+    getDocument(databaseId: string, collectionId: string, documentId: string) {
+        return this.databases.getDocument(databaseId, collectionId, documentId);
+    }
+
     listDocuments(databaseId: string, collectionId: string, queries?: string[]) {
+        queries = queries || [Query.limit(this.limit)];
         return this.databases.listDocuments(databaseId, collectionId, queries);
     }
 

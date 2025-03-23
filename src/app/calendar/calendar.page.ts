@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarApi, CalendarOptions, EventInput } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -14,6 +14,9 @@ import { SharedModule } from '../modules/shared.module';
 import { SchedulesProvider } from '../providers/schedules.provider';
 import { AuthService } from '../services/auth.service';
 import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
+import { EventService } from '../services/event.service';
+import tippy from 'tippy.js';
+import { AppointmentsProvider } from '../providers/appointments.provider';
 
 @Component({
   selector: 'app-calendar',
@@ -25,6 +28,7 @@ export class CalendarPage implements OnInit{
 
   component = 'CalendarPage';
   schedules: Models.DocumentList<Models.Document> | null = null;
+  appointments: Models.DocumentList<Models.Document> | null = null;
   calendarOptions?: CalendarOptions;
 
   eventsPromise?: Promise<EventInput[]>;
@@ -33,11 +37,16 @@ export class CalendarPage implements OnInit{
 
   @ViewChild('nav') private nav!: IonNav;
   @ViewChild('modal') private modal!: IonModal;
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+
+  private calendarApi!: CalendarApi;
 
   constructor(
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
+    private appointmentsPvd: AppointmentsProvider,
     private actionSheetCtrl: ActionSheetController,
+    private events: EventService
   ) {
     this.calendarOptions = {
       timeZone: 'Europe/Madrid',
@@ -54,8 +63,14 @@ export class CalendarPage implements OnInit{
       plugins: [timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin],
       dateClick: (arg: any) => this.handleDateClick(arg),
       events: [
-        { title: 'Mari Angels', start: '2024-12-28 12:00:00', end: '2024-12-28 13:00:00' },
-        { title: 'Isabel Romero', start: '2024-12-29 11:00:00', end: '2024-12-29 13:00:00' },
+        { title: 'Mari Angels', start: '2025-03-23 12:00:00', end: '2025-03-23 13:00:00', extendedProps: { description: 'Uñas rojas' } },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
+        { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
         {
           title: 'Special Business Hours',
           start: '2025-02-16 08:00:00',
@@ -63,6 +78,7 @@ export class CalendarPage implements OnInit{
           rendering: 'background'
         }
       ],
+      dayMaxEventRows: true,
       eventColor: '#FE7B92',
       businessHours: [ // specify an array instead
         {
@@ -75,12 +91,72 @@ export class CalendarPage implements OnInit{
           startTime: '10:00', // 10am
           endTime: '16:00' // 4pm
         }
-      ]
+      ],
+      eventDidMount: (info) => {
+        tippy(info.el, {
+          content: info.event.extendedProps['description'],
+          trigger: 'mouseenter',
+          allowHTML: true,
+        });
+      },
     };
   }
 
+  ngAfterViewInit() {
+    this.calendarApi = this.calendarComponent.getApi();
+    if (this.calendarOptions) {
+      this.calendarOptions.datesSet = () => {
+        this.fetchAppointments();
+      };
+    }
+    this.initialize();
+  }
+
+
   async ngOnInit() {
+    this.subscribeEvents();
+  }
+
+  async initialize(){
+    this.fetchAppointments();
+    this.fetchSchedules();
+  }
+
+  reload() {
+    this.initialize();
+  }
+
+  async fetchSchedules() {
+    let businessHours = [];
     this.schedules = await this.schedulesPvd.listSchedules();
+
+    // Add business hours to calendar
+    this.schedules.documents.forEach(schedule => {
+      businessHours.push({
+        daysOfWeek: schedule['days'],
+        startTime: schedule['start_time'],
+        endTime: schedule['end_time']
+      });
+      this.calendarOptions!.businessHours = businessHours;
+      console.log(schedule);
+    });
+  }
+  async fetchAppointments() {
+    let events: EventInput[] = [];
+    let calendarDate = this.calendarApi.getDate();
+    this.appointments = await this.appointmentsPvd.listAppointments(calendarDate.getMonth()+1, calendarDate.getFullYear());
+    let businessHours = [];
+
+    // Add appointments to events
+    this.appointments.documents.forEach(appointment => {
+      events.push({
+        title: appointment['client'].name,
+        start: appointment['start_time'],
+        end: appointment['end_time'],
+        extendedProps: { description: appointment['note'] }
+      });
+    });
+    this.calendarOptions!.events = events;
   }
 
   async onWillPresent() {
@@ -94,39 +170,92 @@ export class CalendarPage implements OnInit{
     if(canGoBack) {
       this.nav.pop();
     } else {
-      this.modal.dismiss();
+      this.modal.dismiss().then(() => {
+        this.reload();
+      });
     }
   }
 
   async handleDateClick(arg: any) {
-    //alert('date click! ' + arg.dateStr)
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: dateFormatter({value: arg.dateStr}, false),
-      buttons: [
-        {
-          text: 'Añadir cita',
-          role: 'destructive',
-          handler: () => {
-
-          }
-        },
-        {
-          text: 'Habilitar/Deshabilitar',
-          data: {
-            action: 'share',
+    console.log(arg);
+    if(this.checkIfBussinessDay(new Date(arg.dateStr))) {
+      //alert('date click! ' + arg.dateStr)
+      const actionSheet = await this.actionSheetCtrl.create({
+        header: dateFormatter({value: arg.dateStr}, false),
+        buttons: [
+          {
+            text: 'Añadir cita',
             role: 'destructive',
             handler: () => {
-            
+  
             }
           },
-        },
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-        },
-      ],
-    });
+          {
+            text: 'Habilitar/Deshabilitar (No implementado aún)',
+            data: {
+              action: 'share',
+              role: 'destructive',
+              handler: () => {
+              
+              },
+            },
+            disabled: true
+          },
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+          },
+        ],
+      });
+  
+      await actionSheet.present();
+    }
+  }
 
-    await actionSheet.present();
+  checkIfBusinessHours(date: Date) {
+    const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format
+    return this.schedules?.documents.some(schedule => {
+      const startTime = schedule['start_time'];
+      const endTime = schedule['end_time'];
+      return time >= startTime && time <= endTime;
+    }) || false;
+  }
+
+  checkIfBussinessDay(date: Date) {
+    return this.schedules?.documents.some(schedule => {
+      return schedule['days'].includes(date.getDay().toString());
+    }) || false;
+  }
+
+  getNextAvailableDateByDatetime(date: Date) {
+    const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format
+    const day = date.getDay().toString();
+    const schedule = this.schedules?.documents.find(schedule => {
+      return schedule['days'].includes(day) && time <= schedule['start_time'];
+    });
+    if(schedule) {
+      return new Date(`${date.toDateString()} ${schedule['start_time']}`);
+    }
+    return null;
+  }
+
+getNextAvailableDateByDateTimeRange(date: Date) {
+    const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format
+    const day = date.getDay().toString();
+    const schedule = this.schedules?.documents.find(schedule => {
+      return schedule['days'].includes(day) && time <= schedule['start_time'];
+    });
+    if(schedule) {
+      return new Date(`${date.toDateString()} ${schedule['start_time']}`);
+    }
+    return null;
+  }
+
+  subscribeEvents() {
+    this.events.getObservable().subscribe((event) => {
+      if(event.name === 'add.calendar') {
+        console.log('add.calendar', event.value);
+      }
+    });
   }
 }

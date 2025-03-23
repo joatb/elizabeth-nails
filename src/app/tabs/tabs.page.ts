@@ -1,6 +1,7 @@
-import { Component, EnvironmentInjector, inject } from '@angular/core';
+import { Component, EnvironmentInjector, inject, OnDestroy } from '@angular/core';
 import { SegmentComponent } from '../../core/segment/segment.component';
 import { SharedModule } from '../modules/shared.module';
+import { EventService } from '../services/event.service';
 
 @Component({
   selector: 'app-tabs',
@@ -8,9 +9,14 @@ import { SharedModule } from '../modules/shared.module';
   styleUrls: ['tabs.page.scss'],
   imports: [SharedModule, SegmentComponent],
 })
-export class TabsPage {
+export class TabsPage implements OnDestroy {
   public environmentInjector = inject(EnvironmentInjector);
 
-  constructor() {
+  constructor(private events: EventService) {
+
+  }
+
+  ngOnDestroy(): void {
+    this.events.destroy();
   }
 }

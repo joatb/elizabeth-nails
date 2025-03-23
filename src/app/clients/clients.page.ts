@@ -12,6 +12,7 @@ import { ModalController } from '@ionic/angular/standalone';
 import { ClientFormPage } from './components/client-form/client-form-page';
 import { AlertService } from '../services/alert.service';
 import { AuthService } from '../services/auth.service';
+import { EventService } from '../services/event.service';
 
 interface ClientsRowData  {
   id: string;
@@ -132,6 +133,7 @@ export class ClientsPage implements OnInit{
     private clientsProvider: ClientsProvider,
     private modalCtrl: ModalController,
     private alertService: AlertService,
+    private events: EventService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -152,6 +154,8 @@ export class ClientsPage implements OnInit{
 
     this.agGrid.api?.setGridOption('rowData', this.rowData);
     this.cdr.detectChanges(); // Forzar la detección de cambios
+
+    this.subscribeToEvents();
   }
 
   async addClient() {
@@ -166,8 +170,10 @@ export class ClientsPage implements OnInit{
     await modal.present();
 
     modal.onDidDismiss().then(async (event) => {
-      await this.clientsProvider.createClient(event.data);
-      this.reload();
+      if(event.data){
+        await this.clientsProvider.createClient(event.data);
+        this.reload();
+      }
     });
   }
 
@@ -184,5 +190,13 @@ export class ClientsPage implements OnInit{
   async reload() {
     this.ngOnInit();
     await this.alertService.presentToast('Se ha actualizado la tabla', 2500);
+  }
+
+  async subscribeToEvents() {
+    this.events.getObservable().subscribe(async (event) => {
+      if (event.name === 'add.client') {
+        this.addClient();
+      }
+    });
   }
 }

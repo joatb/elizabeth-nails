@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../app/modules/shared.module';
+import { ClientsPage } from '../../app/clients/clients.page';
+import { EventService } from '../../app/services/event.service';
 
 
 @Component({
@@ -15,7 +17,8 @@ export class SegmentComponent implements OnInit {
     constructor(
         //public global: GlobalService,
         private route: ActivatedRoute,
-        private router: Router
+        private router: Router,
+        private events: EventService
     ) {
     }
 
@@ -28,6 +31,14 @@ export class SegmentComponent implements OnInit {
         });
         */
         this.getRoute();
+    }
+
+    add(){
+        if(this.selectedSegment === 'calwndar'){
+            this.events.push('add.calendar', true);
+        } else if(this.selectedSegment === 'events'){
+            this.events.push('add.event', true);
+        }
     }
 
     getRoute() {

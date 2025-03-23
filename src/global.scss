@@ -43,6 +43,8 @@
 
 @import "theme/full-calendar.scss";
 
+@import 'tippy.js/dist/tippy.css';
+
 
 ion-toolbar {
     --opacity: 0.5;
@@ -97,6 +99,7 @@ ion-button {
    color: white;            
    box-shadow: 0 0 20px #eee;
    border-radius: 4px;
+   --opacity: 1;
  }
 
  ion-button:hover {
