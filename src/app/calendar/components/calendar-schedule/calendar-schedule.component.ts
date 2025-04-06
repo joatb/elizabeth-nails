@@ -6,15 +6,16 @@ import { Models } from 'appwrite';
 import { localeText } from '../../../../locale/ag-grid.locale';
 import { getDayString } from '../../../../shared/date-formatter/date-formatter';
 import { SharedModule } from '../../../modules/shared.module';
-import { SchedulesProvider } from '../../../providers/schedules.provider';
+import { SchedulesProvider } from '../../../providers/schedules/schedules.provider';
 import { AlertService } from '../../../services/alert.service';
 import { AuthService } from '../../../services/auth.service';
 import { CalendarScheduleFormComponent } from '../calendar-schedule-form/calendar-schedule-form.component';
+import { Schedule } from '../../../providers/schedules/models/schedule';
 
 interface CalendarScheduleRowData  {
   id: string;
   schedule: string;
-  days: number[];
+  days: string;
 }
 
 // Register all community features
@@ -116,7 +117,7 @@ export class CalendarScheduleComponent {
 
   localeText = localeText;
 
-  private schedules: Models.DocumentList<Models.Document> | null = null;
+  private schedules: Models.DocumentList<Schedule> | null = null;
 
   constructor(
     protected authService: AuthService,
@@ -137,9 +138,9 @@ export class CalendarScheduleComponent {
       this.rowData.push({
         id: schedule['$id'],
         schedule: `${schedule['start_time']} - ${schedule['end_time']}`,
-        days: schedule['days'].map((d: string)=>getDayString(Number(d))).join(', ')
+        days: schedule.days.map((d: string)=>getDayString(Number(d))).join(', ')
       })
-    });
+    });   
     this.cdr.detectChanges(); // Forzar la detección de cambios
   }
 

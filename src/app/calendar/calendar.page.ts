@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarApi, CalendarOptions, EventInput } from '@fullcalendar/core';
 import esLocale from '@fullcalendar/core/locales/es';
@@ -6,17 +6,24 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import timeGridPlugin from '@fullcalendar/timegrid';
-import { ActionSheetController } from '@ionic/angular';
-import { IonNav, IonModal } from '@ionic/angular/standalone';
+import { ActionSheetController, AlertController, ModalController } from '@ionic/angular';
+import { IonModal, IonNav } from '@ionic/angular/standalone';
 import { Models } from 'appwrite';
-import { dateFormatter } from '../../shared/date-formatter/date-formatter';
-import { SharedModule } from '../modules/shared.module';
-import { SchedulesProvider } from '../providers/schedules.provider';
-import { AuthService } from '../services/auth.service';
-import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
-import { EventService } from '../services/event.service';
+import { Subscription } from 'rxjs';
 import tippy from 'tippy.js';
-import { AppointmentsProvider } from '../providers/appointments.provider';
+import { dateFormatter } from '../../shared/date-formatter/date-formatter';
+import { Day } from '../models/day';
+import { SharedModule } from '../modules/shared.module';
+import { AppointmentsProvider } from '../providers/appointments/appointments.provider';
+import { Appointment } from '../providers/appointments/models/appointment';
+import { Schedule } from '../providers/schedules/models/schedule';
+import { SchedulesProvider } from '../providers/schedules/schedules.provider';
+import { AlertService } from '../services/alert.service';
+import { AuthService } from '../services/auth.service';
+import { EventService } from '../services/event.service';
+import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
+import { CalendarAppointmentModalComponent } from './components/calendar-appointment-modal/calendar-appointment-modal';
+import { DateTime } from 'luxon';
 
 @Component({
   selector: 'app-calendar',
@@ -24,16 +31,18 @@ import { AppointmentsProvider } from '../providers/appointments.provider';
   styleUrls: ['calendar.page.scss'],
   imports: [SharedModule, FullCalendarModule],
 })
-export class CalendarPage implements OnInit{
+export class CalendarPage {
 
   component = 'CalendarPage';
-  schedules: Models.DocumentList<Models.Document> | null = null;
-  appointments: Models.DocumentList<Models.Document> | null = null;
+  schedules: Models.DocumentList<Schedule> | null = null;
+  appointments: Models.DocumentList<Appointment> | null = null;
   calendarOptions?: CalendarOptions;
 
   eventsPromise?: Promise<EventInput[]>;
 
   showModalBackButton: boolean = false;
+
+  modalTitle: string = 'Horarios';
 
   @ViewChild('nav') private nav!: IonNav;
   @ViewChild('modal') private modal!: IonModal;
@@ -41,15 +50,20 @@ export class CalendarPage implements OnInit{
 
   private calendarApi!: CalendarApi;
 
+  private eventsSubscription: Subscription | null = null;
+
   constructor(
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
     private appointmentsPvd: AppointmentsProvider,
     private actionSheetCtrl: ActionSheetController,
-    private events: EventService
+    private alertCtrl: AlertController,
+    private alertService: AlertService,
+    private events: EventService,
+    private modalController: ModalController
   ) {
     this.calendarOptions = {
-      timeZone: 'Europe/Madrid',
+      timeZone: 'local',
       initialView: 'dayGridMonth',
       locale: esLocale,
       navLinks: true,
@@ -59,9 +73,11 @@ export class CalendarPage implements OnInit{
         center: '',
         end: 'prev,next dayGridMonth,timeGridDay', // will normally be on the right. if RTL, will be on the left
       },
+      displayEventEnd: true,
       nowIndicator: true,
       plugins: [timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin],
       dateClick: (arg: any) => this.handleDateClick(arg),
+      eventClick: (info) => this.handleEventClick(info),
       events: [
         { title: 'Mari Angels', start: '2025-03-23 12:00:00', end: '2025-03-23 13:00:00', extendedProps: { description: 'Uñas rojas' } },
         { title: 'Isabel Romero', start: '2025-03-23 13:00:00', end: '2025-03-23 14:00:00' },
@@ -99,6 +115,11 @@ export class CalendarPage implements OnInit{
           allowHTML: true,
         });
       },
+      eventTimeFormat: { // like '14:30:00'
+        hour: '2-digit',
+        minute: '2-digit',
+        meridiem: false
+      }
     };
   }
 
@@ -112,15 +133,24 @@ export class CalendarPage implements OnInit{
     this.initialize();
   }
 
-
-  async ngOnInit() {
-    this.subscribeEvents();
+  ionViewDidEnter(){
+    this.subscribeToEvents();
   }
+  ionViewDidLeave(){
+    this.eventsSubscription?.unsubscribe();
+    this.eventsSubscription = null;
+  }
+
+  ngOnInit() {
+    setTimeout( function() {
+        window.dispatchEvent(new Event('resize'))
+    }, 1)
+}
 
   async initialize(){
-    this.fetchAppointments();
-    this.fetchSchedules();
-  }
+    await this.fetchAppointments();
+    await this.fetchSchedules();
+}
 
   reload() {
     this.initialize();
@@ -133,12 +163,11 @@ export class CalendarPage implements OnInit{
     // Add business hours to calendar
     this.schedules.documents.forEach(schedule => {
       businessHours.push({
-        daysOfWeek: schedule['days'],
-        startTime: schedule['start_time'],
-        endTime: schedule['end_time']
+        daysOfWeek: schedule.days,
+        startTime: schedule.start_time,
+        endTime: schedule.end_time
       });
       this.calendarOptions!.businessHours = businessHours;
-      console.log(schedule);
     });
   }
   async fetchAppointments() {
@@ -150,14 +179,15 @@ export class CalendarPage implements OnInit{
     // Add appointments to events
     this.appointments.documents.forEach(appointment => {
       events.push({
-        title: appointment['client'].name,
-        start: appointment['start_time'],
-        end: appointment['end_time'],
-        extendedProps: { description: appointment['note'] }
+        title: appointment.client.name,
+        start: appointment.start_time,
+        end: appointment.end_time,
+        extendedProps: { id: appointment.$id, description: appointment.note }
       });
     });
     this.calendarOptions!.events = events;
   }
+  
 
   async onWillPresent() {
     this.nav.setRoot(CalendarScheduleComponent, {nav: this.nav});
@@ -187,7 +217,11 @@ export class CalendarPage implements OnInit{
             text: 'Añadir cita',
             role: 'destructive',
             handler: () => {
-  
+              this.openAppoinmentFormModal(
+                new Day(arg.date),
+                new Date(arg.dateStr + 'T08:00:00'),
+                new Date(arg.dateStr + 'T09:00:00')
+              );
             }
           },
           {
@@ -212,49 +246,207 @@ export class CalendarPage implements OnInit{
     }
   }
 
+  async handleEventClick(info: any) {
+    const appointmentId = info.event.extendedProps['id'];
+      const appointment = this.appointments?.documents.find(appointment => appointment.$id === appointmentId);
+      if (appointment) {
+        const alert = await this.alertCtrl.create({
+          header: 'Eliminar Cita',
+          message: `Desea eliminar esta cita?`,
+          buttons: [
+            {
+              text: 'Eliminar',
+              role: 'destructive',
+              handler: () => {
+                this.appointmentsPvd.deleteAppointment(appointmentId).then(() => {
+                  this.alertService.presentToast('Cita eliminada', 2500);
+                  this.reload();
+                });
+              }
+            },
+            {
+              text: 'Cancelar',
+              role: 'cancel',
+              handler: () => {
+                // Do nothing
+              }
+            }
+            ]
+      });
+
+      await alert.present();
+    }
+  }
+
   checkIfBusinessHours(date: Date) {
     const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format
     return this.schedules?.documents.some(schedule => {
-      const startTime = schedule['start_time'];
-      const endTime = schedule['end_time'];
-      return time >= startTime && time <= endTime;
+      const startTime = schedule.start_time;
+      const endTime = schedule.end_time;
+      const start = new Date(`1970-01-01T${startTime}:00`);
+      const end = new Date(`1970-01-01T${endTime}:00`);
+      const currentTime = new Date(`1970-01-01T${time}`);
+      return currentTime >= start && currentTime <= end;
     }) || false;
   }
 
   checkIfBussinessDay(date: Date) {
     return this.schedules?.documents.some(schedule => {
-      return schedule['days'].includes(date.getDay().toString());
+      return schedule.days.includes(date.getDay().toString());
     }) || false;
   }
 
-  getNextAvailableDateByDatetime(date: Date) {
-    const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format
-    const day = date.getDay().toString();
-    const schedule = this.schedules?.documents.find(schedule => {
-      return schedule['days'].includes(day) && time <= schedule['start_time'];
-    });
-    if(schedule) {
-      return new Date(`${date.toDateString()} ${schedule['start_time']}`);
-    }
-    return null;
+  getDaysCurrentMonth(){
+    let currentDate = new Date();
+    let daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    let days = [];
+    for(let i = 1; i <= daysInMonth; i++){
+      let date = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+      if(this.checkIfBussinessDay(date)) {
+        days.push({date});
+      }
+    } 
+
+    days = days.map((day)=>new Day(day.date))
+    return days;
   }
 
-getNextAvailableDateByDateTimeRange(date: Date) {
-    const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format
-    const day = date.getDay().toString();
-    const schedule = this.schedules?.documents.find(schedule => {
-      return schedule['days'].includes(day) && time <= schedule['start_time'];
+  getSchedulesAndAppointments(){
+    let days = this.getDaysCurrentMonth();
+
+    days.forEach((day: Day) => {
+      day.schedule = this.schedules?.documents.filter(schedule => {
+        return schedule.days.includes(day.date.getDay().toString());
+      }
+      ) ?? [];
+      day.appointments = this.appointments?.documents.filter(appointment => {
+        return appointment.start_time >= day.date.toISOString();
+      }) ?? [];
+
     });
-    if(schedule) {
-      return new Date(`${date.toDateString()} ${schedule['start_time']}`);
-    }
-    return null;
+
+    return days;
   }
 
-  subscribeEvents() {
-    this.events.getObservable().subscribe((event) => {
-      if(event.name === 'add.calendar') {
-        console.log('add.calendar', event.value);
+getNextAvailableDateByHours(hours: number) {
+  const days = this.getSchedulesAndAppointments();
+}
+
+  async addAppointment(){
+    const days = this.getSchedulesAndAppointments();
+    let done = false;
+
+    outerLoop:
+    for await (const day of days) {
+      if (done) break;
+
+      const availableGaps = day.getAvailableHourGapsByHoursAndSchedules(3);
+      let availableGapsIndex = 0;
+
+      for await (const availableGap of availableGaps) {
+        if (availableGap) {
+          const alertResult = await this.showAlert({date: DateTime.fromJSDate(day.date, {zone: 'system'}).toFormat("dd-MM-yyyy"), start: DateTime.fromJSDate(availableGap.start, {zone: 'system'}).toFormat("H:mm"), end: DateTime.fromJSDate(availableGap.end, {zone: 'system'}).toFormat("H:mm")});
+  
+          switch (alertResult) {
+            case 'accepted':
+              // Agregar la cita
+              done = true;
+
+            this.openAppoinmentFormModal(
+              day, 
+              availableGap.start,
+              availableGap.end
+            );
+
+              break outerLoop;
+            case 'next':
+              // Ir al rango de horas siguiente
+              availableGapsIndex++;
+              break;
+            case 'cancel':
+              // Cancelar la cita
+              done = false;
+              break outerLoop;
+            default:
+              // Manejar valores inesperados
+              break outerLoop;
+          }
+        }
+      }
+
+    }
+  }
+
+  async openAppoinmentFormModal(day: Day, startTime: Date, endTime: Date){
+    const modal = await this.modalController.create({
+      component: CalendarAppointmentModalComponent,
+      initialBreakpoint: 0.30,
+      breakpoints: [0, 0.25, 0.5, 0.75],
+      componentProps: {
+        day,
+        startTime: DateTime.fromJSDate(startTime, {zone: 'system'}).toISO(),
+        endTime: DateTime.fromJSDate(endTime, {zone: 'system'}).toISO(),
+      },
+  });
+
+  await modal.present();
+
+  modal.onDidDismiss().then((data) => {
+    if (data.data) {
+      this.saveAppointment(data.data);
+    }
+  });
+  }
+
+  private async showAlert(availableRange: {date: string, start: string; end: string }): Promise<string> {
+    return new Promise(async (resolve) => {
+      const alert = await this.alertCtrl.create({
+        header: 'Cita disponible',
+        message: `Cita disponible el día ${availableRange.date} desde ${availableRange.start} hasta ${availableRange.end}`,
+        buttons: [
+          {
+            text: 'Aceptar',
+            handler: () => {
+              resolve('accepted'); // El usuario aceptó
+            },
+          },
+          {
+            text: 'Siguiente',
+            handler: () => {
+              resolve('next'); // El usuario aceptó
+            },
+          },
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+            handler: () => {
+              resolve('cancel'); // El usuario canceló
+            },
+          },
+        ],
+      });
+  
+      await alert.present();
+    });
+  }
+
+  async saveAppointment(appointment: {
+    note: string,
+    start_time: string,
+    end_time: string,
+    client: string
+  }) {
+
+    await this.appointmentsPvd.createAppointment(appointment);
+    await this.alertService.presentToast('Cita creada', 2500);
+    this.reload();
+  }
+
+  private subscribeToEvents() {
+    this.eventsSubscription = this.events.getObservable().subscribe((event) => {
+      if(event.name === 'add.event') {
+        console.log('add.event', event.value);
+        this.addAppointment();
       }
     });
   }

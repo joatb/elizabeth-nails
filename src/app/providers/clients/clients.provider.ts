@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
-import { DBService } from "../services/db.service";
+import { Client } from "./models/client";
+import { DBService } from "../../services/db.service";
 
 @Injectable({
     providedIn: 'root',
@@ -15,7 +16,7 @@ export class ClientsProvider {
         return this.dbService.getDocument(this.database, this.collection, clientId);
     }
     listClients() {
-        return this.dbService.listDocuments(this.database, this.collection);
+        return this.dbService.listDocuments<Client>(this.database, this.collection);
     }
 
     createClient(client: any) {

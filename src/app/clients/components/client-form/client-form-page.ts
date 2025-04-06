@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { SharedModule } from '../../../modules/shared.module';
-import { ClientsProvider } from '../../../providers/clients.provider';
 import { ModalController } from '@ionic/angular/standalone';
+import { SharedModule } from '../../../modules/shared.module';
 
 
 @Component({

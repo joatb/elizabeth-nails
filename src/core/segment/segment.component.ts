@@ -34,11 +34,7 @@ export class SegmentComponent implements OnInit {
     }
 
     add(){
-        if(this.selectedSegment === 'calwndar'){
-            this.events.push('add.calendar', true);
-        } else if(this.selectedSegment === 'events'){
-            this.events.push('add.event', true);
-        }
+        this.events.push('add.event', true);
     }
 
     getRoute() {

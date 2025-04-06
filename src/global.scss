@@ -11,7 +11,7 @@
 
 // FONTS
 // ---------------------------------------------------
-@use "theme/font.titillium";
+@use "theme/font.ibm-plex-sans";
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
@@ -100,6 +100,7 @@ ion-button {
    box-shadow: 0 0 20px #eee;
    border-radius: 4px;
    --opacity: 1;
+   font-weight: 400;
  }
 
  ion-button:hover {
@@ -127,3 +128,9 @@ ion-button {
     color: #fff;
     text-decoration: none;
   }
+
+  :host ::ng-deep .fc {
+    height: auto;
+    min-height: 600px;
+  }
+  

@@ -3,7 +3,6 @@ import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular'; // An
 import type { ColDef, ICellRendererParams } from 'ag-grid-community'; // Column Definition Type Interface
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { SharedModule } from '../modules/shared.module';
-import { ClientsProvider } from '../providers/clients.provider';
 import { Models } from 'appwrite';
 import { localeText } from '../../locale/ag-grid.locale';
 import { dateFormatter } from '../../shared/date-formatter/date-formatter';
@@ -13,6 +12,11 @@ import { ClientFormPage } from './components/client-form/client-form-page';
 import { AlertService } from '../services/alert.service';
 import { AuthService } from '../services/auth.service';
 import { EventService } from '../services/event.service';
+import { ClientsProvider } from '../providers/clients/clients.provider';
+import { Client } from '../providers/clients/models/client';
+import { Appointment } from '../providers/appointments/models/appointment';
+import { DateTime } from 'luxon';
+import { Subscription } from 'rxjs';
 
 interface ClientsRowData  {
   id: string;
@@ -126,7 +130,9 @@ export class ClientsPage implements OnInit{
 
   localeText = localeText;
 
-  private clients: Models.DocumentList<Models.Document> | null = null;
+  private clients: Models.DocumentList<Client> | null = null;
+
+  private eventsSubscription: Subscription | null = null;
 
   constructor(
     protected authService: AuthService,
@@ -137,16 +143,24 @@ export class ClientsPage implements OnInit{
     private cdr: ChangeDetectorRef
   ) {}
 
+  ionViewDidEnter(){
+    this.subscribeToEvents();
+  }
+  ionViewDidLeave(){
+    this.eventsSubscription?.unsubscribe();
+    this.eventsSubscription = null;
+  }
+
   async ngOnInit(): Promise<void> {
     this.clients = await this.clientsProvider.listClients();
     this.rowData = [];
 
-    this.clients.documents.forEach(client => {
+    this.clients?.documents.forEach(client => {
       this.rowData.push({
-        id: client['$id'],
-        name: client['name'],
-        next_appointment: client['appointments'].length > 0 ? client['appointments'].sort((a: any, b: any) => a.date - b.date)[0].date : 'No hay citas',
-        appointments: client['appointments'].length,
+        id: client.$id,
+        name: client.name,
+        next_appointment: client.appointments.length > 0 ? client.appointments.sort((a: Appointment, b: Appointment) => DateTime.fromISO(b.start_time).toMillis() - DateTime.fromISO(a.start_time).toMillis())[0].start_time : 'No hay citas',
+        appointments: client.appointments.length,
         last_notification: 'No hay notificaciones',
         tsinsert: client['$createdAt']
       })
@@ -154,8 +168,6 @@ export class ClientsPage implements OnInit{
 
     this.agGrid.api?.setGridOption('rowData', this.rowData);
     this.cdr.detectChanges(); // Forzar la detección de cambios
-
-    this.subscribeToEvents();
   }
 
   async addClient() {
@@ -193,8 +205,8 @@ export class ClientsPage implements OnInit{
   }
 
   async subscribeToEvents() {
-    this.events.getObservable().subscribe(async (event) => {
-      if (event.name === 'add.client') {
+    this.eventsSubscription = this.events.getObservable().subscribe(async (event) => {
+      if (event.name === 'add.event') {
         this.addClient();
       }
     });

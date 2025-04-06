@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IonNav } from '@ionic/angular/standalone';
 import { SharedModule } from '../../../modules/shared.module';
-import { SchedulesProvider } from '../../../providers/schedules.provider';
+import { SchedulesProvider } from '../../../providers/schedules/schedules.provider';
 import { AuthService } from '../../../services/auth.service';
 import { Models } from 'appwrite';
 import { AlertService } from '../../../services/alert.service';

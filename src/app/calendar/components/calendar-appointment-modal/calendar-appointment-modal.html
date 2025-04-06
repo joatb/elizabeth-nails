@@ -1,0 +1,18 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="cancel()">Cancelar</ion-button>
+        </ion-buttons>
+        <ion-title>Nueva cita</ion-title>
+        <ion-buttons (click)="submit()" slot="end">
+            <ion-button [strong]="true">Crear</ion-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <app-calendar-appointment-form
+    [startTime]="startTime"
+    [endTime]="endTime"
+    (submitEvent)="dismiss($event)"
+    ></app-calendar-appointment-form>
+</ion-content>

@@ -8,6 +8,8 @@ import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, lo
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { GlobalErrorHandler } from './core/global-error-handler/global-error-handler.service';
+import { Settings } from 'luxon';
+
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -35,3 +37,6 @@ addIcons({
   logOutOutline,
   saveOutline
 })
+
+Settings.defaultZone = 'UTC'; // or any other time zone, e.g., 'America/New_York'
+Settings.defaultLocale = 'es-ES'; // or any other locale, e.g., 'en-US'

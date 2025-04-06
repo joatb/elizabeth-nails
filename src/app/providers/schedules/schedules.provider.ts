@@ -1,5 +1,7 @@
 import { Injectable } from "@angular/core";
-import { DBService } from "../services/db.service";
+import { DBService } from "../../services/db.service";
+import { Models } from 'appwrite';
+import { Schedule } from "./models/schedule";
 
 @Injectable({
     providedIn: 'root',
@@ -15,8 +17,8 @@ export class SchedulesProvider {
         return this.dbService.createDocument(this.database, this.collection, schedule);
     }
     
-    listSchedules() {
-        return this.dbService.listDocuments(this.database, this.collection);
+    listSchedules(): Promise<Models.DocumentList<Schedule>> {
+        return this.dbService.listDocuments<Schedule>(this.database, this.collection);
     }
 
     deleteSchedule(clientId: string) {
