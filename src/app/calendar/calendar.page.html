@@ -1,14 +1,32 @@
 <ion-header [translucent]="true">
-  <ion-toolbar color="primary">
+  <ion-toolbar>
     <ion-title>
       Calendario
     </ion-title>
-    <ion-buttons slot="end">
-      <ion-button color="info" fill="solid">Cerrar sesión</ion-button>
+    <ion-buttons slot="end" style="gap: .5rem;">
+      <ion-button (click)="authService.logout()" color="none" fill="solid">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+      <ion-button id="openModal" color="none" fill="solid">Configurar horario</ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding" [fullscreen]="true">
-  <full-calendar [options]="calendarOptions" [events]="eventsPromise | async"></full-calendar>
+<ion-content class="ion-padding" [fullscreen]="true" style="max-height: 100vh;">
+  <full-calendar #calendar [options]="calendarOptions" [events]="eventsPromise | async"></full-calendar>
+  <ion-modal #modal trigger="openModal" (willPresent)="onWillPresent()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Horarios</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="modalClose()"> Cerrar </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-nav #nav></ion-nav>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

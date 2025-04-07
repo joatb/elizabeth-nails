@@ -1,18 +1,22 @@
-import { Component, EnvironmentInjector, inject } from '@angular/core';
-import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular/standalone';
-import { addIcons } from 'ionicons';
-import { triangle, ellipse, square } from 'ionicons/icons';
+import { Component, EnvironmentInjector, inject, OnDestroy } from '@angular/core';
+import { SegmentComponent } from '../../core/segment/segment.component';
+import { SharedModule } from '../modules/shared.module';
+import { EventService } from '../services/event.service';
 
 @Component({
   selector: 'app-tabs',
   templateUrl: 'tabs.page.html',
   styleUrls: ['tabs.page.scss'],
-  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
+  imports: [SharedModule, SegmentComponent],
 })
-export class TabsPage {
+export class TabsPage implements OnDestroy {
   public environmentInjector = inject(EnvironmentInjector);
 
-  constructor() {
-    addIcons({ triangle, ellipse, square });
+  constructor(private events: EventService) {
+
+  }
+
+  ngOnDestroy(): void {
+    this.events.destroy();
   }
 }

@@ -1,0 +1,42 @@
+<form (ngSubmit)="submit()" [formGroup]="form">
+    
+    <div class="input-group">
+        <ion-card>
+            <ion-item>
+                <ion-label>Inicio</ion-label>
+                <ion-datetime-button datetime="startTime"></ion-datetime-button>
+            </ion-item>
+            <ion-item>
+                <ion-label>Final</ion-label>
+                <ion-datetime-button datetime="endTime"></ion-datetime-button>
+            </ion-item>
+            <ion-item>
+                <ion-textarea aria-label="Nota" type="text" placeholder="Nota" formControlName="note"></ion-textarea>
+            </ion-item>
+            <ion-item>
+              <ionic-selectable
+              formControlName="client"
+              [placeholder]="'Seleccionar cliente'"
+              [items]="selectableClientsOptions"
+              itemValueField="id"
+              itemTextField="name"
+              [canSearch]="true"
+              closeButtonText="Cerrar"
+              (onChange)="onClientChange($event)">
+            </ionic-selectable>
+            </ion-item>
+        </ion-card>
+    </div>
+</form>
+
+<ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime locale="es-ES" [value]="startTime" id="startTime"></ion-datetime>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime locale="es-ES" [value]="endTime" id="endTime"></ion-datetime>
+    </ng-template>
+  </ion-modal>

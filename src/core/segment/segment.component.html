@@ -1,0 +1,26 @@
+<div class="footer">
+    <img class="img" src="assets/svgs/footer.svg">
+    <div class="footer-content">
+        <div class="left">
+            <div class="item" [class.active]="selectedSegment === 'calendar'" (click)="onChangeSegment('calendar')">
+                <ion-icon aria-hidden="true" name="calendar-time"></ion-icon>
+                <ion-label>Calendario</ion-label>
+            </div>
+        </div>
+        <div class="center">
+            <ion-fab-button [disabled]="selectedSegment === 'chat'" (click)="add()">
+                <ion-icon name="add-outline"></ion-icon>
+            </ion-fab-button>
+        </div>
+        <div class="right">
+            <div class="item" [class.active]="selectedSegment === 'clients'" (click)="onChangeSegment('clients')">
+                <ion-icon aria-hidden="true" name="user"></ion-icon>
+                <ion-label>Clientes</ion-label>
+            </div>
+            <div class="item" [class.active]="selectedSegment === 'chat'" (click)="onChangeSegment('chat')">
+                <ion-icon aria-hidden="true" name="logo-whatsapp"></ion-icon>
+                <ion-label>Chat</ion-label>
+            </div>
+        </div>
+    </div>
+</div>

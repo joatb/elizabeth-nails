@@ -1,0 +1,61 @@
+<ion-content class="ion-padding" [fullscreen]="true">
+  @if(form){  
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+      <ion-fab-button color="success" (click)="saveSchedule()">
+        <ion-icon name="save-outline"></ion-icon>
+    </ion-fab-button>
+    </ion-fab>
+  }
+  <form [formGroup]="form">
+    <ion-list>
+      <ion-item>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-list>
+                <ion-item lines="none" *ngFor="let day of daysOfWeek.slice(0, 4)">
+                  <ion-checkbox slot="start" [checked]="form.controls['days'].value.includes(day.value)" (ionChange)="toggleDay(day.value)"></ion-checkbox>
+                  <ion-label>{{ day.name }}</ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-col>
+            <ion-col>
+              <ion-list>
+                <ion-item lines="none" *ngFor="let day of daysOfWeek.slice(4)">
+                  <ion-checkbox slot="start" [checked]="form.controls['days'].value.includes(day.value)" (ionChange)="toggleDay(day.value)"></ion-checkbox>
+                  <ion-label>{{ day.name }}</ion-label>
+                </ion-item>
+              </ion-list>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-item>
+      <ion-item class="schedule-form-item" lines="none">
+          <ion-datetime
+          formControlName="startTime"
+          presentation="time"
+          hourCycle="h24"
+          [value]="form.controls['startTime'].value"
+          [formatOptions]="{
+            time: {
+              hour: '2-digit',
+              minute: '2-digit',
+            },
+          }"
+        ></ion-datetime>
+          <ion-datetime
+          formControlName="endTime"
+          presentation="time"
+          hourCycle="h24"
+          [value]="form.controls['endTime'].value"
+          [formatOptions]="{
+            time: {
+              hour: '2-digit',
+              minute: '2-digit',
+            },
+          }"
+        ></ion-datetime>
+      </ion-item>
+    </ion-list>
+  </form>
+</ion-content>

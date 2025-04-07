@@ -1,0 +1,10 @@
+.fc .fc-button-primary{
+    background-color: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+    border: none;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active, .fc .fc-button-primary:not(:disabled):active{
+    background-color: var(--ion-color-primary-tint);
+    color: var(--ion-color-primary-contrast);
+}

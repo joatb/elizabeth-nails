@@ -1,0 +1,15 @@
+<ion-content class="ion-padding" [fullscreen]="true">
+  <!-- The AG Grid component -->
+  <ag-grid-angular
+  #agGrid
+  style="width: 100%; height: 100%;"
+  [rowData]="rowData"
+  [columnDefs]="colDefs"
+  [localeText]="localeText"
+  />
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="addSchedule()">
+      <ion-icon name="add-outline"></ion-icon>
+  </ion-fab-button>
+  </ion-fab>
+</ion-content>

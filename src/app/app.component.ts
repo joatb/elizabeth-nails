@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { SharedModule } from './modules/shared.module';
+import { AnimationController, IonApp, IonRouterOutlet, AnimationBuilder } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-root',
@@ -8,5 +7,7 @@ import { SharedModule } from './modules/shared.module';
   imports: [IonApp, IonRouterOutlet],
 })
 export class AppComponent {
-  constructor() {}
+
+  constructor() {
+  }
 }

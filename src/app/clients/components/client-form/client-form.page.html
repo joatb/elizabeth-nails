@@ -1,0 +1,29 @@
+<ion-header [translucent]="true">
+    <ion-toolbar color="primary">
+        <ion-title>
+            {{title}}
+        </ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding" [fullscreen]="true">
+    @if(form){
+        <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+            <ion-fab-button color="success" (click)="submit()" [disabled]="!form.valid">
+                <ion-icon name="save-outline"></ion-icon>
+            </ion-fab-button>
+        </ion-fab>
+    }
+    <form [formGroup]="form">
+        <ion-list>
+            <ion-item>
+                <ion-input aria-label="Nombre" type="text" placeholder="Nombre" formControlName="name"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-input aria-label="Teléfono" type="tel" placeholder="Teléfono" formControlName="phone"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-input aria-label="Código de país" type="tel" placeholder="Código de país" formControlName="phone_country"></ion-input>
+            </ion-item>
+        </ion-list>
+    </form>
+</ion-content>

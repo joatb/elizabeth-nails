@@ -1,0 +1,30 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <img [src]="recipientAvatar" class="avatar" />
+    <div class="user-info">
+      <h3>{{ recipientName }}</h3>
+    </div>
+  </div>
+
+  <div class="messages-container">
+    <div *ngFor="let message of messages" 
+         [ngClass]="{'message-sent': message.sent, 'message-received': !message.sent}"
+         class="message-bubble">
+      <p>{{ message.content }}</p>
+      <span class="timestamp">{{ message.timestamp | date:'shortTime' }}</span>
+      <span class="status-indicator" *ngIf="message.sent">
+        <i [class]="message.read ? 'fas fa-check-double' : 'fas fa-check'"></i>
+      </span>
+    </div>
+  </div>
+
+  <div class="input-container">
+    <input type="text" 
+           [(ngModel)]="newMessage" 
+           placeholder="Escribe un mensaje..."
+           (keyup.enter)="sendMessage()" />
+    <button (click)="sendMessage()">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+</div> 

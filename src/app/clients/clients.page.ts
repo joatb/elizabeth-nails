@@ -1,24 +1,97 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular'; // Angular Data Grid Component
 import type { ColDef, ICellRendererParams } from 'ag-grid-community'; // Column Definition Type Interface
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { SharedModule } from '../modules/shared.module';
+import { Models } from 'appwrite';
+import { localeText } from '../../locale/ag-grid.locale';
+import { dateFormatter } from '../../shared/date-formatter/date-formatter';
+import { AlertController } from '@ionic/angular/standalone';
+import { ModalController } from '@ionic/angular/standalone';
+import { ClientFormPage } from './components/client-form/client-form-page';
+import { AlertService } from '../services/alert.service';
+import { AuthService } from '../services/auth.service';
+import { EventService } from '../services/event.service';
+import { ClientsProvider } from '../providers/clients/clients.provider';
+import { Client } from '../providers/clients/models/client';
+import { Appointment } from '../providers/appointments/models/appointment';
+import { DateTime } from 'luxon';
+import { Subscription } from 'rxjs';
+
+interface ClientsRowData  {
+  id: string;
+  name: string;
+  phone: string;
+  phone_country: string;
+  next_appointment: string;
+  appointments: number;
+  last_notification: string;
+  tsinsert: string;
+}
 
 // Register all community features
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 @Component({
   standalone: true,
-  template: `<ion-button (click)="buttonClicked()">Enviar aviso proxima cita</ion-button>`,
+  template: `
+    <div *ngFor="let button of buttons">
+      <ion-button [color]="button.color ? button.color : 'primary'" (click)="buttonClicked(button.action)">
+        <ion-icon *ngIf="button.icon && !button.label" slot="icon-only" [name]="button.icon"></ion-icon>
+        <ion-icon *ngIf="button.icon && button.label" slot="start" [name]="button.icon"></ion-icon>
+        {{button.label}}
+      </ion-button>
+    </div>
+  `,
   imports: [SharedModule]
 })
-export class CustomButtonComponent implements ICellRendererAngularComp {
-  agInit(params: ICellRendererParams): void {}
+class CustomButtonComponent implements ICellRendererAngularComp {
+  private params!: ICellRendererParams & { buttons: Array<{ label?: string, icon?: string, color?: string, action: string }>, reload: () => void };
+  public buttons: Array<{ label?: string, icon?: string, color?: string, action: string }> = [];
+
+  constructor(
+    private clientsProvider: ClientsProvider,
+    private alertCtrl: AlertController
+  ) {
+
+  }
+
+  agInit(params: ICellRendererParams & { buttons: Array<{ label?: string, icon?: string, color?: string, action: string }>, reload: () => void }): void {
+    this.params = params;
+    this.buttons = params.buttons || [];
+  }
   refresh(params: ICellRendererParams) {
     return true;
   }
-  buttonClicked() {
-    alert("clicked");
+  buttonClicked(action: string) {
+    if (action === 'delete') {
+      this.delete();
+    } else {
+      alert(`Clicked: ${this.params.data.name}`);
+    }
+  }
+
+  async delete(){
+    const alert = await this.alertCtrl.create({
+        header: 'Eliminar cliente',
+        message: 'Quieres eliminar este cliente?',
+        buttons: [
+            {
+                text: 'Cancelar',
+                role: 'cancel',
+            },
+            {
+                text: 'OK',
+                role: 'confirm',
+                handler: async () => {
+                  await this.clientsProvider.deleteClient(this.params.data.id);
+                  this.params.reload();
+                },
+            },
+        ],
+    });
+
+    await alert.present();
   }
 }
 
@@ -28,24 +101,120 @@ export class CustomButtonComponent implements ICellRendererAngularComp {
   styleUrls: ['clients.page.scss'],
   imports: [SharedModule, AgGridAngular]
 })
-export class ClientsPage {
+export class ClientsPage implements OnInit{
+
+  @ViewChild('agGrid') agGrid!: AgGridAngular;
 
   // Row Data: The data to be displayed.
-  rowData = [
-    { name: "Isabel Romero", next_appointment: "29/12/2024 (11:00-13:00)", appointments: 10, last_notification: "29/12/2024 09:00:00", tsinsert: "01/01/2024 11:50:00" },
-    { name: "Mari Angels", next_appointment: "28/12/2024 (12:00-13:00)", appointments: 5, last_notification: "28/12/2024 09:00:00", tsinsert: "01/01/2024 11:50:00" },
-  ];
+  rowData: Array<ClientsRowData> = [];
 
-      // Column Definitions: Defines the columns to be displayed.
+  // Column Definitions: Defines the columns to be displayed.
   colDefs: ColDef[] = [
-    { field: "name", headerName: "Cliente", flex: 2 },
-    { field: "next_appointment", headerName: "Próxima Cita", flex: 1, autoHeight: true },
-    { field: "last_notification", headerName: "Fecha última notificación", flex: 1, autoHeight: true },
-    { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true },
+    { field: "id", headerName: "id", hide: true },
+    { field: "name", headerName: "Cliente", flex: 2, filter: 'agTextColumnFilter', editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
+    { field: "phone_country", headerName: "Prefijo", flex: 1, autoHeight: true },
+    { field: "phone", headerName: "Teléfono", flex: 1, autoHeight: true },
+    { field: "next_appointment", headerName: "Próxima Cita", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
+    { field: "last_notification", headerName: "Fecha última notificación", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
+    { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "appointments", headerName: "Total de citas", flex: 1, autoHeight: true },
-    { field: "Whatsapp", headerName: "", cellRenderer: CustomButtonComponent, flex: 1, autoHeight: true },
+    { 
+      field: "actions", 
+      headerName: "", 
+      cellRenderer: CustomButtonComponent,
+      cellRendererParams: {
+        buttons: [
+          { icon: 'trash-outline', color: 'danger', action: 'delete' }
+        ],
+        reload: () => this.reload()
+      },
+      flex: 1, 
+      autoHeight: true },
   ];
 
-  constructor() {}
+  localeText = localeText;
 
+  private clients: Models.DocumentList<Client> | null = null;
+
+  private eventsSubscription: Subscription | null = null;
+
+  constructor(
+    protected authService: AuthService,
+    private clientsProvider: ClientsProvider,
+    private modalCtrl: ModalController,
+    private alertService: AlertService,
+    private events: EventService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ionViewDidEnter(){
+    this.subscribeToEvents();
+  }
+  ionViewDidLeave(){
+    this.eventsSubscription?.unsubscribe();
+    this.eventsSubscription = null;
+  }
+
+  async ngOnInit(): Promise<void> {
+    this.clients = await this.clientsProvider.listClients();
+    this.rowData = [];
+
+    this.clients?.documents.forEach(client => {
+      this.rowData.push({
+        id: client.$id,
+        name: client.name,
+        phone: client.phone,
+        phone_country: client.phone_country,
+        next_appointment: client.appointments.length > 0 ? client.appointments.sort((a: Appointment, b: Appointment) => DateTime.fromISO(b.start_time).toMillis() - DateTime.fromISO(a.start_time).toMillis())[0].start_time : 'No hay citas',
+        appointments: client.appointments.length,
+        last_notification: 'No hay notificaciones',
+        tsinsert: client['$createdAt']
+      })
+    });
+
+    this.agGrid.api?.setGridOption('rowData', this.rowData);
+    this.cdr.detectChanges(); // Forzar la detección de cambios
+  }
+
+  async addClient() {
+    const modal = await this.modalCtrl.create({
+      component: ClientFormPage,
+      componentProps: {
+        title: 'Nuevo Cliente',
+        client: null
+      }
+    });
+
+    await modal.present();
+
+    modal.onDidDismiss().then(async (event) => {
+      if(event.data){
+        await this.clientsProvider.createClient(event.data);
+        this.reload();
+      }
+    });
+  }
+
+  async editClient(event: any) {
+    try {
+      await this.clientsProvider.updateClient(event.data.id, {name: event.data.name});
+      await this.alertService.presentToast('Cliente actualizado', 2500);
+    } catch (error) {
+      event.api.undoCellEditing();
+      await this.alertService.presentToast('Error al actualizar el cliente', 2500);
+    }
+  }
+
+  async reload() {
+    this.ngOnInit();
+    await this.alertService.presentToast('Se ha actualizado la tabla', 2500);
+  }
+
+  async subscribeToEvents() {
+    this.eventsSubscription = this.events.getObservable().subscribe(async (event) => {
+      if (event.name === 'add.event') {
+        this.addClient();
+      }
+    });
+  }
 }
