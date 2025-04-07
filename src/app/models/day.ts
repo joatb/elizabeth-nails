@@ -98,6 +98,9 @@ export class Day {
 
     isPast(): boolean {
         const today = new Date();
-        return this.date < today;
+        today.setHours(0, 0, 0, 0); // Reset time to midnight
+        const targetDate = new Date(this.date);
+        targetDate.setHours(0, 0, 0, 0); // Reset time to midnight
+        return targetDate < today;
     }
 }

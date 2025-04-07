@@ -13,8 +13,22 @@ export class AppointmentsProvider {
     ) { }
     
     listAppointments(month: number, year: number) {
+        // Asegurarse de que el mes tenga dos dígitos
+        const monthStr = month.toString().padStart(2, '0');
+        
+        // Calcular el último día del mes
+        const lastDay = new Date(year, month, 0).getDate();
+        const lastDayStr = lastDay.toString().padStart(2, '0');
+        
+        // Crear fechas en formato ISO 8601
+        const startDate = `${year}-${monthStr}-01T00:00:00.000Z`;
+        const endDate = `${year}-${monthStr}-${lastDayStr}T23:59:59.999Z`;
+        
         return this.dbService.listDocuments<Appointment>('core', 'appointments', [
-            Query.and([Query.greaterThanEqual('start_time', `${year}-${month}-01 00:00:00`), Query.lessThanEqual('end_time', `${year}-${month}-31 00:00:00`)])
+            Query.and([
+                Query.greaterThanEqual('start_time', startDate),
+                Query.lessThanEqual('end_time', endDate)
+            ])
         ]);
     }
 

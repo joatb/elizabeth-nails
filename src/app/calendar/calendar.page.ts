@@ -386,6 +386,8 @@ export class CalendarPage {
     const days = this.getSchedulesAndAppointments();
     let done = false;
 
+    let availableGapsCount = 0;
+
     outerLoop: for await (const day of days) {
       if (done) break;
 
@@ -394,6 +396,7 @@ export class CalendarPage {
 
       for await (const availableGap of availableGaps) {
         if (availableGap) {
+          availableGapsCount++;
           const alertResult = await this.showAlert({
             date: DateTime.fromJSDate(day.date, { zone: 'system' }).toFormat(
               'dd-MM-yyyy'
@@ -432,6 +435,10 @@ export class CalendarPage {
           }
         }
       }
+    }
+
+    if(availableGapsCount === 0) {
+      this.alertService.presentToast('No hay horas disponibles para este mes', 2500);
     }
   }
 

@@ -1,0 +1,25 @@
+<div class="chat-page-container">
+  <div class="clients-list">
+    <h2>Clientes</h2>
+    <div class="client-item" 
+         *ngFor="let client of clients" 
+         (click)="selectClient(client)"
+         [class.selected]="selectedClient?.$id === client.$id">
+      <img [src]="client.avatar || 'assets/default-avatar.png'" class="avatar" />
+      <div class="client-info">
+        <h3>{{ client.name }}</h3>
+        <p>+{{client.phone_country}} {{ client.phone }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <app-chat-messages 
+      *ngIf="selectedClient"
+      [selectedClient]="selectedClient">
+    </app-chat-messages>
+    <div *ngIf="!selectedClient" class="no-client-selected">
+      <p>Selecciona un cliente para abrir el chat</p>
+    </div>
+  </div>
+</div>

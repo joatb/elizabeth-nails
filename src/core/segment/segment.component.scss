@@ -89,3 +89,33 @@ ion-icon {
     //filter: invert(18%) sepia(80%) saturate(3075%) hue-rotate(310deg) brightness(97%) contrast(94%);
     color: #ca1111;
 }
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 10px;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+}
+
+.message.sender {
+    background-color: #d1e7dd;
+    align-self: flex-end;
+}
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+}

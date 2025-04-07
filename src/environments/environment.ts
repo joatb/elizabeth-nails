@@ -4,7 +4,10 @@
 
 export const environment = {
   production: false,
-  endpoint: 'http://localhost/v1',
+  endpoint: process.env['NG_APP_ENDPOINT'] || 'http://localhost/v1',
+
+  whatsappAccessToken: process.env['NG_APP_WHATSAPP_ACCESS_TOKEN'] || '',
+  whatsappPhoneNumberId: process.env['NG_APP_WHATSAPP_PHONE_NUMBER_ID'] || '',
 };
 
 /*

@@ -4,11 +4,12 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 
 import { ErrorHandler } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, saveOutline, trashOutline } from 'ionicons/icons';
+import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, saveOutline, trashOutline, logoWhatsapp } from 'ionicons/icons';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { GlobalErrorHandler } from './core/global-error-handler/global-error-handler.service';
 import { Settings } from 'luxon';
+import { provideHttpClient } from '@angular/common/http';
 
 
 bootstrapApplication(AppComponent, {
@@ -17,6 +18,7 @@ bootstrapApplication(AppComponent, {
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideHttpClient(),
   ],
 });
 
@@ -35,7 +37,8 @@ addIcons({
   ellipsisVertical,
   trashOutline,
   logOutOutline,
-  saveOutline
+  saveOutline,
+  logoWhatsapp
 })
 
 Settings.defaultZone = 'UTC'; // or any other time zone, e.g., 'America/New_York'

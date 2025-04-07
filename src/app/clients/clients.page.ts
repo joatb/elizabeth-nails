@@ -21,6 +21,8 @@ import { Subscription } from 'rxjs';
 interface ClientsRowData  {
   id: string;
   name: string;
+  phone: string;
+  phone_country: string;
   next_appointment: string;
   appointments: number;
   last_notification: string;
@@ -110,6 +112,8 @@ export class ClientsPage implements OnInit{
   colDefs: ColDef[] = [
     { field: "id", headerName: "id", hide: true },
     { field: "name", headerName: "Cliente", flex: 2, filter: 'agTextColumnFilter', editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
+    { field: "phone_country", headerName: "Prefijo", flex: 1, autoHeight: true },
+    { field: "phone", headerName: "Teléfono", flex: 1, autoHeight: true },
     { field: "next_appointment", headerName: "Próxima Cita", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "last_notification", headerName: "Fecha última notificación", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
@@ -159,6 +163,8 @@ export class ClientsPage implements OnInit{
       this.rowData.push({
         id: client.$id,
         name: client.name,
+        phone: client.phone,
+        phone_country: client.phone_country,
         next_appointment: client.appointments.length > 0 ? client.appointments.sort((a: Appointment, b: Appointment) => DateTime.fromISO(b.start_time).toMillis() - DateTime.fromISO(a.start_time).toMillis())[0].start_time : 'No hay citas',
         appointments: client.appointments.length,
         last_notification: 'No hay notificaciones',
