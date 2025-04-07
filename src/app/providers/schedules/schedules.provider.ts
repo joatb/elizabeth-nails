@@ -9,7 +9,7 @@ import { Schedule } from "./models/schedule";
 export class SchedulesProvider {
 
     private database: string = 'core';
-    private collection: string = '67b1bb1d0025dd7894e0';
+    private collection: string = 'schedules';
 
     constructor(private dbService: DBService) { }
 

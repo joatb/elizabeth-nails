@@ -73,8 +73,8 @@ export class Day {
             }
             // Check for gaps in the schedule
             for (const timeSpan of scheduleTimeSpans) {
-                const timeSpanStartTime = DateTime.fromJSDate(timeSpan.start, {zone: 'system'}).toFormat('H:mm');
-                const timeSpanEndTime = DateTime.fromJSDate(timeSpan.end, {zone: 'system'}).toFormat('H:mm');
+                const timeSpanStartTime = DateTime.fromJSDate(timeSpan.start).toFormat('H:mm');
+                const timeSpanEndTime = DateTime.fromJSDate(timeSpan.end).toFormat('H:mm');
                 const hasAppointment = sortedAppointments.some(appointment => {
                     const appointmentStartTime = DateTime.fromJSDate(new Date(appointment.start_time)).toFormat('H:mm');
                     const appointmentEndTime = DateTime.fromJSDate(new Date(appointment.end_time)).toFormat('H:mm');
