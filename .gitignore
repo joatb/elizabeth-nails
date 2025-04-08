@@ -68,3 +68,11 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+
+# Environment variables
+.env
+
+# Environment configuration files
+environment.ts
+environment.prod.ts
