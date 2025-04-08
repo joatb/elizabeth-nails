@@ -5,9 +5,10 @@
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
-    "start": "node -r dotenv/config env.js && ng serve",
-    "build": "node -r dotenv/config env.js && ng build",
-    "watch": "ng build --watch --configuration development",
+    "start": "npm run config && ng serve",
+    "build": "npm run config && ng build",
+    "watch": "npm run config && ng build --watch --configuration development",
+    "config": "node -r dotenv/config env.js",
     "test": "ng test",
     "lint": "ng lint"
   },
