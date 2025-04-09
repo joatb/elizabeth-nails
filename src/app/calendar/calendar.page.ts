@@ -176,16 +176,14 @@ export class CalendarPage {
 
   ionViewDidEnter() {
     this.subscribeToEvents();
+    this.initialize();
+    setTimeout(function () {
+      window.dispatchEvent(new Event('resize'));
+    }, 1);
   }
   ionViewDidLeave() {
     this.eventsSubscription?.unsubscribe();
     this.eventsSubscription = null;
-  }
-
-  ngOnInit() {
-    setTimeout(function () {
-      window.dispatchEvent(new Event('resize'));
-    }, 1);
   }
 
   async initialize() {

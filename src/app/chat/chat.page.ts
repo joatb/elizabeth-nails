@@ -13,7 +13,7 @@ import { ChatComponent } from './components/chat/chat.component';
   imports: [CommonModule, SharedModule, FormsModule, ChatComponent],
   providers: []
 })
-export class ChatPage implements OnInit {
+export class ChatPage {
   chats: Map<string, { sender: string, message: string }[]> = new Map();
   clients: any[] = [];
   selectedClient: any = null;
@@ -23,7 +23,7 @@ export class ChatPage implements OnInit {
     private clientsProvider: ClientsProvider
   ) {}
 
-  ngOnInit() {
+  ionViewDidEnter() {
     this.loadClients();
   }
 

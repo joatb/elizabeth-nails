@@ -101,7 +101,7 @@ class CustomButtonComponent implements ICellRendererAngularComp {
   styleUrls: ['clients.page.scss'],
   imports: [SharedModule, AgGridAngular]
 })
-export class ClientsPage implements OnInit{
+export class ClientsPage {
 
   @ViewChild('agGrid') agGrid!: AgGridAngular;
 
@@ -147,15 +147,16 @@ export class ClientsPage implements OnInit{
     private cdr: ChangeDetectorRef
   ) {}
 
-  ionViewDidEnter(){
+  async ionViewDidEnter(){
     this.subscribeToEvents();
+    this.initializeClients();
   }
   ionViewDidLeave(){
     this.eventsSubscription?.unsubscribe();
     this.eventsSubscription = null;
   }
 
-  async ngOnInit(): Promise<void> {
+  async initializeClients(){
     this.clients = await this.clientsProvider.listClients();
     this.rowData = [];
 
@@ -206,7 +207,7 @@ export class ClientsPage implements OnInit{
   }
 
   async reload() {
-    this.ngOnInit();
+    this.initializeClients();
     await this.alertService.presentToast('Se ha actualizado la tabla', 2500);
   }
 
