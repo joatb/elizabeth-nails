@@ -5,7 +5,9 @@
          *ngFor="let client of clients" 
          (click)="selectClient(client)"
          [class.selected]="selectedClient?.$id === client.$id">
+      <!--
       <img [src]="client.avatar || 'assets/default-avatar.png'" class="avatar" />
+      !-->
       <div class="client-info">
         <h3>{{ client.name }}</h3>
         <p>+{{client.phone_country}} {{ client.phone }}</p>
