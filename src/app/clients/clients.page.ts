@@ -111,8 +111,8 @@ export class ClientsPage {
   colDefs: ColDef[] = [
     { field: "id", headerName: "id", hide: true },
     { field: "name", headerName: "Cliente", flex: 2, filter: 'agTextColumnFilter', editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
-    { field: "phone_country", headerName: "Prefijo", flex: 1, autoHeight: true },
-    { field: "phone", headerName: "Teléfono", flex: 1, autoHeight: true },
+    { field: "phone_country", headerName: "Prefijo", flex: 1, autoHeight: true, editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
+    { field: "phone", headerName: "Teléfono", flex: 1, autoHeight: true, editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
     { field: "next_appointment", headerName: "Próxima Cita", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "appointments", headerName: "Total de citas", flex: 1, autoHeight: true },
@@ -195,7 +195,11 @@ export class ClientsPage {
 
   async editClient(event: any) {
     try {
-      await this.clientsProvider.updateClient(event.data.id, {name: event.data.name});
+      await this.clientsProvider.updateClient(event.data.id, {
+        name: event.data.name,
+        phone: event.data.phone,
+        phone_country: event.data.phone_country
+      });
       await this.alertService.presentToast('Cliente actualizado', 2500);
     } catch (error) {
       event.api.undoCellEditing();
