@@ -25,7 +25,6 @@ interface ClientsRowData  {
   phone_country: string;
   next_appointment: string;
   appointments: number;
-  last_notification: string;
   tsinsert: string;
 }
 
@@ -115,7 +114,6 @@ export class ClientsPage {
     { field: "phone_country", headerName: "Prefijo", flex: 1, autoHeight: true },
     { field: "phone", headerName: "Teléfono", flex: 1, autoHeight: true },
     { field: "next_appointment", headerName: "Próxima Cita", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
-    { field: "last_notification", headerName: "Fecha última notificación", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
     { field: "appointments", headerName: "Total de citas", flex: 1, autoHeight: true },
     { 
@@ -168,7 +166,6 @@ export class ClientsPage {
         phone_country: client.phone_country,
         next_appointment: client.appointments.length > 0 ? client.appointments.sort((a: Appointment, b: Appointment) => DateTime.fromISO(b.start_time).toMillis() - DateTime.fromISO(a.start_time).toMillis())[0].start_time : 'No hay citas',
         appointments: client.appointments.length,
-        last_notification: 'No hay notificaciones',
         tsinsert: client['$createdAt']
       })
     });
