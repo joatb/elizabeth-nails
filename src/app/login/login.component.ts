@@ -15,6 +15,7 @@ export class LoginPage implements OnInit {
 
   protected email: string = '';
   protected password: string = '';
+  protected showPassword: boolean = false;
 
   constructor(
     private router: Router, 

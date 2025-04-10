@@ -5,7 +5,7 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { provideHttpClient } from '@angular/common/http';
 import { ErrorHandler } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, saveOutline, trashOutline } from 'ionicons/icons';
+import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, eyeOutline, eyeOffOutline, lockClosed, logOutOutline, person, saveOutline, trashOutline } from 'ionicons/icons';
 import { Settings } from 'luxon';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
@@ -32,6 +32,8 @@ addIcons({
   addOutline,
   add,
   eye,
+  eyeOutline,
+  eyeOffOutline,
   lockClosed,
   person,
   ellipsisVertical,

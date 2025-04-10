@@ -20,13 +20,18 @@
       <ion-item lines="none" class="custom-input">
         <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
         <ion-input
-          type="password"
+          [type]="showPassword ? 'text' : 'password'"
           placeholder="Contraseña"
           [(ngModel)]="password"
           name="password"
           required>
         </ion-input>
-        <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+        <ion-icon 
+          slot="end" 
+          [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+          (click)="showPassword = !showPassword"
+          class="toggle-password">
+        </ion-icon>
       </ion-item>
 
       <ion-button
