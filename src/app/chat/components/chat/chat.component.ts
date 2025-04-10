@@ -1,19 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ChatProvider } from '../../../providers/chat/chat.provider';
 import { WhatsAppService } from '../../../services/whatsapp.service';
 import { ChatMessage } from './models/chat-message';
+import { LucideAngularModule, ChevronLeft, ChevronRight, Users } from 'lucide-angular';
 
 @Component({
   selector: 'app-chat-messages',
   templateUrl: 'chat.component.html',
   styleUrls: ['chat.component.scss'],
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule, LucideAngularModule]
 })
 export class ChatComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedClient: any;
+  @Output() toggleMenu = new EventEmitter<void>();
+  
+  // Iconos
+  chevronLeft = ChevronLeft;
+  chevronRight = ChevronRight;
+  users = Users;
+
   chatHistory?: ChatMessage[];
   messages: {
     content: string;

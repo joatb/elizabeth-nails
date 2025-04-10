@@ -5,22 +5,25 @@
     </ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="authService.logout()" color="none" fill="solid">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+        <i-lucide [img]="LogOut"></i-lucide>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-
-      <!-- The AG Grid component -->
-      <ag-grid-angular
+  <div class="grid-container">
+    <ag-grid-angular
       #agGrid
-      style="width: 100%; height: 100%;"
+      class="ag-theme-alpine"
       [rowData]="rowData"
       [columnDefs]="colDefs"
       [localeText]="localeText"
       [undoRedoCellEditing]="true"
-      />
-
+      [domLayout]="'autoHeight'"
+      [suppressHorizontalScroll]="true"
+      [enableCellTextSelection]="true"
+      [animateRows]="true"
+    />
+  </div>
 </ion-content>

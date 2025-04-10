@@ -48,6 +48,8 @@ export class CalendarAppointmentFormComponent {
       this.form = this.fb.group({
         note: [''],
         client: ['', [Validators.required]],
+        startTime: [this.startTime, [Validators.required]],
+        endTime: [this.endTime, [Validators.required]],
       });
 
       this.clients = await this.clientsPvd.listClients();
@@ -68,8 +70,21 @@ export class CalendarAppointmentFormComponent {
   
     async submit() {
       if(this.form.valid) {
-        this.modalCtrl.dismiss(this.form.value);
+        const formValue = this.form.value;
+        const utcStartTime = this.convertToUTC(formValue.startTime);
+        const utcEndTime = this.convertToUTC(formValue.endTime);
+        
+        this.modalCtrl.dismiss({
+          ...formValue,
+          startTime: utcStartTime,
+          endTime: utcEndTime
+        });
       }
+    }
+
+    private convertToUTC(dateTime: string): string {
+      const date = new Date(dateTime);
+      return date.toISOString();
     }
 
     onClientChange(event: any) {
@@ -80,8 +95,8 @@ export class CalendarAppointmentFormComponent {
       this.eventsSubscription = this.events.getObservable().subscribe(async (event) => {
         if (event.name === 'submit') {
           const appointment = {
-            start_time: this.startTime,
-            end_time: this.endTime,
+            start_time: this.convertToUTC(this.form.controls['startTime'].value),
+            end_time: this.convertToUTC(this.form.controls['endTime'].value),
             note: this.form.controls['note'].value,
             client: this.form.controls['client'].value.id,
           }

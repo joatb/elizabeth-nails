@@ -65,11 +65,16 @@
             cursor: pointer;
             ion-label {
                 font-size: 1rem;
+                font-weight: 400;
                 color: var(--ion-color-primary);
             }
 
+
             &.active {
                 ion-label {
+                    font-weight: 600;
+                }
+                i-lucide {
                     font-weight: 600;
                 }
             }
@@ -78,6 +83,10 @@
 }
 
 ion-icon {
+    color: var(--ion-color-primary);
+}
+
+i-lucide {
     color: var(--ion-color-primary);
 }
 

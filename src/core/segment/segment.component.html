@@ -3,7 +3,7 @@
     <div class="footer-content">
         <div class="left">
             <div class="item" [class.active]="selectedSegment === 'calendar'" (click)="onChangeSegment('calendar')">
-                <ion-icon aria-hidden="true" name="calendar-time"></ion-icon>
+                <i-lucide [img]="CalendarDays"></i-lucide>
                 <ion-label>Calendario</ion-label>
             </div>
         </div>
@@ -14,11 +14,11 @@
         </div>
         <div class="right">
             <div class="item" [class.active]="selectedSegment === 'clients'" (click)="onChangeSegment('clients')">
-                <ion-icon aria-hidden="true" name="user"></ion-icon>
+                <i-lucide [img]="UsersRound"></i-lucide>
                 <ion-label>Clientes</ion-label>
             </div>
             <div class="item" [class.active]="selectedSegment === 'chat'" (click)="onChangeSegment('chat')">
-                <ion-icon aria-hidden="true" name="logo-whatsapp"></ion-icon>
+                <i-lucide [img]="MessageCircle"></i-lucide>
                 <ion-label>Chat</ion-label>
             </div>
         </div>

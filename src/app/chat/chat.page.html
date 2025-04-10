@@ -1,16 +1,33 @@
 <div class="chat-page-container">
-  <div class="clients-list">
-    <h2>Clientes</h2>
-    <div class="client-item" 
-         *ngFor="let client of clients" 
-         (click)="selectClient(client)"
-         [class.selected]="selectedClient?.$id === client.$id">
-      <!--
-      <img [src]="client.avatar || 'assets/default-avatar.png'" class="avatar" />
-      !-->
-      <div class="client-info">
-        <h3>{{ client.name }}</h3>
-        <p>+{{client.phone_country}} {{ client.phone }}</p>
+  <div class="clients-list" [class.collapsed]="isMenuCollapsed">
+    <div class="menu-header">
+      <div class="header-content">
+        <lucide-icon [name]="users" size="24" *ngIf="!isMenuCollapsed"></lucide-icon>
+        <h2 *ngIf="!isMenuCollapsed">Clientes</h2>
+      </div>
+    </div>
+    <div class="search-container">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (ngModelChange)="filterClients()"
+        placeholder="Buscar por nombre o teléfono..."
+        class="search-input"
+      >
+      <i-lucide [name]="search" class="search-icon"></i-lucide>
+    </div>
+    <div class="clients-container">
+      <div class="client-item" 
+           *ngFor="let client of filteredClients" 
+           (click)="selectClient(client)"
+           [class.selected]="selectedClient?.$id === client.$id">
+        <!--
+        <img [src]="client.avatar || 'assets/default-avatar.png'" class="avatar" />
+        !-->
+        <div class="client-info">
+          <h3>{{ client.name }}</h3>
+          <p>+{{client.phone_country}} {{ client.phone }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -18,7 +35,8 @@
   <div class="chat-container">
     <app-chat-messages 
       *ngIf="selectedClient"
-      [selectedClient]="selectedClient">
+      [selectedClient]="selectedClient"
+      (toggleMenu)="toggleMenu()">
     </app-chat-messages>
     <div *ngIf="!selectedClient" class="no-client-selected">
       <p>Selecciona un cliente para abrir el chat</p>

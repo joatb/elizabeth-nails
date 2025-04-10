@@ -1,0 +1,95 @@
+.custom-alert {
+  --backdrop-opacity: 0.7;
+  --background: var(--ion-color-light);
+  --border-radius: 16px;
+  --box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+
+  .alert-wrapper {
+    border-radius: 16px;
+  }
+
+  .alert-title {
+    color: var(--ion-color-dark);
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+
+  .alert-message {
+    color: var(--ion-color-medium);
+    font-size: 1rem;
+  }
+
+  .alert-button-group {
+    padding: 8px;
+  }
+
+  .alert-button-cancel {
+    color: var(--ion-color-medium);
+    font-weight: 500;
+    text-transform: none;
+  }
+
+  .alert-button-confirm {
+    color: var(--ion-color-danger);
+    font-weight: 600;
+    text-transform: none;
+  }
+}
+
+.grid-container {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.ag-theme-alpine {
+  width: 100%;
+  height: 100%;
+
+  .ag-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ag-header-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// Estilos responsivos para la tabla
+@media screen and (max-width: 768px) {
+  .grid-container {
+    padding: 8px;
+  }
+
+  .ag-theme-alpine {
+    .ag-header-cell {
+      font-size: 12px;
+    }
+
+    .ag-cell {
+      font-size: 12px;
+    }
+  }
+}
+
+// Ajustes para pantallas muy pequeñas
+@media screen and (max-width: 480px) {
+  .grid-container {
+    padding: 4px;
+  }
+
+  .ag-theme-alpine {
+    .ag-header-cell {
+      font-size: 11px;
+    }
+
+    .ag-cell {
+      font-size: 11px;
+    }
+  }
+}

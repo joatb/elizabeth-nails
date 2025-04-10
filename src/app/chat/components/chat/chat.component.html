@@ -1,11 +1,12 @@
 <div class="chat-container">
   <div class="chat-header">
-    <!--
-    <img [src]="recipientAvatar" class="avatar" />
-    !-->
-    <div class="user-info">
-      <h3>{{ recipientName }}</h3>
+    <div class="header-content">
+      <lucide-icon [name]="users" size="24"></lucide-icon>
+      <h2>{{ recipientName }}</h2>
     </div>
+    <button class="toggle-button" (click)="toggleMenu.emit()">
+      <lucide-icon [name]="chevronLeft" size="24"></lucide-icon>
+    </button>
   </div>
 
   <div class="messages-container">

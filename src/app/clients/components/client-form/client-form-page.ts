@@ -35,4 +35,8 @@ export class ClientFormPage {
       await this.alertService.presentToast('Datos inválidos', 2500);
     }
   }
+
+  dismiss() {
+    this.modalCtrl.dismiss();
+  }
 }

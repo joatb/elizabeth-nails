@@ -31,6 +31,8 @@ import { EventService } from '../services/event.service';
 import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
 import { CalendarAppointmentModalComponent } from './components/calendar-appointment-modal/calendar-appointment-modal';
 import { DateTime } from 'luxon';
+import { LogOut, Settings } from 'lucide-angular';
+import { CalendarEventInfoComponent } from './components/calendar-event-info/calendar-event-info.component';
 
 @Component({
   selector: 'app-calendar',
@@ -39,6 +41,8 @@ import { DateTime } from 'luxon';
   imports: [SharedModule, FullCalendarModule],
 })
 export class CalendarPage {
+  readonly LogOut =  LogOut;
+  readonly Settings =  Settings;
   component = 'CalendarPage';
   schedules: Models.DocumentList<Schedule> | null = null;
   appointments: Models.DocumentList<Appointment> | null = null;
@@ -75,92 +79,30 @@ export class CalendarPage {
       navLinks: true,
       titleFormat: { year: 'numeric', month: 'long', day: 'numeric' },
       headerToolbar: {
-        start: 'title', // will normally be on the left. if RTL, will be on the right
+        start: 'title',
         center: '',
-        end: 'prev,next dayGridMonth,timeGridDay', // will normally be on the right. if RTL, will be on the left
+        end: 'prev,next dayGridMonth,timeGridDay',
       },
       displayEventEnd: true,
       nowIndicator: true,
       plugins: [timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin],
       dateClick: (arg: any) => this.handleDateClick(arg),
       eventClick: (info) => this.handleEventClick(info),
-      events: [
-        {
-          title: 'Mari Angels',
-          start: '2025-03-23 12:00:00',
-          end: '2025-03-23 13:00:00',
-          extendedProps: { description: 'Uñas rojas' },
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Isabel Romero',
-          start: '2025-03-23 13:00:00',
-          end: '2025-03-23 14:00:00',
-        },
-        {
-          title: 'Special Business Hours',
-          start: '2025-02-16 08:00:00',
-          end: '2025-02-16 14:00:00',
-          rendering: 'background',
-        },
-      ],
       dayMaxEventRows: true,
       eventColor: '#FE7B92',
-      businessHours: [
-        // specify an array instead
-        {
-          daysOfWeek: [1, 2, 3], // Monday, Tuesday, Wednesday
-          startTime: '08:00', // 8am
-          endTime: '18:00', // 6pm
-        },
-        {
-          daysOfWeek: [4, 5], // Thursday, Friday
-          startTime: '10:00', // 10am
-          endTime: '16:00', // 4pm
-        },
-      ],
-      eventDidMount: (info) => {
-        tippy(info.el, {
-          content: info.event.extendedProps['description'],
-          trigger: 'mouseenter',
-          allowHTML: true,
-        });
-      },
       eventTimeFormat: {
-        // like '14:30:00'
         hour: '2-digit',
         minute: '2-digit',
         meridiem: false,
       },
+      eventOverlap: false,
+      eventConstraint: {
+        startTime: '00:00',
+        endTime: '24:00',
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6]
+      },
+      eventDisplay: 'block',
+      eventMaxStack: 1
     };
   }
 
@@ -224,7 +166,7 @@ export class CalendarPage {
         title: appointment.client.name,
         start: appointment.start_time,
         end: appointment.end_time,
-        extendedProps: { id: appointment.$id, description: appointment.note },
+        extendedProps: { id: appointment.$id, description: appointment.note, phone_country: appointment.client.phone_country, phone: appointment.client.phone },
       });
     });
     this.calendarOptions!.events = events;
@@ -250,7 +192,6 @@ export class CalendarPage {
   async handleDateClick(arg: any) {
     console.log(arg);
     if (this.checkIfBussinessDay(new Date(arg.dateStr))) {
-      //alert('date click! ' + arg.dateStr)
       const actionSheet = await this.actionSheetCtrl.create({
         header: dateFormatter({ value: arg.dateStr }, false),
         buttons: [
@@ -258,10 +199,12 @@ export class CalendarPage {
             text: 'Añadir cita',
             role: 'destructive',
             handler: () => {
+              const startTime = DateTime.fromISO(arg.dateStr, { zone: 'system' }).set({ hour: 8, minute: 0 });
+              const endTime = DateTime.fromISO(arg.dateStr, { zone: 'system' }).set({ hour: 9, minute: 0 });
               this.openAppoinmentFormModal(
                 new Day(arg.date),
-                new Date(arg.dateStr + 'T08:00:00'),
-                new Date(arg.dateStr + 'T09:00:00')
+                startTime.toJSDate(),
+                endTime.toJSDate()
               );
             },
           },
@@ -286,36 +229,41 @@ export class CalendarPage {
   }
 
   async handleEventClick(info: any) {
-    const appointmentId = info.event.extendedProps['id'];
-    const appointment = this.appointments?.documents.find(
-      (appointment) => appointment.$id === appointmentId
-    );
-    if (appointment) {
-      const alert = await this.alertCtrl.create({
-        header: 'Eliminar Cita',
-        message: `Desea eliminar esta cita?`,
+    const modal = await this.modalController.create({
+      component: CalendarEventInfoComponent,
+      componentProps: {
+        event: info.event
+      }
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    
+    if (data === 'delete') {
+      const confirmAlert = await this.alertCtrl.create({
+        header: 'Confirmar eliminación',
+        message: '¿Estás seguro de que deseas eliminar esta cita?',
         buttons: [
           {
-            text: 'Eliminar',
-            role: 'destructive',
-            handler: () => {
-              this.appointmentsPvd.deleteAppointment(appointmentId).then(() => {
-                this.alertService.presentToast('Cita eliminada', 2500);
-                this.reload();
-              });
-            },
+            text: 'Cancelar',
+            role: 'cancel'
           },
           {
-            text: 'Cancelar',
-            role: 'cancel',
-            handler: () => {
-              // Do nothing
-            },
-          },
-        ],
+            text: 'Eliminar',
+            handler: async () => {
+              try {
+                await this.appointmentsPvd.deleteAppointment(info.event.extendedProps.id);
+                await this.alertService.presentToast('Cita eliminada correctamente', 2500);
+                this.reload();
+              } catch (error) {
+                await this.alertService.presentToast('Error al eliminar la cita', 2500);
+              }
+            }
+          }
+        ]
       });
-
-      await alert.present();
+      await confirmAlert.present();
     }
   }
 

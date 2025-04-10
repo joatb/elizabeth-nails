@@ -1,5 +1,10 @@
 <ion-header [translucent]="true">
-    <ion-toolbar color="primary">
+    <ion-toolbar>
+        <ion-buttons slot="end">
+            <ion-button (click)="dismiss()">
+                Cancelar
+            </ion-button>
+        </ion-buttons>
         <ion-title>
             {{title}}
         </ion-title>
@@ -18,12 +23,33 @@
             <ion-item>
                 <ion-input aria-label="Nombre" type="text" placeholder="Nombre" formControlName="name"></ion-input>
             </ion-item>
+            @if(form.get('name')?.invalid && (form.get('name')?.dirty || form.get('name')?.touched)) {
+                <ion-item lines="none">
+                    <ion-text color="danger">
+                        <p>El nombre es requerido</p>
+                    </ion-text>
+                </ion-item>
+            }
             <ion-item>
                 <ion-input aria-label="Teléfono" type="tel" placeholder="Teléfono" formControlName="phone"></ion-input>
             </ion-item>
+            @if(form.get('phone')?.invalid && (form.get('phone')?.dirty || form.get('phone')?.touched)) {
+                <ion-item lines="none">
+                    <ion-text color="danger">
+                        <p>El teléfono es invalido</p>
+                    </ion-text>
+                </ion-item>
+            }
             <ion-item>
                 <ion-input aria-label="Código de país" type="tel" placeholder="Código de país" formControlName="phone_country"></ion-input>
             </ion-item>
+            @if(form.get('phone_country')?.invalid && (form.get('phone_country')?.dirty || form.get('phone_country')?.touched)) {
+                <ion-item lines="none">
+                    <ion-text color="danger">
+                        <p>El código de país es invalido</p>
+                    </ion-text>
+                </ion-item>
+            }
         </ion-list>
     </form>
 </ion-content>

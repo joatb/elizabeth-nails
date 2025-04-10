@@ -1,22 +1,22 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular'; // Angular Data Grid Component
 import type { ColDef, ICellRendererParams } from 'ag-grid-community'; // Column Definition Type Interface
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
-import { SharedModule } from '../modules/shared.module';
 import { Models } from 'appwrite';
+import { LogOut } from 'lucide-angular';
+import { DateTime } from 'luxon';
+import { Subscription } from 'rxjs';
 import { localeText } from '../../locale/ag-grid.locale';
 import { dateFormatter } from '../../shared/date-formatter/date-formatter';
-import { AlertController } from '@ionic/angular/standalone';
-import { ModalController } from '@ionic/angular/standalone';
-import { ClientFormPage } from './components/client-form/client-form-page';
+import { SharedModule } from '../modules/shared.module';
+import { Appointment } from '../providers/appointments/models/appointment';
+import { ClientsProvider } from '../providers/clients/clients.provider';
+import { Client } from '../providers/clients/models/client';
 import { AlertService } from '../services/alert.service';
 import { AuthService } from '../services/auth.service';
 import { EventService } from '../services/event.service';
-import { ClientsProvider } from '../providers/clients/clients.provider';
-import { Client } from '../providers/clients/models/client';
-import { Appointment } from '../providers/appointments/models/appointment';
-import { DateTime } from 'luxon';
-import { Subscription } from 'rxjs';
+import { ClientFormPage } from './components/client-form/client-form-page';
 
 interface ClientsRowData  {
   id: string;
@@ -34,14 +34,22 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 @Component({
   standalone: true,
   template: `
-    <div *ngFor="let button of buttons">
-      <ion-button [color]="button.color ? button.color : 'primary'" (click)="buttonClicked(button.action)">
-        <ion-icon *ngIf="button.icon && !button.label" slot="icon-only" [name]="button.icon"></ion-icon>
-        <ion-icon *ngIf="button.icon && button.label" slot="start" [name]="button.icon"></ion-icon>
-        {{button.label}}
-      </ion-button>
+    <div class="action-buttons">
+      <ion-fab-button *ngFor="let button of buttons" 
+        [color]="button.color ? button.color : 'primary'" 
+        (click)="buttonClicked(button.action)"
+        size="small">
+        <ion-icon [name]="button.icon"></ion-icon>
+      </ion-fab-button>
     </div>
   `,
+  styles: [`
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+  `],
   imports: [SharedModule]
 })
 class CustomButtonComponent implements ICellRendererAngularComp {
@@ -50,10 +58,9 @@ class CustomButtonComponent implements ICellRendererAngularComp {
 
   constructor(
     private clientsProvider: ClientsProvider,
-    private alertCtrl: AlertController
-  ) {
-
-  }
+    private alertCtrl: AlertController,
+    private alertService: AlertService
+  ) {}
 
   agInit(params: ICellRendererParams & { buttons: Array<{ label?: string, icon?: string, color?: string, action: string }>, reload: () => void }): void {
     this.params = params;
@@ -72,22 +79,30 @@ class CustomButtonComponent implements ICellRendererAngularComp {
 
   async delete(){
     const alert = await this.alertCtrl.create({
-        header: 'Eliminar cliente',
-        message: 'Quieres eliminar este cliente?',
-        buttons: [
-            {
-                text: 'Cancelar',
-                role: 'cancel',
-            },
-            {
-                text: 'OK',
-                role: 'confirm',
-                handler: async () => {
-                  await this.clientsProvider.deleteClient(this.params.data.id);
-                  this.params.reload();
-                },
-            },
-        ],
+      header: 'Eliminar cliente',
+      message: '¿Estás seguro de que quieres eliminar este cliente?',
+      cssClass: 'custom-alert',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
+            try {
+              await this.clientsProvider.deleteClient(this.params.data.id);
+              await this.alertService.presentToast('Cliente eliminado correctamente', 2500);
+              this.params.reload();
+            } catch (error) {
+              await this.alertService.presentErrorToast('Error al eliminar el cliente', 2500);
+            }
+          }
+        }
+      ]
     });
 
     await alert.present();
@@ -102,6 +117,8 @@ class CustomButtonComponent implements ICellRendererAngularComp {
 })
 export class ClientsPage {
 
+  readonly LogOut =  LogOut;
+
   @ViewChild('agGrid') agGrid!: AgGridAngular;
 
   // Row Data: The data to be displayed.
@@ -110,12 +127,62 @@ export class ClientsPage {
   // Column Definitions: Defines the columns to be displayed.
   colDefs: ColDef[] = [
     { field: "id", headerName: "id", hide: true },
-    { field: "name", headerName: "Cliente", flex: 2, filter: 'agTextColumnFilter', editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
-    { field: "phone_country", headerName: "Prefijo", flex: 1, autoHeight: true, editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
-    { field: "phone", headerName: "Teléfono", flex: 1, autoHeight: true, editable: true, onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt) },
-    { field: "next_appointment", headerName: "Próxima Cita", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
-    { field: "tsinsert", headerName: "Fecha de alta", flex: 1, autoHeight: true, valueFormatter: dateFormatter },
-    { field: "appointments", headerName: "Total de citas", flex: 1, autoHeight: true },
+    { 
+      field: "name", 
+      headerName: "Cliente", 
+      flex: 2, 
+      minWidth: 150,
+      filter: 'agTextColumnFilter', 
+      editable: true, 
+      onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt), 
+      cellStyle: { display: 'flex', alignItems: 'center' } 
+    },
+    { 
+      field: "phone_country", 
+      headerName: "Prefijo", 
+      flex: 1, 
+      minWidth: 100,
+      autoHeight: true, 
+      editable: true, 
+      onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt), 
+      cellStyle: { display: 'flex', alignItems: 'center' } 
+    },
+    { 
+      field: "phone", 
+      headerName: "Teléfono", 
+      flex: 1, 
+      minWidth: 120,
+      autoHeight: true, 
+      editable: true, 
+      onCellValueChanged: (cellValueChangedEvt)=> this.editClient(cellValueChangedEvt), 
+      cellStyle: { display: 'flex', alignItems: 'center' } 
+    },
+    { 
+      field: "next_appointment", 
+      headerName: "Próxima Cita", 
+      flex: 1, 
+      minWidth: 150,
+      autoHeight: true, 
+      valueFormatter: dateFormatter, 
+      cellStyle: { display: 'flex', alignItems: 'center' } 
+    },
+    { 
+      field: "tsinsert", 
+      headerName: "Fecha de alta", 
+      flex: 1, 
+      minWidth: 150,
+      autoHeight: true, 
+      valueFormatter: dateFormatter, 
+      cellStyle: { display: 'flex', alignItems: 'center' } 
+    },
+    { 
+      field: "appointments", 
+      headerName: "Total de citas", 
+      flex: 1, 
+      minWidth: 120,
+      autoHeight: true, 
+      cellStyle: { display: 'flex', alignItems: 'center' } 
+    },
     { 
       field: "actions", 
       headerName: "", 
@@ -127,7 +194,10 @@ export class ClientsPage {
         reload: () => this.reload()
       },
       flex: 1, 
-      autoHeight: true },
+      minWidth: 100,
+      autoHeight: true,
+      cellStyle: { display: 'flex', alignItems: 'center', justifyContent: 'center' }
+    },
   ];
 
   localeText = localeText;

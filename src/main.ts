@@ -2,14 +2,14 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { PreloadAllModules, RouteReuseStrategy, provideRouter, withPreloading } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
 
+import { provideHttpClient } from '@angular/common/http';
 import { ErrorHandler } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, saveOutline, trashOutline, logoWhatsapp } from 'ionicons/icons';
+import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, lockClosed, logOutOutline, person, saveOutline, trashOutline } from 'ionicons/icons';
+import { Settings } from 'luxon';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
 import { GlobalErrorHandler } from './core/global-error-handler/global-error-handler.service';
-import { Settings } from 'luxon';
-import { provideHttpClient } from '@angular/common/http';
 
 
 bootstrapApplication(AppComponent, {
@@ -38,7 +38,6 @@ addIcons({
   trashOutline,
   logOutOutline,
   saveOutline,
-  logoWhatsapp
 })
 
 Settings.defaultZone = 'UTC'; // or any other time zone, e.g., 'America/New_York'

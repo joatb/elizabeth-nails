@@ -22,21 +22,32 @@
               itemTextField="name"
               [canSearch]="true"
               closeButtonText="Cerrar"
+              searchPlaceholder="Buscar cliente..."
+              noItemsFoundText="No se encontraron clientes"
               (onChange)="onClientChange($event)">
             </ionic-selectable>
             </ion-item>
         </ion-card>
     </div>
+    <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime 
+            locale="es-ES" 
+            formControlName="startTime"
+            id="startTime"
+            >
+          </ion-datetime>
+        </ng-template>
+    </ion-modal>
+    
+    <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime 
+            locale="es-ES" 
+            formControlName="endTime"
+            id="endTime"
+            >
+          </ion-datetime>
+        </ng-template>
+    </ion-modal>
 </form>
-
-<ion-modal [keepContentsMounted]="true">
-    <ng-template>
-      <ion-datetime locale="es-ES" [value]="startTime" id="startTime"></ion-datetime>
-    </ng-template>
-  </ion-modal>
-
-  <ion-modal [keepContentsMounted]="true">
-    <ng-template>
-      <ion-datetime locale="es-ES" [value]="endTime" id="endTime"></ion-datetime>
-    </ng-template>
-  </ion-modal>
