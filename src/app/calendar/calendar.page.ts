@@ -102,7 +102,7 @@ export class CalendarPage {
         daysOfWeek: [0, 1, 2, 3, 4, 5, 6]
       },
       eventDisplay: 'block',
-      eventMaxStack: 1
+      eventMaxStack: 4
     };
   }
 
