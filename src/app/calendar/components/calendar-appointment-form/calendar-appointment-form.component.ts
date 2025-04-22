@@ -26,6 +26,7 @@ export class CalendarAppointmentFormComponent {
     protected clients: Models.DocumentList<Client> | null = null;
     protected selectableClientsOptions: Array<{id: string, name: string}> = [];
     private eventsSubscription: Subscription | null = null;
+    formSubmitted = false;
     
     
     constructor(
@@ -69,6 +70,7 @@ export class CalendarAppointmentFormComponent {
     }
   
     async submit() {
+      this.formSubmitted = true;
       if(this.form.valid) {
         const formValue = this.form.value;
         const utcStartTime = this.convertToUTC(formValue.startTime);
@@ -94,14 +96,22 @@ export class CalendarAppointmentFormComponent {
     async subscribeToEvents() {
       this.eventsSubscription = this.events.getObservable().subscribe(async (event) => {
         if (event.name === 'submit') {
-          const appointment = {
-            start_time: this.convertToUTC(this.form.controls['startTime'].value),
-            end_time: this.convertToUTC(this.form.controls['endTime'].value),
-            note: this.form.controls['note'].value,
-            client: this.form.controls['client'].value.id,
+          this.formSubmitted = true;
+          if(this.form.valid) {
+            const appointment = {
+              start_time: this.convertToUTC(this.form.controls['startTime'].value),
+              end_time: this.convertToUTC(this.form.controls['endTime'].value),
+              note: this.form.controls['note'].value,
+              client: this.form.controls['client'].value.id,
+            }
+            this.submitEvent.emit(appointment);
           }
-          this.submitEvent.emit(appointment);
         }
       });
+    }
+
+    isControlInvalid(controlName: string): boolean {
+      const control = this.form.get(controlName);
+      return !!control && control.invalid && (control.touched || this.formSubmitted);
     }
 }

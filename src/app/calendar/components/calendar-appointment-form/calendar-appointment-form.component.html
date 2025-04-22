@@ -6,9 +6,19 @@
                 <ion-label>Inicio</ion-label>
                 <ion-datetime-button datetime="startTime"></ion-datetime-button>
             </ion-item>
+            <ion-item lines="none" *ngIf="isControlInvalid('startTime')" class="ion-no-padding error-message">
+                <ion-text color="danger">
+                    <small>La fecha de inicio es obligatoria</small>
+                </ion-text>
+            </ion-item>
             <ion-item>
                 <ion-label>Final</ion-label>
                 <ion-datetime-button datetime="endTime"></ion-datetime-button>
+            </ion-item>
+            <ion-item lines="none" *ngIf="isControlInvalid('endTime')" class="ion-no-padding error-message">
+                <ion-text color="danger">
+                    <small>La fecha de fin es obligatoria</small>
+                </ion-text>
             </ion-item>
             <ion-item>
                 <ion-textarea aria-label="Nota" type="text" placeholder="Nota" formControlName="note"></ion-textarea>
@@ -26,6 +36,11 @@
               noItemsFoundText="No se encontraron clientes"
               (onChange)="onClientChange($event)">
             </ionic-selectable>
+            </ion-item>
+            <ion-item lines="none" *ngIf="isControlInvalid('client')" class="ion-no-padding error-message">
+                <ion-text color="danger">
+                    <small>Es necesario seleccionar un cliente</small>
+                </ion-text>
             </ion-item>
         </ion-card>
     </div>

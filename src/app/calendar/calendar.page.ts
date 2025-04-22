@@ -430,7 +430,7 @@ export class CalendarPage {
   async openAppoinmentFormModal(day: Day, startTime: Date, endTime: Date) {
     const modal = await this.modalController.create({
       component: CalendarAppointmentModalComponent,
-      initialBreakpoint: 0.3,
+      initialBreakpoint: 0.5,
       breakpoints: [0, 0.25, 0.5, 0.75],
       componentProps: {
         day,

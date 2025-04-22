@@ -1,5 +1,14 @@
-.schedule-form-item{
+.schedule-form-item {
     ion-datetime {
       margin: auto;
     }
+}
+
+.error-message {
+  padding-left: 16px;
+  margin-top: -10px;
+  
+  ion-text {
+    font-size: 12px;
+  }
 }
