@@ -71,6 +71,8 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
       client: message.client,
       read: message.read
     }));
+
+    this.messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 
   private setupWebhook() {

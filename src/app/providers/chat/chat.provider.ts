@@ -18,7 +18,11 @@ export class ChatProvider {
             const response = await this.dbService.listDocuments<ChatMessage>(
                 this.DATABASE_ID,
                 this.COLLECTION_ID,
-                [Query.equal('client', clientId)]
+                [
+                    Query.equal('client', clientId),
+                    Query.orderDesc('timestamp'),
+                    Query.limit(25)
+                ]
             );
 
             return response;

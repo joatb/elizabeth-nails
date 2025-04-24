@@ -14,7 +14,7 @@
          [ngClass]="{'message-sent': message.sent, 'message-received': !message.sent}"
          class="message-bubble">
       <p>{{ message.content }}</p>
-      <span class="timestamp">{{ message.timestamp | date:'shortTime' }}</span>
+      <span class="timestamp">{{ message.timestamp | date:'dd/MM - HH:mm' }}</span>
       <span class="status-indicator" *ngIf="message.sent">
         <i [class]="message.read ? 'fas fa-check-double' : 'fas fa-check'"></i>
       </span>
