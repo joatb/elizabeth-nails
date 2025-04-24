@@ -27,8 +27,9 @@ export class AppointmentsProvider {
         return this.dbService.listDocuments<Appointment>('core', 'appointments', [
             Query.and([
                 Query.greaterThanEqual('start_time', startDate),
-                Query.lessThanEqual('end_time', endDate)
-            ])
+                Query.lessThanEqual('end_time', endDate),
+            ]),
+            Query.limit(2500)
         ]);
     }
 
