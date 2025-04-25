@@ -30,8 +30,25 @@
             align-items: center;
             width: 100%;
             height: 100%;
-            //font-size: 1.5rem;
             font-size: 30px;
+        }
+
+        .item i-lucide, .item ion-icon {
+            font-size: 2.1rem;
+            transition: font-size 0.2s;
+        }
+        @media (max-width: 600px) {
+            .item i-lucide, .item ion-icon {
+                font-size: 1.3rem;
+            }
+            .center ion-fab-button {
+                height: 54px;
+                width: 54px;
+                margin-top: -62px;
+            }
+            .center ion-fab-button ion-icon {
+                font-size: 30px;
+            }
         }
 
         .center {
@@ -51,6 +68,7 @@
                 ion-icon {
                     color: white;
                     font-size: 55px;
+                    transition: font-size 0.2s;
                 }
             }
         }
@@ -67,8 +85,13 @@
                 font-size: 1rem;
                 font-weight: 400;
                 color: var(--ion-color-primary);
+                transition: opacity 0.2s;
             }
-
+            @media (max-width: 600px) {
+                ion-label {
+                    display: none;
+                }
+            }
 
             &.active {
                 ion-label {

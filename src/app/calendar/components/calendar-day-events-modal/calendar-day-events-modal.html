@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Eventos del día ({{ events.length }})</ion-title>
+    <ion-buttons slot="end">
+
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="add-event-content-btn-wrapper">
+    <ion-button (click)="addEvent()" class="add-event-btn" expand="block" color="primary">
+      <ion-icon name="add-outline"></ion-icon>
+      <ion-text class="button-label">Añadir cita</ion-text>
+    </ion-button>
+  </div>
+  <div *ngIf="events.length === 0" class="timeline-empty">No hay citas para este día.</div>
+  <div class="timeline-container" *ngIf="!loading">
+    <div *ngFor="let event of events" class="timeline-event">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-time">{{ event.start_time | date: 'HH:mm' }} - {{ event.end_time | date: 'HH:mm' }}</div>
+        <div class="timeline-title">{{ event.client.name }}</div>
+        <div class="timeline-note">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
+        <div class="timeline-note">{{ event.note }}</div>
+      </div>
+      <ion-button fill="clear" size="small" (click)="deleteEvent(event)">
+        <ion-icon name="trash-outline"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+  <ion-spinner *ngIf="loading"></ion-spinner>
+</ion-content>

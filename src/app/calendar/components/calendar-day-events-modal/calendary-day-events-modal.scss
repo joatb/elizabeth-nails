@@ -1,0 +1,117 @@
+.timeline-container {
+  position: relative;
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 2px solid #e0e0e0;
+}
+.timeline-event {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  position: relative;
+}
+.timeline-event ion-button {
+    margin-left: 12px;
+    margin-top: 6px;
+    --background: transparent;
+    --color: var(--ion-color-primary-contrast);
+    --box-shadow: none;
+    --border-radius: 50%;
+    --padding-start: 0;
+    --padding-end: 0;
+    --padding-top: 0;
+    --padding-bottom: 0;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.timeline-dot {
+  width: 14px;
+  height: 14px;
+  background: #FE7B92;
+  border-radius: 50%;
+  position: absolute;
+  left: -23px;
+  top: 4px;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #FE7B9233;
+}
+.timeline-content {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 10px 16px;
+    margin-left: 10px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.timeline-time {
+  font-weight: bold;
+  color: #FE7B92;
+  margin-bottom: 2px;
+}
+.timeline-title {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+.timeline-note {
+  font-size: 0.98em;
+  color: #555;
+}
+.add-event-content-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.add-event-btn {
+  --color: #fff;
+  --box-shadow: 0 2px 8px #fe7b9240;
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  border: none;
+}
+.add-event-btn ion-icon {
+  font-size: 1.4em;
+  margin-right: 0.5em;
+}
+.add-event-btn .button-label {
+  margin-left: 0;
+  font-size: 1em;
+  font-weight: 600;
+}
+
+.custom-handle {
+  width: 40px;
+  height: 5px;
+  background: #ccc;
+  border-radius: 2.5px;
+  margin: 10px auto 4px auto;
+  display: block;
+}
+
+.timeline-empty {
+  text-align: center;
+  color: #888;
+  margin: 2rem 0;
+}
+
+@media (max-width: 600px) {
+  .timeline-event ion-button .button-label {
+    display: none;
+  }
+}

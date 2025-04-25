@@ -16,9 +16,9 @@ import {
 } from '@ionic/angular';
 import { IonModal, IonNav } from '@ionic/angular/standalone';
 import { Models } from 'appwrite';
+import { LogOut, Settings } from 'lucide-angular';
+import { DateTime } from 'luxon';
 import { Subscription } from 'rxjs';
-import tippy from 'tippy.js';
-import { dateFormatter } from '../../shared/date-formatter/date-formatter';
 import { Day } from '../models/day';
 import { SharedModule } from '../modules/shared.module';
 import { AppointmentsProvider } from '../providers/appointments/appointments.provider';
@@ -28,11 +28,9 @@ import { SchedulesProvider } from '../providers/schedules/schedules.provider';
 import { AlertService } from '../services/alert.service';
 import { AuthService } from '../services/auth.service';
 import { EventService } from '../services/event.service';
-import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
 import { CalendarAppointmentModalComponent } from './components/calendar-appointment-modal/calendar-appointment-modal';
-import { DateTime } from 'luxon';
-import { LogOut, Settings } from 'lucide-angular';
 import { CalendarEventInfoComponent } from './components/calendar-event-info/calendar-event-info.component';
+import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
 
 @Component({
   selector: 'app-calendar',
@@ -87,6 +85,7 @@ export class CalendarPage {
       nowIndicator: true,
       plugins: [timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin],
       dateClick: (arg: any) => this.handleDateClick(arg),
+      moreLinkClick: (arg: any) => this.handleMoreLinkClick(arg),
       eventClick: (info) => this.handleEventClick(info),
       dayMaxEventRows: true,
       eventColor: '#FE7B92',
@@ -154,19 +153,42 @@ export class CalendarPage {
   async fetchAppointments() {
     let events: EventInput[] = [];
     let calendarDate = this.calendarApi.getDate();
-    this.appointments = await this.appointmentsPvd.listAppointments(
-      calendarDate.getMonth() + 1,
-      calendarDate.getFullYear()
-    );
-    let businessHours = [];
+    let year = calendarDate.getFullYear();
+    let month = calendarDate.getMonth() + 1;
 
-    // Add appointments to events
+    // Calculate start (first day of previous month) and end (last day of next month)
+    let prevMonth = month - 1;
+    let prevYear = year;
+    if (prevMonth === 0) {
+      prevMonth = 12;
+      prevYear--;
+    }
+    let nextMonth = month + 1;
+    let nextYear = year;
+    if (nextMonth === 13) {
+      nextMonth = 1;
+      nextYear++;
+    }
+
+    // Start date: first day of previous month
+    const startDate = new Date(prevYear, prevMonth - 1, 1);
+    // End date: last day of next month
+    const endDate = new Date(nextYear, nextMonth, 0); // day 0 of following month = last day of nextMonth
+
+    // Single call to provider
+    this.appointments = await this.appointmentsPvd.listAppointmentsInRange(startDate, endDate);
+
     this.appointments.documents.forEach((appointment) => {
       events.push({
         title: appointment.client.name,
         start: appointment.start_time,
         end: appointment.end_time,
-        extendedProps: { id: appointment.$id, description: appointment.note, phone_country: appointment.client.phone_country, phone: appointment.client.phone },
+        extendedProps: {
+          id: appointment.$id,
+          description: appointment.note,
+          phone_country: appointment.client.phone_country,
+          phone: appointment.client.phone
+        },
       });
     });
     this.calendarOptions!.events = events;
@@ -190,45 +212,28 @@ export class CalendarPage {
   }
 
   async handleDateClick(arg: any) {
-    console.log(arg);
     if (this.checkIfBussinessDay(new Date(arg.dateStr))) {
-      const actionSheet = await this.actionSheetCtrl.create({
-        header: dateFormatter({ value: arg.dateStr }, false),
-        buttons: [
-          {
-            text: 'Añadir cita',
-            role: 'destructive',
-            handler: () => {
-              const startTime = DateTime.fromISO(arg.dateStr, { zone: 'system' }).set({ hour: 8, minute: 0 });
-              const endTime = DateTime.fromISO(arg.dateStr, { zone: 'system' }).set({ hour: 9, minute: 0 });
-              this.openAppoinmentFormModal(
-                new Day(arg.date),
-                startTime.toJSDate(),
-                endTime.toJSDate()
-              );
-            },
-          },
-          {
-            text: 'Habilitar/Deshabilitar (No implementado aún)',
-            data: {
-              action: 'share',
-              role: 'destructive',
-              handler: () => {},
-            },
-            disabled: true,
-          },
-          {
-            text: 'Cancelar',
-            role: 'cancel',
-          },
-        ],
+      const dateObj = new Date(arg.dateStr);
+      const dayStr = dateObj.toISOString().substring(0, 10);
+      // Filtra entre todos los appointments cargados (de los tres meses)
+      const events = this.appointments?.documents.filter((event: any) => event.start_time.startsWith(dayStr));
+      const modal = await this.modalController.create({
+        component: (await import('./components/calendar-day-events-modal/calendar-day-events-modal')).CalendarDayEventsModalComponent,
+        initialBreakpoint: 0.5,
+        breakpoints: [0, 0.25, 0.5, 0.75, 1],
+        componentProps: {
+          date: dateObj,
+          events
+        }
       });
-
-      await actionSheet.present();
+      await modal.present();
+      await modal.onDidDismiss();
+      this.reload();
     }
   }
 
   async handleEventClick(info: any) {
+    return this.handleDateClick({ dateStr: info.event.start.toString() });
     const modal = await this.modalController.create({
       component: CalendarEventInfoComponent,
       componentProps: {
@@ -266,6 +271,13 @@ export class CalendarPage {
       await confirmAlert.present();
     }
   }
+
+  handleMoreLinkClick(arg: any) {
+    arg.dateStr = arg.date.toString();
+    this.handleDateClick(arg);
+    return 'dayGridMonth';
+  }
+
 
   checkIfBusinessHours(date: Date) {
     const time = date.toTimeString().split(' ')[0]; // Extract time in HH:MM:SS format

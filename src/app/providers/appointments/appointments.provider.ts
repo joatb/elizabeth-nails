@@ -33,6 +33,25 @@ export class AppointmentsProvider {
         ]);
     }
 
+    /**
+     * Obtiene las citas entre dos fechas (incluyendo ambas).
+     * @param startDate Fecha de inicio (Date)
+     * @param endDate Fecha de fin (Date)
+     */
+    listAppointmentsInRange(startDate: Date, endDate: Date) {
+        // Convertir fechas a ISO 8601 string
+        const startIso = startDate.toISOString();
+        // Para incluir todo el día final, poner hora máxima
+        const endIso = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999).toISOString();
+        return this.dbService.listDocuments<Appointment>('core', 'appointments', [
+            Query.and([
+                Query.greaterThanEqual('start_time', startIso),
+                Query.lessThanEqual('end_time', endIso),
+            ]),
+            Query.limit(2500)
+        ]);
+    }
+
     createAppointment(appointment: any) {
         return this.dbService.createDocument('core', 'appointments', appointment);
     }

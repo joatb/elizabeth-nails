@@ -35,6 +35,12 @@
               searchPlaceholder="Buscar cliente..."
               noItemsFoundText="No se encontraron clientes"
               (onChange)="onClientChange($event)">
+              <ng-template ionicSelectableItemTemplate let-item="item">
+                {{ item.name }}
+              </ng-template>
+              <ng-template ionicSelectableIconTemplate>
+                <ion-icon name="add-circle"></ion-icon>
+              </ng-template>
             </ionic-selectable>
             </ion-item>
             <ion-item lines="none" *ngIf="isControlInvalid('client')" class="ion-no-padding error-message">

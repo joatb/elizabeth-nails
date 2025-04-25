@@ -3,6 +3,14 @@
     pointer-events: auto;
 }
 
+// Evita los efectos hover en los eventos del calendario
+::ng-deep .fc-event,
+::ng-deep .fc-event:hover,
+::ng-deep .fc-daygrid-event,
+::ng-deep .fc-daygrid-event:hover {
+  transform: none !important;
+}
+
 .alert-message {
   .alert-message {
     white-space: pre-line;
