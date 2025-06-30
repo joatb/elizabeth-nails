@@ -50,11 +50,7 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   ngOnInit() {
-    if (this.selectedClient) {
-      this.recipientName = this.selectedClient.name;
-      this.loadChatHistory();
-      this.setupWebhook();
-    }
+    // No cargar historial aquí para evitar duplicados
   }
 
   ngOnDestroy() {
@@ -107,4 +103,4 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
       this.subscriptions.push(sub);
     }
   }
-} 
+}

@@ -117,7 +117,6 @@ export class CalendarPage {
 
   ionViewDidEnter() {
     this.subscribeToEvents();
-    this.initialize();
     setTimeout(function () {
       window.dispatchEvent(new Event('resize'));
     }, 1);
