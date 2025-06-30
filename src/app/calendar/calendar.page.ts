@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef } from '@angular/core';
 import {
   FullCalendarComponent,
   FullCalendarModule,
@@ -60,6 +60,8 @@ export class CalendarPage {
 
   private eventsSubscription: Subscription | null = null;
 
+  isLoadingEvents: boolean = false;
+
   constructor(
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
@@ -68,7 +70,8 @@ export class CalendarPage {
     private alertCtrl: AlertController,
     private alertService: AlertService,
     private events: EventService,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private cdr: ChangeDetectorRef
   ) {
     this.calendarOptions = {
       timeZone: 'local',
@@ -150,6 +153,8 @@ export class CalendarPage {
     });
   }
   async fetchAppointments() {
+    this.isLoadingEvents = true;
+    this.cdr.detectChanges();
     let events: EventInput[] = [];
     let calendarDate = this.calendarApi.getDate();
     let year = calendarDate.getFullYear();
@@ -191,6 +196,8 @@ export class CalendarPage {
       });
     });
     this.calendarOptions!.events = events;
+    this.isLoadingEvents = false;
+    this.cdr.detectChanges();
   }
 
   async onWillPresent() {

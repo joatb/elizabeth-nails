@@ -15,7 +15,8 @@
 </ion-header>
 
 <ion-content class="ion-padding" [fullscreen]="true" style="max-height: 100vh;">
-  <full-calendar #calendar [options]="calendarOptions" [events]="eventsPromise | async"></full-calendar>
+  <ion-skeleton-text *ngIf="isLoadingEvents" animated style="width: 100%; height: 100vh; border-radius: 12px;"></ion-skeleton-text>
+  <full-calendar #calendar [options]="calendarOptions" [events]="eventsPromise | async" [ngClass]="{'calendar-hidden': isLoadingEvents}"></full-calendar>
   <ion-modal #modal trigger="openModal" (willPresent)="onWillPresent()">
     <ng-template>
       <ion-header>
@@ -32,3 +33,14 @@
     </ng-template>
   </ion-modal>
 </ion-content>
+
+<style>
+  .calendar-hidden {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+    height: 0;
+    z-index: 0;
+  }
+</style>
