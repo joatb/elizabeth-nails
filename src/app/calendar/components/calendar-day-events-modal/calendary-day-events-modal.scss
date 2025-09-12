@@ -34,13 +34,13 @@
 .timeline-dot {
   width: 14px;
   height: 14px;
-  background: #FE7B92;
+  background: var(--ion-color-primary);
   border-radius: 50%;
   position: absolute;
   left: -23px;
   top: 4px;
   border: 2px solid #fff;
-  box-shadow: 0 0 0 2px #FE7B9233;
+  box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.2);
 }
 .timeline-content {
     background: #fff;
@@ -55,7 +55,7 @@
 }
 .timeline-time {
   font-weight: bold;
-  color: #FE7B92;
+  color: var(--ion-color-primary);
   margin-bottom: 2px;
 }
 .timeline-title {
@@ -75,7 +75,7 @@
 
 .add-event-btn {
   --color: #fff;
-  --box-shadow: 0 2px 8px #fe7b9240;
+  --box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.25);
   font-size: 1em;
   font-weight: 600;
   letter-spacing: 0.3px;
