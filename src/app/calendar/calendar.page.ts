@@ -516,7 +516,6 @@ export class CalendarPage {
   private subscribeToEvents() {
     this.eventsSubscription = this.events.getObservable().subscribe((event) => {
       if (event.name === 'add.event') {
-        console.log('add.event', event.value);
         this.addAppointment();
       }
     });

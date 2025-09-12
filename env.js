@@ -8,6 +8,7 @@ const envDevelopmentFile = `export const environment = {
     endpoint: '${process.env.NG_APP_ENDPOINT}',
     whatsappAccessToken: '${process.env.NG_APP_WHATSAPP_ACCESS_TOKEN}',
     whatsappPhoneNumberId: '${process.env.NG_APP_WHATSAPP_PHONE_NUMBER_ID}',
+    redisUrl: '${process.env.NG_APP_REDIS_URL || process.env.REDIS_URL}',
 };
 `;
 const targetPathDevelopment = path.join(__dirname, './src/environments/environment.ts');
@@ -25,6 +26,7 @@ const envProductionFile = `export const environment = {
     endpoint: '${process.env.NG_APP_ENDPOINT}',
     whatsappAccessToken: '${process.env.NG_APP_WHATSAPP_ACCESS_TOKEN}',
     whatsappPhoneNumberId: '${process.env.NG_APP_WHATSAPP_PHONE_NUMBER_ID}',
+    redisUrl: '${process.env.NG_APP_REDIS_URL || process.env.REDIS_URL}',
 };
 `;
 const targetPathProduction = path.join(__dirname, './src/environments/environment.prod.ts');
