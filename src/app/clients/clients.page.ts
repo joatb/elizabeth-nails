@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { AlertController, ModalController } from '@ionic/angular/standalone';
 import { AgGridAngular, ICellRendererAngularComp } from 'ag-grid-angular'; // Angular Data Grid Component
 import type { ColDef, ICellRendererParams } from 'ag-grid-community'; // Column Definition Type Interface
@@ -120,9 +120,18 @@ export class ClientsPage {
   readonly LogOut =  LogOut;
 
   @ViewChild('agGrid') agGrid!: AgGridAngular;
+  @ViewChild('agGrid', { read: ElementRef }) agGridElement!: ElementRef;
 
   // Row Data: The data to be displayed.
   rowData: Array<ClientsRowData> = [];
+  
+  // Paginación
+  currentOffset = 0;
+  private readonly pageSize = 50;
+  totalClients = 0;
+  isLoadingMore = false;
+  allClientsLoaded = false;
+  isLoadingAll = false;
 
   // Column Definitions: Defines the columns to be displayed.
   colDefs: ColDef[] = [
@@ -219,29 +228,129 @@ export class ClientsPage {
     this.subscribeToEvents();
     this.initializeClients();
   }
+
+  onGridReady(event: any) {
+    // Configurar listener para detectar cuando se activa la búsqueda
+    event.api.addEventListener('filterChanged', () => {
+      this.onFilterChanged();
+    });
+  }
+
+  private async onFilterChanged() {
+    // Verificar si hay algún filtro activo
+    const filterModel = this.agGrid.api?.getFilterModel();
+    const hasActiveFilters = filterModel && Object.keys(filterModel).length > 0;
+    
+    if (hasActiveFilters && !this.allClientsLoaded && !this.isLoadingAll) {
+      await this.loadAllClients();
+    }
+  }
   ionViewDidLeave(){
     this.eventsSubscription?.unsubscribe();
     this.eventsSubscription = null;
   }
 
   async initializeClients(){
-    this.clients = await this.clientsProvider.listClients();
-    this.rowData = [];
+    try {
+      // Reset paginación
+      this.currentOffset = 0;
+      this.rowData = [];
+      
+      // Usar paginación inteligente - cargar solo 50 clientes inicialmente
+      const paginatedResult = await this.clientsProvider.listClientsPaginated(this.pageSize, this.currentOffset);
+      
+      this.totalClients = paginatedResult.total;
+      this.currentOffset = this.pageSize;
 
-    this.clients?.documents.forEach(client => {
-      this.rowData.push({
-        id: client.$id,
-        name: client.name,
-        phone: client.phone,
-        phone_country: client.phone_country,
-        next_appointment: client.appointments.length > 0 ? client.appointments.sort((a: Appointment, b: Appointment) => DateTime.fromISO(b.start_time).toMillis() - DateTime.fromISO(a.start_time).toMillis())[0].start_time : 'No hay citas',
-        appointments: client.appointments.length,
-        tsinsert: client['$createdAt']
-      })
-    });
+      paginatedResult.documents.forEach(client => {
+        this.rowData.push(this.mapClientToRowData(client));
+      });
 
-    this.agGrid.api?.setGridOption('rowData', this.rowData);
-    this.cdr.detectChanges(); // Forzar la detección de cambios
+      this.agGrid.api?.setGridOption('rowData', this.rowData);
+      this.cdr.detectChanges(); // Forzar la detección de cambios
+      
+    } catch (error) {
+      console.error('❌ Error cargando clientes:', error);
+      // Fallback al método original si hay error
+      this.clients = await this.clientsProvider.listClients();
+      this.rowData = [];
+      this.clients?.documents.forEach(client => {
+        this.rowData.push(this.mapClientToRowData(client));
+      });
+      this.agGrid.api?.setGridOption('rowData', this.rowData);
+      this.cdr.detectChanges();
+    }
+  }
+
+  private mapClientToRowData(client: Client): ClientsRowData {
+    return {
+      id: client.$id,
+      name: client.name,
+      phone: client.phone,
+      phone_country: client.phone_country,
+      next_appointment: client.appointments.length > 0 ? client.appointments.sort((a: Appointment, b: Appointment) => DateTime.fromISO(b.start_time).toMillis() - DateTime.fromISO(a.start_time).toMillis())[0].start_time : 'No hay citas',
+      appointments: client.appointments.length,
+      tsinsert: client['$createdAt']
+    };
+  }
+
+
+  async loadMoreClients() {
+    if (this.isLoadingMore || this.currentOffset >= this.totalClients) return;
+    
+    this.isLoadingMore = true;
+    
+    try {
+      const paginatedResult = await this.clientsProvider.listClientsPaginated(this.pageSize, this.currentOffset);
+      
+      // Agregar nuevos clientes a la lista existente
+      paginatedResult.documents.forEach(client => {
+        this.rowData.push(this.mapClientToRowData(client));
+      });
+      
+      this.currentOffset += this.pageSize;
+      
+      // Actualizar la grilla
+      this.agGrid.api?.setGridOption('rowData', this.rowData);
+      this.cdr.detectChanges();
+      
+    } catch (error) {
+      console.error('❌ Error cargando más clientes:', error);
+    } finally {
+      this.isLoadingMore = false;
+    }
+  }
+
+  async loadAllClients() {
+    if (this.isLoadingAll || this.allClientsLoaded) return;
+    
+    this.isLoadingAll = true;
+    
+    try {
+      const allClients = await this.clientsProvider.loadAllClientsForSearch();
+      
+      // Reemplazar todos los datos
+      this.rowData = [];
+      allClients.forEach(client => {
+        this.rowData.push(this.mapClientToRowData(client));
+      });
+      
+      this.allClientsLoaded = true;
+      this.currentOffset = allClients.length;
+      
+      // Actualizar la grilla
+      this.agGrid.api?.setGridOption('rowData', this.rowData);
+      this.cdr.detectChanges();
+      
+      // Mostrar mensaje informativo
+      await this.alertService.presentToast('Todos los clientes cargados. Búsqueda completa disponible.', 3000);
+      
+    } catch (error) {
+      console.error('❌ Error cargando todos los clientes:', error);
+      await this.alertService.presentToast('Error cargando todos los clientes', 3000);
+    } finally {
+      this.isLoadingAll = false;
+    }
   }
 
   async addClient() {

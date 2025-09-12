@@ -1,3 +1,5 @@
 <ion-tabs style="max-height: calc(100% - var(--app-segment-height, 69px));"></ion-tabs>
 
+<app-cache-debug *ngIf="!environment.production"></app-cache-debug>
+
 <app-segment></app-segment>
