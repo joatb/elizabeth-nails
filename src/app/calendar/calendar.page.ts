@@ -91,7 +91,7 @@ export class CalendarPage {
       moreLinkClick: (arg: any) => this.handleMoreLinkClick(arg),
       eventClick: (info) => this.handleEventClick(info),
       dayMaxEventRows: true,
-      eventColor: '#FE7B92',
+      eventColor: 'var(--ion-color-primary)',
       eventTimeFormat: {
         hour: '2-digit',
         minute: '2-digit',
