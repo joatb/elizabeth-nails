@@ -1,3 +1,4 @@
+
 import { Injectable } from "@angular/core";
 import { Query } from "appwrite";
 import { Client } from "./models/client";
@@ -44,7 +45,7 @@ export class ClientsProvider {
     /**
      * Lista clientes básico (para compatibilidad)
      */
-    listClients(limit: number = 50, offset: number = 0) {
+    listClients(limit: number = 50, offset: number = 0, forceRefresh: boolean = false) {
         return this.dbService.listDocuments<Client>(
             this.database, 
             this.collection,
@@ -85,4 +86,33 @@ export class ClientsProvider {
     deleteClient(clientId: string) {
         return this.dbService.deleteDocument(this.database, this.collection, clientId);
     }
+
+    /**
+     * Busca clientes por nombre - SIN CACHÉ
+     * Usa DBService con forceRefresh: true para evitar el caché
+     */
+    async searchClientsByName(searchTerm: string, limit: number = 50): Promise<Client[]> {
+        if (!searchTerm || searchTerm.trim().length === 0) {
+            return [];
+        }
+
+        try {
+            // Usar DBService con forceRefresh: true para evitar el caché
+            const result = await this.dbService.listDocuments<Client>(
+                this.database,
+                this.collection,
+                [
+                    Query.search('name', searchTerm),
+                    Query.limit(limit)
+                ],
+                true // forceRefresh: true para evitar caché
+            );
+            
+            return result.documents;
+        } catch (error) {
+            console.error('Error searching clients by name:', error);
+            return [];
+        }
+    }
+
 }

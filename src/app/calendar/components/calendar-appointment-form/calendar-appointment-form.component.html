@@ -31,10 +31,13 @@
               itemValueField="id"
               itemTextField="name"
               [canSearch]="true"
+              [hasInfiniteScroll]="true"
               closeButtonText="Cerrar"
               searchPlaceholder="Buscar cliente..."
               noItemsFoundText="No se encontraron clientes"
-              (onChange)="onClientChange($event)">
+              (onChange)="onClientChange($event)"
+              (onSearch)="onClientSearch($event)"
+              (onInfiniteScroll)="onClientLoadMore($event)">
               <ng-template ionicSelectableItemTemplate let-item="item">
                 {{ item.name }}
               </ng-template>

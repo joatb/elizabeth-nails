@@ -28,6 +28,13 @@ export class CalendarAppointmentFormComponent {
     private eventsSubscription: Subscription | null = null;
     formSubmitted = false;
     
+    // Variables para infinite scroll y búsqueda
+    private currentOffset = 0;
+    private readonly limit = 50;
+    private isLoadingMore = false;
+    private hasMoreClients = true;
+    private currentSearchTerm = '';
+    
     
     constructor(
       private fb: FormBuilder,
@@ -53,15 +60,7 @@ export class CalendarAppointmentFormComponent {
         endTime: [this.endTime, [Validators.required]],
       });
 
-      this.clients = await this.clientsPvd.listClients();
-
-      this.selectableClientsOptions = this.clients?.documents.map((client) => {
-        return {
-          id: client.$id,
-          name: client.name,
-        };
-      }
-      ) || [];
+      await this.loadInitialClients();
     }
 
     ngOnDestroy() {
@@ -93,6 +92,111 @@ export class CalendarAppointmentFormComponent {
       this.form.controls['client'].setValue(event.value);
     }
 
+    /**
+     * Carga los clientes iniciales
+     */
+    private async loadInitialClients() {
+      try {
+        this.clients = await this.clientsPvd.listClients(this.limit, 0);
+        this.selectableClientsOptions = this.clients?.documents.map((client) => ({
+          id: client.$id,
+          name: client.name,
+        })) || [];
+        
+        this.currentOffset = this.limit;
+        this.hasMoreClients = this.clients ? this.clients.documents.length === this.limit : false;
+      } catch (error) {
+        console.error('Error loading initial clients:', error);
+        this.selectableClientsOptions = [];
+      }
+    }
+
+    /**
+     * Maneja la búsqueda de clientes
+     */
+    async onClientSearch(event: { text: string }) {
+      const searchTerm = event.text?.trim();
+      this.currentSearchTerm = searchTerm;
+
+      if (!searchTerm || searchTerm.length === 0) {
+        // Si no hay término de búsqueda, cargar clientes iniciales
+        await this.loadInitialClients();
+        return;
+      }
+
+      try {
+        // Buscar clientes por nombre en la base de datos
+        const searchResults = await this.clientsPvd.searchClientsByName(searchTerm);
+        this.selectableClientsOptions = searchResults.map((client) => ({
+          id: client.$id,
+          name: client.name,
+        }));
+        
+        // Resetear variables de paginación para búsqueda
+        this.currentOffset = 0;
+        this.hasMoreClients = false; // Para búsquedas no usamos infinite scroll
+      } catch (error) {
+        console.error('Error searching clients:', error);
+        this.selectableClientsOptions = [];
+      }
+    }
+
+    /**
+     * Maneja la carga de más clientes (infinite scroll)
+     */
+    async onClientLoadMore(event: { component: any; text: string }) {
+      // Si está cargando o hay búsqueda activa, no hacer nada
+      if (this.isLoadingMore || this.currentSearchTerm) {
+        event.component.endInfiniteScroll();
+        return;
+      }
+
+      // Si no hay más clientes, deshabilitar infinite scroll
+      if (!this.hasMoreClients) {
+        event.component.disableInfiniteScroll();
+        return;
+      }
+
+      this.isLoadingMore = true;
+
+      try {
+        const moreClients = await this.clientsPvd.listClients(this.limit, this.currentOffset);
+        
+        if (moreClients && moreClients.documents.length > 0) {
+          const newOptions = moreClients.documents.map((client) => ({
+            id: client.$id,
+            name: client.name,
+          }));
+          
+          // Concatenar con los items existentes del componente
+          const allOptions = event.component.items.concat(newOptions);
+          event.component.items = allOptions;
+          
+          // Actualizar también nuestra variable local
+          this.selectableClientsOptions = allOptions;
+          this.currentOffset += this.limit;
+          
+          // Solo deshabilitar si recibimos menos clientes de los esperados
+          this.hasMoreClients = moreClients.documents.length === this.limit;
+        } else {
+          this.hasMoreClients = false;
+        }
+      } catch (error) {
+        console.error('Error loading more clients:', error);
+        this.hasMoreClients = false;
+      } finally {
+        this.isLoadingMore = false;
+        
+        // Finalizar el infinite scroll según la documentación
+        event.component.endInfiniteScroll();
+        
+        // Solo deshabilitar infinite scroll si no hay más clientes
+        if (!this.hasMoreClients) {
+          event.component.disableInfiniteScroll();
+        }
+      }
+    }
+
     async subscribeToEvents() {
       this.eventsSubscription = this.events.getObservable().subscribe(async (event) => {
         if (event.name === 'submit') {
@@ -114,4 +218,5 @@ export class CalendarAppointmentFormComponent {
       const control = this.form.get(controlName);
       return !!control && control.invalid && (control.touched || this.formSubmitted);
     }
+
 }

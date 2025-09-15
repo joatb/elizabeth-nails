@@ -234,14 +234,24 @@ export class ClientsPage {
     event.api.addEventListener('filterChanged', () => {
       this.onFilterChanged();
     });
+    
+    // Configurar listener para detectar cuando se ordena
+    event.api.addEventListener('sortChanged', () => {
+      this.onFilterChanged();
+    });
   }
 
   private async onFilterChanged() {
-    // Verificar si hay algún filtro activo
+    // Verificar si hay algún filtro activo (texto, número, fecha, etc.)
     const filterModel = this.agGrid.api?.getFilterModel();
     const hasActiveFilters = filterModel && Object.keys(filterModel).length > 0;
     
-    if (hasActiveFilters && !this.allClientsLoaded && !this.isLoadingAll) {
+    // Verificar si hay algún ordenamiento activo
+    const columnState = this.agGrid.api?.getColumnState();
+    const hasActiveSorting = columnState && columnState.some(col => col.sort !== null);
+    
+    // Cargar todos los clientes si hay filtros o ordenamiento activo
+    if ((hasActiveFilters || hasActiveSorting) && !this.allClientsLoaded && !this.isLoadingAll) {
       await this.loadAllClients();
     }
   }
@@ -343,7 +353,7 @@ export class ClientsPage {
       this.cdr.detectChanges();
       
       // Mostrar mensaje informativo
-      await this.alertService.presentToast('Todos los clientes cargados. Búsqueda completa disponible.', 3000);
+      await this.alertService.presentToast('Todos los clientes cargados. Filtros y ordenamiento completos disponibles.', 3000);
       
     } catch (error) {
       console.error('❌ Error cargando todos los clientes:', error);
