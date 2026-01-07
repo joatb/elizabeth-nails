@@ -1,25 +1,26 @@
-import { Component, Input } from '@angular/core';
-import { ModalController } from '@ionic/angular/standalone';
-import { AppointmentsProvider } from '../../../providers/appointments/appointments.provider';
-import { CalendarAppointmentModalComponent } from '../calendar-appointment-modal/calendar-appointment-modal';
-import { IonicModule, AlertController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
-import { Appointment } from '../../../providers/appointments/models/appointment';
+import { Component, Input } from '@angular/core';
+import { AlertController, IonicModule } from '@ionic/angular';
+import { ModalController } from '@ionic/angular/standalone';
+import { LucideAngularModule, Trash } from 'lucide-angular';
 import { DateTime } from 'luxon';
+import { AppointmentsProvider } from '../../../providers/appointments/appointments.provider';
+import { Appointment } from '../../../providers/appointments/models/appointment';
 import { AlertService } from '../../../services/alert.service';
+import { CalendarAppointmentModalComponent } from '../calendar-appointment-modal/calendar-appointment-modal';
 
 @Component({
   selector: 'app-calendar-day-events-modal',
   templateUrl: 'calendar-day-events-modal.html',
   styleUrl: 'calendary-day-events-modal.scss',
   standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, LucideAngularModule],
 })
 export class CalendarDayEventsModalComponent {
   @Input() date!: Date;
   @Input() events: Appointment[] = [];
   loading = true;
-
+  readonly Trash = Trash;
   constructor(
     private modalCtrl: ModalController,
     private appointmentsPvd: AppointmentsProvider,

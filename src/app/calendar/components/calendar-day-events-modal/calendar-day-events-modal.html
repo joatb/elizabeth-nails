@@ -24,8 +24,8 @@
         <div class="timeline-note">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
         <div class="timeline-note">{{ event.note }}</div>
       </div>
-      <ion-button fill="clear" size="small" (click)="deleteEvent(event)">
-        <ion-icon name="trash-outline"></ion-icon>
+      <ion-button fill="clear" size="small" color="danger" (click)="deleteEvent(event)">
+        <i-lucide [img]="Trash"></i-lucide>
       </ion-button>
     </div>
   </div>

@@ -9,26 +9,51 @@
   align-items: flex-start;
   margin-bottom: 28px;
   position: relative;
+  gap: 8px;
+  
+  &:hover ion-button {
+    opacity: 1;
+  }
 }
 .timeline-event ion-button {
-    margin-left: 12px;
-    margin-top: 6px;
+    margin-left: 8px;
+    margin-top: 4px;
     --background: transparent;
-    --color: var(--ion-color-primary-contrast);
+    --color: var(--ion-color-danger);
     --box-shadow: none;
     --border-radius: 50%;
-    --padding-start: 0;
-    --padding-end: 0;
-    --padding-top: 0;
-    --padding-bottom: 0;
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    min-height: 34px;
-    display: flex;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    z-index: 10;
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    
+    &:hover {
+        --background: rgba(var(--ion-color-danger-rgb), 0.15);
+        transform: scale(1.1);
+    }
+    
+    &:active {
+        transform: scale(0.95);
+    }
+    
+    ion-icon {
+        font-size: 1.4em;
+        color: var(--ion-color-danger);
+        display: block;
+    }
 }
 
 .timeline-dot {
