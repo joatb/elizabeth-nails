@@ -88,16 +88,11 @@ ion-toast.custom-toast::part(button) {
 
 
 ion-button {
-    background-image: linear-gradient(to right, var(--ion-color-primary) 0%, #eceff4  51%, var(--ion-color-primary)  100%)
-}
-
-ion-button {
    text-align: center;
    text-transform: uppercase;
    transition: 0.5s;
    background-size: 200% auto;
    color: white;
-   box-shadow: 0 0 20px #eee;
    border-radius: 4px;
    --opacity: 1;
    font-weight: 400;
