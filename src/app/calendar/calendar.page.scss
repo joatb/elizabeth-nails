@@ -16,3 +16,29 @@
     white-space: pre-line;
   }
 }
+
+// Estil per al botó personalitzat del selector de mes
+::ng-deep .fc-monthPicker-button {
+  font-size: 1.2em !important;
+  padding: 0.4em 0.65em !important;
+  cursor: pointer;
+  
+  &:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+  }
+}
+
+// Estil per al botó "Hoy"
+::ng-deep .fc-todayButton-button {
+  font-size: 1em !important;
+  padding: 0.5em 1em !important;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
