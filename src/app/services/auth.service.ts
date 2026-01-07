@@ -4,6 +4,7 @@ import { AlertController } from '@ionic/angular/standalone';
 import { Models } from "appwrite";
 import { catchError, firstValueFrom, from, map, Observable, of } from "rxjs";
 import { account } from "../../lib/appwrite";
+import { UserPreferences } from "../models/user-preferences";
 
 @Injectable({
     providedIn: 'root',
@@ -12,7 +13,7 @@ export class AuthService {
     private loggedInUser: Observable<Models.User<Models.Preferences> | null>;
 
     constructor(
-        private router: Router, 
+        private router: Router,
         private alertCtrl: AlertController) {
         this.loggedInUser = from(account.get());
     }
@@ -62,6 +63,14 @@ export class AuthService {
         await alert.present();
     }
 
+    async saveUserPreferences(preferences: UserPreferences) {
+      try {
+        await account.updatePrefs(preferences);
+      } catch (error) {
+        this.handleError(error);
+      }
+    }
+
     private async handleError(error: any) {
         switch (error.code) {
             case 429:
@@ -72,7 +81,7 @@ export class AuthService {
                     })).present();
                 }
                 break;
-        
+
             default:
                 throw error;
         }
