@@ -16,7 +16,7 @@ import {
 } from '@ionic/angular';
 import { IonModal, IonNav } from '@ionic/angular/standalone';
 import { Models } from 'appwrite';
-import { LogOut, Settings } from 'lucide-angular';
+import { LogOut, Settings, EllipsisVertical } from 'lucide-angular';
 import { DateTime } from 'luxon';
 import { Subscription } from 'rxjs';
 import { Day } from '../models/day';
@@ -31,16 +31,18 @@ import { EventService } from '../services/event.service';
 import { CalendarAppointmentModalComponent } from './components/calendar-appointment-modal/calendar-appointment-modal';
 import { CalendarEventInfoComponent } from './components/calendar-event-info/calendar-event-info.component';
 import { CalendarScheduleComponent } from './components/calendar-schedule/calendar-schedule.component';
+import { ConfigModalComponent } from '../components/modals/config-modal/config-modal.component';
 
 @Component({
   selector: 'app-calendar',
   templateUrl: 'calendar.page.html',
   styleUrls: ['calendar.page.scss'],
-  imports: [SharedModule, FullCalendarModule],
+  imports: [SharedModule, FullCalendarModule, ConfigModalComponent],
 })
 export class CalendarPage {
   readonly LogOut =  LogOut;
   readonly Settings =  Settings;
+  readonly EllipsisVertical =  EllipsisVertical;
   component = 'CalendarPage';
   schedules: Models.DocumentList<Schedule> | null = null;
   appointments: Models.DocumentList<Appointment> | null = null;
@@ -250,7 +252,7 @@ export class CalendarPage {
     await modal.present();
 
     const { data } = await modal.onDidDismiss();
-    
+
     if (data === 'delete') {
       const confirmAlert = await this.alertCtrl.create({
         header: 'Confirmar eliminación',
