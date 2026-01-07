@@ -20,6 +20,32 @@
 <ion-content class="ion-padding" [fullscreen]="true" style="max-height: 100vh;">
   <ion-skeleton-text *ngIf="isLoadingEvents" animated style="width: 100%; height: 100vh; border-radius: 12px;"></ion-skeleton-text>
   <full-calendar #calendar [options]="calendarOptions" [events]="eventsPromise | async" [ngClass]="{'calendar-hidden': isLoadingEvents}"></full-calendar>
+
+  <ion-modal [isOpen]="isMonthPickerOpen" (didDismiss)="onMonthPickerDismiss()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Seleccionar mes</ion-title>
+          <ion-buttons slot="start">
+            <ion-button (click)="cancelMonthPicker()">Cancelar</ion-button>
+          </ion-buttons>
+          <ion-buttons slot="end">
+            <ion-button (click)="confirmMonthPicker()" [strong]="true">Confirmar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <ion-datetime
+          #monthDatetime
+          presentation="month-year"
+          preferWheel="true"
+          [value]="monthPickerValue"
+          locale="es-ES">
+        </ion-datetime>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
   <ion-modal #modal trigger="openModal" (willPresent)="onWillPresent()">
     <ng-template>
       <ion-header>

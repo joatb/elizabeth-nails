@@ -16,7 +16,7 @@ import {
 } from '@ionic/angular';
 import { IonModal, IonNav } from '@ionic/angular/standalone';
 import { Models } from 'appwrite';
-import { LogOut, Clock, EllipsisVertical } from 'lucide-angular';
+import { LogOut, Clock, EllipsisVertical, CalendarDays } from 'lucide-angular';
 import { DateTime } from 'luxon';
 import { Subscription } from 'rxjs';
 import { Day } from '../models/day';
@@ -56,6 +56,7 @@ export class CalendarPage {
 
   @ViewChild('nav') private nav!: IonNav;
   @ViewChild('modal') private modal!: IonModal;
+  @ViewChild('monthDatetime') monthDatetime: any;
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
   private calendarApi!: CalendarApi;
@@ -63,6 +64,9 @@ export class CalendarPage {
   private eventsSubscription: Subscription | null = null;
 
   isLoadingEvents: boolean = false;
+
+  isMonthPickerOpen: boolean = false;
+  monthPickerValue: string = DateTime.local().startOf('month').toISODate() ?? '';
 
   constructor(
     protected authService: AuthService,
@@ -84,7 +88,19 @@ export class CalendarPage {
       headerToolbar: {
         start: 'title',
         center: '',
-        end: 'prev,next dayGridMonth,timeGridDay',
+        end: 'prev todayButton next monthPicker dayGridMonth,timeGridDay',
+      },
+      customButtons: {
+        todayButton: {
+          text: 'Mes actual',
+          hint: 'Volver al mes actual',
+          click: () => this.goToToday()
+        },
+        monthPicker: {
+          text: '📅',
+          hint: 'Seleccionar mes',
+          click: () => this.openMonthPicker()
+        }
       },
       displayEventEnd: true,
       nowIndicator: true,
@@ -115,6 +131,7 @@ export class CalendarPage {
     if (this.calendarOptions) {
       this.calendarOptions.datesSet = () => {
         this.fetchAppointments();
+        this.updateTodayButtonVisibility();
       };
     }
     this.initialize();
@@ -134,6 +151,7 @@ export class CalendarPage {
   async initialize() {
     await this.fetchAppointments();
     await this.fetchSchedules();
+    this.updateTodayButtonVisibility();
   }
 
   reload() {
@@ -216,6 +234,88 @@ export class CalendarPage {
       this.modal.dismiss().then(() => {
         this.reload();
       });
+    }
+  }
+
+  async openMonthPicker() {
+    const currentDate = this.calendarApi.getDate();
+    this.monthPickerValue = DateTime.fromJSDate(currentDate).startOf('month').toISODate() ?? this.monthPickerValue;
+    this.isMonthPickerOpen = true;
+  }
+
+  cancelMonthPicker() {
+    this.isMonthPickerOpen = false;
+  }
+
+  onMonthPickerDismiss() {
+    this.isMonthPickerOpen = false;
+  }
+
+  confirmMonthPicker() {
+    // Obtener el valor seleccionado del ion-datetime
+    const selectedValue = this.monthDatetime?.value;
+    if (!selectedValue || !this.calendarApi) {
+      this.isMonthPickerOpen = false;
+      return;
+    }
+
+    // Convertir a fecha ISO
+    const iso = selectedValue.length === 7 ? `${selectedValue}-01` : selectedValue;
+    const dt = DateTime.fromISO(iso);
+    if (!dt.isValid) {
+      this.isMonthPickerOpen = false;
+      return;
+    }
+
+    // Actualizar el valor del picker
+    this.monthPickerValue = dt.startOf('month').toISODate() ?? this.monthPickerValue;
+
+    // Ir al primer día del mes seleccionado
+    this.calendarApi.gotoDate(dt.startOf('month').toJSDate());
+    // Asegurar vista mensual
+    this.calendarApi.changeView('dayGridMonth');
+
+    // Actualizar visibilidad del botón
+    setTimeout(() => {
+      this.updateTodayButtonVisibility();
+    }, 100);
+
+    // Cerrar el modal
+    this.isMonthPickerOpen = false;
+  }
+
+  goToToday() {
+    if (this.calendarApi) {
+      this.calendarApi.today();
+      this.calendarApi.changeView('dayGridMonth');
+      // Actualizar visibilidad del botón después de navegar
+      setTimeout(() => {
+        this.updateTodayButtonVisibility();
+      }, 100);
+    }
+  }
+
+  updateTodayButtonVisibility() {
+    if (!this.calendarApi) return;
+
+    const currentDate = this.calendarApi.getDate();
+    const today = new Date();
+
+    // Verificar si estamos en el mes actual
+    const isCurrentMonth =
+      currentDate.getMonth() === today.getMonth() &&
+      currentDate.getFullYear() === today.getFullYear();
+
+    // Obtener el botón "Hoy" y mostrarlo/ocultarlo
+    const todayButton = document.querySelector('.fc-todayButton-button') as HTMLElement;
+    if (todayButton) {
+      if(isCurrentMonth) {
+        todayButton.setAttribute('disabled', 'true');
+        todayButton.style.opacity = '0.5';
+      } else {
+        todayButton.removeAttribute('disabled');
+        todayButton.style.opacity = '1';
+      }
     }
   }
 
