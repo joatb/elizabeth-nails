@@ -65,8 +65,10 @@ export class AuthService {
 
     async saveUserPreferences(preferences: UserPreferences) {
       try {
+        console.log('Guardando preferencias de usuario:', preferences);
         await account.updatePrefs(preferences);
       } catch (error) {
+        console.error('Error al guardar preferencias de usuario:', error);
         this.handleError(error);
       }
     }

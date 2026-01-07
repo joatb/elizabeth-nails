@@ -7,7 +7,6 @@
 
     <form class="login-form">
       <ion-item lines="none" class="custom-input">
-        <ion-icon slot="start" name="mail-outline"></ion-icon>
         <ion-input
           type="email"
           placeholder="Correo electrónico"
@@ -18,7 +17,6 @@
       </ion-item>
 
       <ion-item lines="none" class="custom-input">
-        <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
         <ion-input
           [type]="showPassword ? 'text' : 'password'"
           placeholder="Contraseña"
@@ -26,8 +24,8 @@
           name="password"
           required>
         </ion-input>
-        <ion-icon 
-          slot="end" 
+        <ion-icon
+          slot="end"
           [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
           (click)="showPassword = !showPassword"
           class="toggle-password">

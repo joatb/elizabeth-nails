@@ -12,57 +12,112 @@ import { LoadingController } from '@ionic/angular/standalone';
   template: `
     <ion-content>
       <ion-list>
-        <ion-list-header>
+        <ion-list-header class="config-header">
           <ion-label>
-            <h2>Tema de colores</h2>
-            <p>Selecciona un tema para personalizar la apariencia de la aplicación</p>
+            <h2 class="config-title">Tema de colores</h2>
+            <p class="config-subtitle">
+              Selecciona un tema para personalizar la apariencia de la
+              aplicación
+            </p>
           </ion-label>
         </ion-list-header>
 
-
-        <ion-item *ngFor="let themeEntry of availableThemes"
-                  [class.selected-theme]="selectedTheme === themeEntry.key"
-                  (click)="selectTheme(themeEntry.key)">
+        <ion-item
+          *ngFor="let themeEntry of availableThemes"
+          [class.selected-theme]="selectedTheme === themeEntry.key"
+          (click)="selectTheme(themeEntry.key)"
+        >
           <ion-avatar slot="start">
-            <div class="theme-preview"
-                 [style.background]="'linear-gradient(135deg, ' + themeEntry.theme.primary + ' 0%, ' + themeEntry.theme.secondary + ' 100%)'">
-            </div>
+            <div
+              class="theme-preview"
+              [style.background]="
+                'linear-gradient(135deg, ' +
+                themeEntry.theme.primary +
+                ' 0%, ' +
+                themeEntry.theme.secondary +
+                ' 100%)'
+              "
+            ></div>
           </ion-avatar>
           <ion-label>
             <h2>{{ themeEntry.theme.name }}</h2>
-            <p>Primari: {{ themeEntry.theme.primary }} | Secundari: {{ themeEntry.theme.secondary }}</p>
+            <ion-text>
+              <p>
+                Primari: {{ themeEntry.theme.primary }} | Secundari:
+                {{ themeEntry.theme.secondary }}
+              </p>
+            </ion-text>
           </ion-label>
-          <ion-icon *ngIf="selectedTheme === themeEntry.key"
-                    name="checkmarkCircle"
-                    color="primary"
-                    slot="end">
+          <ion-icon
+            *ngIf="selectedTheme === themeEntry.key"
+            name="checkmarkCircle"
+            color="primary"
+            slot="end"
+          >
           </ion-icon>
         </ion-item>
       </ion-list>
     </ion-content>
   `,
-  styles: [`
-    .theme-preview {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px solid var(--ion-color-medium);
-    }
+  styles: [
+    `
+      ion-item {
+        cursor: pointer;
+      }
 
-    .selected-theme {
-      --background: var(--ion-color-primary-tint);
-      --background-opacity: 0.1;
-    }
+      ion-item:hover {
+        --background: var(--ion-color-light);
+      }
+      ion-list {
+        padding: 0;
+      }
+      .theme-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--ion-color-medium);
+      }
 
-    ion-item {
-      cursor: pointer;
-    }
+      .selected-theme {
+        --background: var(--ion-color-primary-tint);
+        --background-opacity: 0.1;
+        color: var(--ion-color-primary-contrast);
+      }
 
-    ion-item:hover {
-      --background: var(--ion-color-light);
-    }
-  `],
-  imports: [SharedModule, CommonModule]
+      .selected-theme:hover {
+        color: var(--ion-text-color);
+      }
+
+      .config-header {
+        --background: linear-gradient(
+          135deg,
+          var(--ion-color-primary),
+          var(--ion-color-primary-tint)
+        );
+        padding: 12px 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      }
+
+      /* Forzar contraste del texto del header (evita .sc-ion-label-md-s > p) */
+      .config-header ion-label h2,
+      .config-header ion-label p {
+        color: var(--ion-color-primary-contrast) !important;
+        margin: 0;
+      }
+
+      .config-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+      }
+
+      .config-subtitle {
+        opacity: 0.9;
+        font-size: 0.9rem;
+      }
+    `,
+  ],
+  imports: [SharedModule, CommonModule],
 })
 export class ConfigComponent implements OnInit {
   availableThemes: Array<{ key: string; theme: any }> = [];
@@ -94,9 +149,9 @@ export class ConfigComponent implements OnInit {
 
   async selectTheme(themeKey: string) {
     const loading = await this.loadingCtrl.create({
-      message: 'Guardant tema...',
+      message: 'Guardando tema...',
       spinner: 'crescent',
-      duration: 500
+      duration: 500,
     });
 
     await loading.present();
