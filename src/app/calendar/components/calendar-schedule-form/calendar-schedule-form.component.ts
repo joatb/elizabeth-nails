@@ -51,7 +51,7 @@ export class CalendarScheduleFormComponent {
       this.selectedDays.set(day.value, true);
       this.form.controls['days'].value.push(day.value);
     }
-      
+
   }
 
   async ngOnInit() {

@@ -43,9 +43,8 @@ export class CalendarDayEventsModalComponent {
     // Buscar todas las citas del mes y filtrar por día
     const month = this.date.getMonth() + 1;
     const year = this.date.getFullYear();
-    const appointmentsList = await this.appointmentsPvd.listAppointments(month, year);
-    const dayStr = this.date.toISOString().substring(0, 10);
-    this.events = appointmentsList.documents.filter(app => app.start_time.startsWith(dayStr));
+    const appointmentsList = await this.appointmentsPvd.listAppointmentsInRange(this.date, this.date);
+    this.events = appointmentsList.documents;
     this.loading = false;
   }
 
@@ -78,7 +77,7 @@ export class CalendarDayEventsModalComponent {
   async addEvent() {
     const modal = await this.modalCtrl.create({
       component: CalendarAppointmentModalComponent,
-      componentProps: { 
+      componentProps: {
         day: this.date,
         startTime: DateTime.fromJSDate(this.date, { zone: 'system' }).set({ hour: 9, minute: 0, second: 0, millisecond: 0 }).toISO(),
         endTime: DateTime.fromJSDate(this.date, { zone: 'system' }).set({ hour: 10, minute: 0, second: 0, millisecond: 0 }).toISO(),

@@ -9,6 +9,6 @@ export function dateFormatter(params: any, hours: boolean = true): string {
 }
 
 export function getDayString(day: number): string {
-  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   return days[day - 1];
 }

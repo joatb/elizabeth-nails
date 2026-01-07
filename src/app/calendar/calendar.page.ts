@@ -16,7 +16,7 @@ import {
 } from '@ionic/angular';
 import { IonModal, IonNav } from '@ionic/angular/standalone';
 import { Models } from 'appwrite';
-import { LogOut, Settings, EllipsisVertical } from 'lucide-angular';
+import { LogOut, Clock, EllipsisVertical } from 'lucide-angular';
 import { DateTime } from 'luxon';
 import { Subscription } from 'rxjs';
 import { Day } from '../models/day';
@@ -41,7 +41,7 @@ import { ConfigModalComponent } from '../components/modals/config-modal/config-m
 })
 export class CalendarPage {
   readonly LogOut =  LogOut;
-  readonly Settings =  Settings;
+  readonly Clock =  Clock;
   readonly EllipsisVertical =  EllipsisVertical;
   component = 'CalendarPage';
   schedules: Models.DocumentList<Schedule> | null = null;
