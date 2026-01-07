@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular/standalone';
 import { SharedModule } from '../modules/shared.module';
+import { ToastController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'login-page',
@@ -18,9 +19,11 @@ export class LoginPage implements OnInit {
   protected showPassword: boolean = false;
 
   constructor(
-    private router: Router, 
+    private router: Router,
     private authService: AuthService,
-    private loadingCtrl: LoadingController) {
+    private loadingCtrl: LoadingController,
+    private toastCtrl: ToastController
+  ) {
 
   }
 
@@ -30,7 +33,7 @@ export class LoginPage implements OnInit {
       const loading = await this.loadingCtrl.create({
         spinner: 'crescent'
       });
-  
+
       loading.present();
       this.router.navigate(['/']).finally(() => {
         loading.dismiss();
@@ -46,6 +49,11 @@ export class LoginPage implements OnInit {
     loading.present();
     if(!await this.authService.login(email, password)){
       loading.dismiss();
+      this.toastCtrl.create({
+        message: 'Usuario o contraseña incorrectos',
+        duration: 2000,
+        color: 'danger'
+      }).then(toast => toast.present());
     } else {
       this.router.navigate(['/']).finally(() => {
         loading.dismiss();

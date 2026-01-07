@@ -39,7 +39,7 @@ export class ThemeService {
       secondaryTint: '#b6d1a3'
     },
     ocean: {
-      name: 'Oceà',
+      name: 'Ocean',
       primary: '#0066cc',
       primaryRgb: '0, 102, 204',
       primaryContrast: '#ffffff',
@@ -52,7 +52,7 @@ export class ThemeService {
       secondaryTint: '#1abbbb'
     },
     forest: {
-      name: 'Bosc',
+      name: 'Forest',
       primary: '#2d5016',
       primaryRgb: '45, 80, 22',
       primaryContrast: '#ffffff',
@@ -65,7 +65,7 @@ export class ThemeService {
       secondaryTint: '#5c896a'
     },
     sunset: {
-      name: 'Posta de Sol',
+      name: 'Sunset',
       primary: '#ff6b35',
       primaryRgb: '255, 107, 53',
       primaryContrast: '#ffffff',
@@ -78,7 +78,7 @@ export class ThemeService {
       secondaryTint: '#f89e3b'
     },
     purple: {
-      name: 'Morat',
+      name: 'Purple',
       primary: '#7b2cbf',
       primaryRgb: '123, 44, 191',
       primaryContrast: '#ffffff',
@@ -207,14 +207,17 @@ export class ThemeService {
         } else {
           // Si no hay tema guardado, aplicar el tema por defecto
           this.applyTheme(this.defaultThemes['nord']);
+          this.authService.saveUserPreferences({ theme: 'nord' });
         }
       } else {
         // Si no hay usuario o preferencias, aplicar tema por defecto
         this.applyTheme(this.defaultThemes['nord']);
+        this.authService.saveUserPreferences({ theme: 'nord' });
       }
     } catch (error) {
       // Aplicar tema por defecto
       this.applyTheme(this.defaultThemes['nord']);
+      this.authService.saveUserPreferences({ theme: 'nord' });
     }
   }
 
