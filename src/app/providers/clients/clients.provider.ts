@@ -11,15 +11,17 @@ import { PaginationService, PaginatedResult, PaginationOptions } from "../../ser
 export class ClientsProvider {
 
     private database: string = 'core';
-    private collection: string = 'clients';
+    private tableId: string = 'clients'; // Table ID (migrat de collection a table)
 
     constructor(
         private dbService: DBService,
         private paginationService: PaginationService
     ) { }
-    
+
     getClient(clientId: string) {
-        return this.dbService.getDocument(this.database, this.collection, clientId);
+        return this.dbService.getDocument(this.database, this.tableId, clientId, [
+            Query.select(['*', 'appointments.*'])
+        ]);
     }
     /**
      * Lista clientes con paginación inteligente
@@ -33,9 +35,13 @@ export class ClientsProvider {
 
         const fetchFunction = async (limit: number, offset: number) => {
             return this.dbService.listDocuments<Client>(
-                this.database, 
-                this.collection,
-                [Query.limit(limit), Query.offset(offset)]
+                this.database,
+                this.tableId,
+                [
+                    Query.select(['*', 'appointments.*']),
+                    Query.limit(limit),
+                    Query.offset(offset)
+                ]
             );
         };
 
@@ -47,9 +53,13 @@ export class ClientsProvider {
      */
     listClients(limit: number = 50, offset: number = 0, forceRefresh: boolean = false) {
         return this.dbService.listDocuments<Client>(
-            this.database, 
-            this.collection,
-            [Query.limit(limit), Query.offset(offset)]
+            this.database,
+            this.tableId,
+            [
+                Query.select(['*', 'appointments.*']),
+                Query.limit(limit),
+                Query.offset(offset)
+            ]
         );
     }
 
@@ -57,7 +67,11 @@ export class ClientsProvider {
      * Lista todos los clientes (solo para casos especiales)
      */
     listAllClients() {
-        return this.dbService.listDocuments<Client>(this.database, this.collection);
+        return this.dbService.listDocuments<Client>(
+            this.database,
+            this.tableId,
+            [Query.select(['*', 'appointments.*'])]
+        );
     }
 
     /**
@@ -66,9 +80,13 @@ export class ClientsProvider {
     async loadAllClientsForSearch(): Promise<Client[]> {
         const fetchFunction = async (limit: number, offset: number) => {
             return this.dbService.listDocuments<Client>(
-                this.database, 
-                this.collection,
-                [Query.limit(limit), Query.offset(offset)]
+                this.database,
+                this.tableId,
+                [
+                    Query.select(['*', 'appointments.*']),
+                    Query.limit(limit),
+                    Query.offset(offset)
+                ]
             );
         };
 
@@ -76,15 +94,15 @@ export class ClientsProvider {
     }
 
     createClient(client: any) {
-        return this.dbService.createDocument(this.database, this.collection, client);
+        return this.dbService.createDocument(this.database, this.tableId, client);
     }
 
     updateClient(clientId: string, client: any) {
-        return this.dbService.updateDocument(this.database, this.collection, clientId, client);
+        return this.dbService.updateDocument(this.database, this.tableId, clientId, client);
     }
 
     deleteClient(clientId: string) {
-        return this.dbService.deleteDocument(this.database, this.collection, clientId);
+        return this.dbService.deleteDocument(this.database, this.tableId, clientId);
     }
 
     /**
@@ -100,14 +118,15 @@ export class ClientsProvider {
             // Usar DBService con forceRefresh: true para evitar el caché
             const result = await this.dbService.listDocuments<Client>(
                 this.database,
-                this.collection,
+                this.tableId,
                 [
+                    Query.select(['*', 'appointments.*']),
                     Query.search('name', searchTerm),
                     Query.limit(limit)
                 ],
                 true // forceRefresh: true para evitar caché
             );
-            
+
             return result.documents;
         } catch (error) {
             console.error('Error searching clients by name:', error);

@@ -2,7 +2,11 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0; // Importante para que flex funcione correctamente
+  max-height: 100%;
   background-color: #f0f2f5;
+  position: relative;
+  overflow: hidden;
 
   .chat-header {
     display: flex;
@@ -11,6 +15,7 @@
     padding: 20px;
     border-bottom: 1px solid #ddd;
     background-color: white;
+    flex-shrink: 0; // No se reduce
 
     .header-content {
       display: flex;
@@ -42,23 +47,51 @@
   }
 
   .messages-container {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0; // Importante para que overflow funcione
+    max-height: 100%;
+    overflow-y: auto !important;
+    overflow-x: hidden;
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch; // Smooth scrolling en iOS
+    position: relative;
+    height: 0; // Necesario para que flex: 1 funcione con overflow
 
     .message-bubble {
       max-width: 70%;
       padding: 8px 12px;
       border-radius: 8px;
-      margin-bottom: 8px;
+      word-wrap: break-word;
+      flex-shrink: 0; // No se reduce
       
       &.message-sent {
         background-color: #dcf8c6;
         margin-left: auto;
+        text-align: right;
       }
       
       &.message-received {
         background-color: white;
+        margin-right: auto;
+      }
+
+      p {
+        margin: 0;
+        word-break: break-word;
+      }
+
+      .timestamp {
+        font-size: 11px;
+        opacity: 0.7;
+        display: block;
+        margin-top: 4px;
+      }
+
+      .status-indicator {
+        margin-left: 4px;
       }
     }
   }

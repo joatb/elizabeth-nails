@@ -26,35 +26,36 @@
       [animateRows]="true"
       (gridReady)="onGridReady($event)"
     />
-    
+
     <!-- Indicador de carga para más clientes -->
     <div class="loading-more" *ngIf="isLoadingMore">
       <ion-spinner name="crescent"></ion-spinner>
       <span>Cargando más clientes...</span>
     </div>
-    
+
     <!-- Indicador de carga automática por búsqueda -->
     <div class="loading-search" *ngIf="isLoadingAll">
       <ion-spinner name="crescent"></ion-spinner>
       <span>Cargando todos los clientes para búsqueda...</span>
     </div>
-    
+
     <!-- Información de paginación -->
     <div class="pagination-info" *ngIf="rowData.length > 0">
       <span>Mostrando {{ rowData.length }} de {{ totalClients }} clientes</span>
       <div class="button-group">
-        <ion-button 
-          *ngIf="currentOffset < totalClients && !isLoadingMore" 
-          (click)="loadMoreClients()" 
-          fill="outline" 
+        <ion-button
+          *ngIf="currentOffset < totalClients && !isLoadingMore"
+          (click)="loadMoreClients()"
+          fill="outline"
           size="small"
+          color="primary"
           class="load-more-btn">
           Cargar más
         </ion-button>
-        <ion-button 
-          *ngIf="!allClientsLoaded && !isLoadingAll" 
-          (click)="loadAllClients()" 
-          fill="solid" 
+        <ion-button
+          *ngIf="!allClientsLoaded && !isLoadingAll"
+          (click)="loadAllClients()"
+          fill="solid"
           size="small"
           color="primary"
           class="load-all-btn">
