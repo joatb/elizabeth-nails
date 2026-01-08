@@ -9,19 +9,19 @@ import { Schedule } from "./models/schedule";
 export class SchedulesProvider {
 
     private database: string = 'core';
-    private collection: string = 'schedules';
+    private tableId: string = 'schedules'; // Table ID (migrat de collection a table)
 
     constructor(private dbService: DBService) { }
 
     createSchedule(schedule: any) {
-        return this.dbService.createDocument(this.database, this.collection, schedule);
+        return this.dbService.createDocument(this.database, this.tableId, schedule);
     }
     
     listSchedules(): Promise<Models.DocumentList<Schedule>> {
-        return this.dbService.listDocuments<Schedule>(this.database, this.collection);
+        return this.dbService.listDocuments<Schedule>(this.database, this.tableId);
     }
 
-    deleteSchedule(clientId: string) {
-        return this.dbService.deleteDocument(this.database, this.collection, clientId);
+    deleteSchedule(scheduleId: string) {
+        return this.dbService.deleteDocument(this.database, this.tableId, scheduleId);
     }
 }

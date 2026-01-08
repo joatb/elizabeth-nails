@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, Output, EventEmitter, AfterViewInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { ChatProvider } from '../../../providers/chat/chat.provider';
@@ -13,10 +13,10 @@ import { LucideAngularModule, ChevronLeft, ChevronRight, Users } from 'lucide-an
   styleUrls: ['chat.component.scss'],
   imports: [CommonModule, FormsModule, LucideAngularModule]
 })
-export class ChatComponent implements OnInit, OnDestroy, OnChanges {
+export class ChatComponent implements OnInit, OnDestroy, OnChanges, AfterViewInit {
   @Input() selectedClient: any;
   @Output() toggleMenu = new EventEmitter<void>();
-  
+
   // Iconos
   chevronLeft = ChevronLeft;
   chevronRight = ChevronRight;
@@ -38,7 +38,7 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
   private subscriptions: Subscription[] = [];
 
   constructor(
-    private whatsAppService: WhatsAppService, 
+    private whatsAppService: WhatsAppService,
     private chatProvider: ChatProvider) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -69,6 +69,36 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
     }));
 
     this.messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+    // Scroll al final después de cargar los mensajes
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 100);
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      const messagesContainer = document.querySelector('.messages-container');
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }, 100);
+  }
+
+  ngAfterViewInit() {
+    // Forzar el cálculo de altura después de la inicialización
+    setTimeout(() => {
+      const container = document.querySelector('.messages-container');
+      if (container) {
+        const parent = container.parentElement;
+        if (parent) {
+          const parentHeight = parent.clientHeight;
+          const header = parent.querySelector('.chat-header');
+          const headerHeight = header ? header.clientHeight : 0;
+          (container as HTMLElement).style.maxHeight = `${parentHeight - headerHeight}px`;
+        }
+      }
+    }, 200);
   }
 
   private setupWebhook() {
@@ -89,12 +119,16 @@ export class ChatComponent implements OnInit, OnDestroy, OnChanges {
             });
             this.chatProvider.sendMessage({
               content: this.newMessage,
-              timestamp: new Date(),
               sent: true,
               client: this.selectedClient.$id,
               read: false
             });
             this.newMessage = '';
+
+            // Scroll al final después de enviar el mensaje
+            setTimeout(() => {
+              this.scrollToBottom();
+            }, 100);
           },
           error: (error) => {
             console.error('Error al enviar mensaje:', error);

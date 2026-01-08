@@ -1,8 +1,13 @@
 .chat-page-container {
     display: flex;
     height: 100%;
+    max-height: 100%;
     width: 100%;
     background-color: #f5f5f5;
+    overflow: hidden; // Evita scroll en el contenedor principal
+    position: relative;
+    min-height: 0; // Importante para que flex funcione correctamente
+    box-sizing: border-box;
 }
 
 .clients-list {
@@ -90,6 +95,8 @@
     .clients-container {
         overflow-y: auto;
         flex: 1;
+        min-height: 0; // Importante para que overflow funcione
+        -webkit-overflow-scrolling: touch; // Smooth scrolling en iOS
     }
 
     .client-item {
@@ -125,11 +132,15 @@
 }
 
 .chat-container {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0; // Importante para que flex funcione correctamente
+    max-height: 100%;
     background-color: white;
+    overflow: hidden; // Evita que el contenido se desborde
+    position: relative;
 
     .no-client-selected {
         display: flex;
@@ -138,6 +149,15 @@
         height: 100%;
         color: #666;
         font-size: 18px;
+    }
+    
+    // Asegurar que el componente de chat ocupe todo el espacio
+    app-chat-messages {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 0;
+        flex: 1 1 auto;
     }
 }
 

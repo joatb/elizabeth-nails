@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { AlertController } from '@ionic/angular/standalone';
-import { Client, Databases, ID, Query } from "appwrite";
+import { Client, TablesDB, ID, Query } from "appwrite";
 import { environment } from "../../environments/environment";
 import { Models } from 'appwrite';
 import { AppwriteCacheService } from './appwrite-cache.service';
@@ -11,12 +11,12 @@ import { AppwriteCacheService } from './appwrite-cache.service';
 })
 export class DBService {
     private client: Client;
-    private databases: Databases
+    private tablesDB: TablesDB;
     private limit: number = 2500;
     private totalRowsRead: number = 0;
 
     constructor(
-        private router: Router, 
+        private router: Router,
         private alertCtrl: AlertController,
         private appwriteCache: AppwriteCacheService
     ) {
@@ -24,29 +24,29 @@ export class DBService {
         .setEndpoint(environment.endpoint)
         .setProject("elizabeth-nails");
 
-        this.databases = new Databases(this.client);
+        this.tablesDB = new TablesDB(this.client);
         this.setupMonitoring();
     }
 
     /**
-     * Limpia la caché de listDocuments para una colección específica.
+     * Limpia la caché de listRows para una tabla específica.
      */
-    private async clearListCache(databaseId: string, collectionId: string) {
-        // Mapear colecciones a tipos de datos para Redis
-        const collectionToDataType: Record<string, keyof typeof this.appwriteCache['cacheConfigs']> = {
+    private async clearListCache(databaseId: string, tableId: string) {
+        // Mapear tablas a tipos de datos para Redis
+        const tableToDataType: Record<string, keyof typeof this.appwriteCache['cacheConfigs']> = {
             'clients': 'clients',
             'appointments': 'appointments',
             'messages': 'messages',
             'schedules': 'schedules'
         };
 
-        const dataType = collectionToDataType[collectionId];
+        const dataType = tableToDataType[tableId];
         if (dataType) {
             await this.appwriteCache.invalidate(dataType);
         }
 
         // Limpiar también localStorage como fallback
-        const prefix = `dbcache_${databaseId}_${collectionId}_`;
+        const prefix = `dbcache_${databaseId}_${tableId}_`;
         Object.keys(localStorage).forEach(key => {
             if (key.startsWith(prefix)) {
                 localStorage.removeItem(key);
@@ -54,38 +54,49 @@ export class DBService {
         });
     }
 
-    async createDocument(databaseId: string, collectionId: string, data: any) {
-        const result = await this.databases.createDocument(databaseId, collectionId, ID.unique(), data);
-        await this.clearListCache(databaseId, collectionId);
+    async createDocument(databaseId: string, tableId: string, data: any) {
+        const result = await this.tablesDB.createRow({
+            databaseId,
+            tableId,
+            rowId: ID.unique(),
+            data
+        });
+        await this.clearListCache(databaseId, tableId);
         return result;
     }
 
-    getDocument(databaseId: string, collectionId: string, documentId: string) {
-        return this.databases.getDocument(databaseId, collectionId, documentId);
+    getDocument(databaseId: string, tableId: string, rowId: string, queries?: string[]) {
+        return this.tablesDB.getRow({
+            databaseId,
+            tableId,
+            rowId,
+            queries
+        });
     }
 
     /**
-     * Obtiene documentos con caché Redis + localStorage como fallback.
+     * Obtiene filas (rows) con caché Redis + localStorage como fallback.
+     * Mantiene compatibilidad retornando un objeto similar a DocumentList.
      */
     async listDocuments<T extends Models.Document>(
         databaseId: string,
-        collectionId: string,
+        tableId: string,
         queries?: string[],
         forceRefresh: boolean = false,
         cacheMinutes: number = 1440 // 24 horas por defecto
     ): Promise<Models.DocumentList<T>> {
         queries = queries || [Query.limit(this.limit)];
-        const cacheKey = `${databaseId}_${collectionId}_${btoa(JSON.stringify(queries))}`;
-        
-        // Mapear colecciones a tipos de datos para Redis
-        const collectionToDataType: Record<string, keyof typeof this.appwriteCache['cacheConfigs']> = {
+        const cacheKey = `${databaseId}_${tableId}_${btoa(JSON.stringify(queries))}`;
+
+        // Mapear tablas a tipos de datos para Redis
+        const tableToDataType: Record<string, keyof typeof this.appwriteCache['cacheConfigs']> = {
             'clients': 'clients',
             'appointments': 'appointments',
             'messages': 'messages',
             'schedules': 'schedules'
         };
 
-        const dataType = collectionToDataType[collectionId] || 'clients';
+        const dataType = tableToDataType[tableId] || 'clients';
 
         if (!forceRefresh) {
             // Intentar obtener de caché a través de Appwrite
@@ -95,23 +106,42 @@ export class DBService {
             }
         }
 
-        const data = await this.databases.listDocuments(databaseId, collectionId, queries) as Models.DocumentList<T>;
-        
+        const rowList = await this.tablesDB.listRows({
+            databaseId,
+            tableId,
+            queries
+        });
+
+        // Convertir RowList a DocumentList para mantener compatibilidad
+        const data: Models.DocumentList<T> = {
+            total: rowList.total,
+            documents: rowList.rows as unknown as T[]
+        } as Models.DocumentList<T>;
+
         // Almacenar en caché a través de Appwrite
         await this.appwriteCache.set(cacheKey, data, dataType);
-        
+
         return data;
     }
 
-    async updateDocument(databaseId: string, collectionId: string, documentId: string, data: any) {
-        const result = await this.databases.updateDocument(databaseId, collectionId, documentId, data);
-        await this.clearListCache(databaseId, collectionId);
+    async updateDocument(databaseId: string, tableId: string, rowId: string, data: any) {
+        const result = await this.tablesDB.updateRow({
+            databaseId,
+            tableId,
+            rowId,
+            data
+        });
+        await this.clearListCache(databaseId, tableId);
         return result;
     }
 
-    async deleteDocument(databaseId: string, collectionId: string, documentId: string) {
-        const result = await this.databases.deleteDocument(databaseId, collectionId, documentId);
-        await this.clearListCache(databaseId, collectionId);
+    async deleteDocument(databaseId: string, tableId: string, rowId: string) {
+        const result = await this.tablesDB.deleteRow({
+            databaseId,
+            tableId,
+            rowId
+        });
+        await this.clearListCache(databaseId, tableId);
         return result;
     }
 
@@ -119,14 +149,10 @@ export class DBService {
      * Configura el monitoreo de lecturas
      */
     private setupMonitoring() {
-        const originalListDocuments = this.databases.listDocuments.bind(this.databases);
-        this.databases.listDocuments = async <T extends Models.Document>(
-            databaseId: string, 
-            collectionId: string, 
-            queries?: string[]
-        ) => {
-            const result = await originalListDocuments<T>(databaseId, collectionId, queries);
-            this.totalRowsRead += result.documents.length;
+        const originalListRows = this.tablesDB.listRows.bind(this.tablesDB);
+        this.tablesDB.listRows = async (params: any) => {
+            const result = await originalListRows(params);
+            this.totalRowsRead += result.rows.length;
             return result;
         };
     }
@@ -142,10 +168,10 @@ export class DBService {
     }
 
     /**
-     * Limpia caché específico por colección
+     * Limpia caché específico por tabla
      */
-    async clearCacheForCollection(databaseId: string, collectionId: string) {
-        await this.clearListCache(databaseId, collectionId);
+    async clearCacheForCollection(databaseId: string, tableId: string) {
+        await this.clearListCache(databaseId, tableId);
     }
 
     /**
@@ -161,7 +187,7 @@ export class DBService {
     async getCacheStats() {
         const redisStats = await this.appwriteCache.getStats();
         const localStorageKeys = this.getLocalStorageKeys();
-        
+
         return {
             redis: redisStats || { keys: 0 },
             localStorage: { keys: localStorageKeys }
@@ -172,7 +198,7 @@ export class DBService {
         try {
             let count = 0;
             const cacheKeys: string[] = [];
-            
+
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && (key.startsWith('cache_') || key.startsWith('appwrite_cache_'))) {
@@ -180,7 +206,7 @@ export class DBService {
                     cacheKeys.push(key);
                 }
             }
-            
+
             return count;
         } catch (error) {
             console.warn('Error contando claves de localStorage:', error);

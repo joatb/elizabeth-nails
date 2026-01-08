@@ -22,6 +22,7 @@ export class ChatPage {
   newMessage: string = '';
   isMenuCollapsed: boolean = false;
   searchTerm: string = '';
+  private searchTimeout: any = null;
 
   // Iconos
   chevronLeft = ChevronLeft;
@@ -39,14 +40,20 @@ export class ChatPage {
 
   async loadClients() {
     try {
-      const documentList = await this.clientsProvider.listClients();
-      if (documentList && documentList.documents) {
-        this.clients = documentList.documents;
+      // Sempre carregar TOTS els clients per poder buscar entre tots
+      const allClients = await this.clientsProvider.loadAllClientsForSearch();
+      if (allClients && allClients.length > 0) {
+        this.clients = allClients;
         this.clients.forEach(client => {
           this.chats.set(client.$id, []);
         });
         this.sortClientsByLastMessage();
-        this.filterClients();
+        // Inicialitzar filteredClients amb tots els clients
+        this.filteredClients = [...this.clients];
+        // Aplicar el filtre si hi ha un terme de cerca
+        if (this.searchTerm && this.searchTerm.trim().length > 0) {
+          this.filterClients();
+        }
       }
     } catch (error) {
       console.error('Error al cargar clientes:', error);
@@ -66,16 +73,32 @@ export class ChatPage {
   }
 
   filterClients() {
-    if (!this.searchTerm) {
-      this.filteredClients = [...this.clients];
-      return;
+    // Clear previous timeout
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
     }
 
-    const searchTermLower = this.searchTerm.toLowerCase();
-    this.filteredClients = this.clients.filter(client => 
-      client.name.toLowerCase().includes(searchTermLower) ||
-      client.phone.toLowerCase().includes(searchTermLower)
-    );
+    // Debounce per evitar filtres excessius
+    this.searchTimeout = setTimeout(() => {
+      // Si no hi ha terme de cerca, mostrar tots els clients
+      if (!this.searchTerm || this.searchTerm.trim().length === 0) {
+        this.filteredClients = [...this.clients];
+        return;
+      }
+
+      // Fer el filtre local sobre tots els clients ja carregats
+      const searchTermLower = this.searchTerm.trim().toLowerCase();
+      this.filteredClients = this.clients.filter(client => {
+        const nameMatch = client.name && client.name.toLowerCase().includes(searchTermLower);
+        const phoneMatch = client.phone && client.phone.toLowerCase().includes(searchTermLower);
+        const phoneCountryMatch = client.phone_country && client.phone_country.toLowerCase().includes(searchTermLower);
+        // Buscar també en el número complet (país + telèfon)
+        const fullPhoneMatch = client.phone_country && client.phone && 
+          `${client.phone_country}${client.phone}`.toLowerCase().includes(searchTermLower);
+        
+        return nameMatch || phoneMatch || phoneCountryMatch || fullPhoneMatch;
+      });
+    }, 200); // Debounce de 200ms
   }
 
   selectClient(client: Client) {

@@ -226,7 +226,19 @@ export class ClientsPage {
 
   async ionViewDidEnter(){
     this.subscribeToEvents();
-    this.initializeClients();
+    // Verificar si hi ha filtres actius a ag-Grid abans de carregar
+    await this.checkAndInitializeClients();
+  }
+
+  private async checkAndInitializeClients() {
+    // Carregar els clients inicialment
+    await this.initializeClients();
+    
+    // Després de carregar, verificar si hi ha filtres actius a ag-Grid
+    // Esperar una mica perquè el grid s'actualitzi
+    setTimeout(() => {
+      this.checkForActiveFilters();
+    }, 300);
   }
 
   onGridReady(event: any) {
@@ -239,6 +251,23 @@ export class ClientsPage {
     event.api.addEventListener('sortChanged', () => {
       this.onFilterChanged();
     });
+    
+    // Verificar si hi ha filtres actius quan el grid està llest
+    setTimeout(() => {
+      this.checkForActiveFilters();
+    }, 200);
+  }
+  
+  private async checkForActiveFilters() {
+    if (!this.agGrid?.api) return;
+    
+    const filterModel = this.agGrid.api.getFilterModel();
+    const hasActiveFilters = filterModel && Object.keys(filterModel).length > 0;
+    
+    // Si hi ha filtres actius i no tenim tots els clients carregats, carregar-los
+    if (hasActiveFilters && !this.allClientsLoaded && !this.isLoadingAll) {
+      await this.loadAllClients();
+    }
   }
 
   private async onFilterChanged() {
@@ -260,11 +289,16 @@ export class ClientsPage {
     this.eventsSubscription = null;
   }
 
-  async initializeClients(){
+  async initializeClients(resetAllClientsLoaded: boolean = true){
     try {
       // Reset paginación
       this.currentOffset = 0;
       this.rowData = [];
+      
+      // Si s'ha de resetejar l'estat de "tots carregats"
+      if (resetAllClientsLoaded) {
+        this.allClientsLoaded = false;
+      }
       
       // Usar paginación inteligente - cargar solo 50 clientes inicialmente
       const paginatedResult = await this.clientsProvider.listClientsPaginated(this.pageSize, this.currentOffset);

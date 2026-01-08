@@ -6,6 +6,7 @@ import { SchedulesProvider } from '../../../providers/schedules/schedules.provid
 import { AuthService } from '../../../services/auth.service';
 import { Models } from 'appwrite';
 import { AlertService } from '../../../services/alert.service';
+import { Schedule } from '../../../providers/schedules/models/schedule';
 
 
 @Component({
@@ -32,7 +33,7 @@ export class CalendarScheduleFormComponent {
 
   protected selectedDays: Map<string, boolean> = new Map();
 
-  private schedules: Models.DocumentList<Models.Document> | null = null;
+  private schedules: Models.DocumentList<Schedule> | null = null;
 
   constructor(
     protected authService: AuthService,
@@ -83,8 +84,8 @@ export class CalendarScheduleFormComponent {
       // Comprovar que no se solapan los horarios
       if(this.schedules){
         for (const s of this.schedules.documents) {
-          if (s['days'].some((d: string) => days.includes(d))) { // Si hay algún día en común
-            if ((startTime >= s['start_time'] && startTime <= s['end_time']) || (endTime >= s['start_time'] && endTime <= s['end_time'])) {
+          if (s.days.some((d: string) => days.includes(d))) { // Si hay algún día en común
+            if ((startTime >= s.start_time && startTime <= s.end_time) || (endTime >= s.start_time && endTime <= s.end_time)) {
               await this.alertService.presentErrorToast('Horario solapado');
               return;
             }
