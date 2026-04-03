@@ -1,0 +1,19 @@
+<ion-button
+  [color]="color"
+  [size]="size"
+  [fill]="fill"
+  [expand]="expand"
+  [shape]="shape"
+  [disabled]="disabled"
+  [type]="type"
+>
+  <ion-icon *ngIf="icon" [name]="icon" [slot]="iconSlot"></ion-icon>
+  <ng-container *ngIf="showContent">
+    <ng-container *ngIf="label; else projectedContent">{{
+      label
+    }}</ng-container>
+    <ng-template #projectedContent>
+      <ng-content></ng-content>
+    </ng-template>
+  </ng-container>
+</ion-button>

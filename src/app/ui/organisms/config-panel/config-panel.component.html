@@ -1,0 +1,41 @@
+<ion-content>
+  <ion-list>
+    <ion-list-header class="config-header">
+      <ion-label>
+        <h2 class="config-title">Tema de colores</h2>
+        <p class="config-subtitle">
+          Selecciona un tema para personalizar la apariencia de la aplicación
+        </p>
+      </ion-label>
+    </ion-list-header>
+
+    <ion-item
+      *ngFor="let themeEntry of availableThemes"
+      [class.selected-theme]="selectedTheme === themeEntry.key"
+      (click)="selectTheme(themeEntry.key)"
+    >
+      <ion-avatar slot="start">
+        <div
+          class="theme-preview"
+          [style.background]="'linear-gradient(135deg, ' + themeEntry.theme.primary + ' 0%, ' + themeEntry.theme.secondary + ' 100%)'"
+        ></div>
+      </ion-avatar>
+      <ion-label>
+        <h2>{{ themeEntry.theme.name }}</h2>
+        <ion-text>
+          <p>
+            Primari: {{ themeEntry.theme.primary }} | Secundari:
+            {{ themeEntry.theme.secondary }}
+          </p>
+        </ion-text>
+      </ion-label>
+      <ion-icon
+        *ngIf="selectedTheme === themeEntry.key"
+        name="checkmarkCircle"
+        color="primary"
+        slot="end"
+      >
+      </ion-icon>
+    </ion-item>
+  </ion-list>
+</ion-content>

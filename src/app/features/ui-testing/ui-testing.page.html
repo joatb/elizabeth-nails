@@ -1,0 +1,120 @@
+<ion-content class="ui-testing">
+  <div class="ui-section">
+    <h2>Botones</h2>
+    <div class="ui-row">
+      <atom-button label="Primario"></atom-button>
+      <atom-button
+        label="Con icono"
+        icon="add-outline"
+        iconSlot="start"
+      ></atom-button>
+      <atom-button icon="trash-outline" iconSlot="icon-only"></atom-button>
+      <atom-button label="Outline" fill="outline" color="secondary"></atom-button>
+    </div>
+  </div>
+
+  <div class="ui-section">
+    <h2>Inputs</h2>
+    <atom-input
+      label="Correo"
+      placeholder="correo@demo.com"
+      type="email"
+      name="email"
+      [(ngModel)]="demoEmail"
+    ></atom-input>
+
+    <atom-input
+      label="Contraseña"
+      placeholder="••••••"
+      type="password"
+      name="password"
+      [(ngModel)]="demoPassword"
+      [invalid]="passwordInvalid"
+      errorText="La contraseña es requerida"
+    ></atom-input>
+
+    <atom-input
+      label="Texto de ayuda"
+      placeholder="Escribe algo"
+      name="helper"
+      [(ngModel)]="demoText"
+      helperText="Este es un helper de ejemplo"
+    ></atom-input>
+  </div>
+
+  <div class="ui-section">
+    <h2>Iconos</h2>
+    <div class="ui-row">
+      <atom-icon name="checkmark-circle" color="success"></atom-icon>
+      <atom-icon name="eye-outline" color="medium"></atom-icon>
+      <atom-icon name="add-outline" color="primary"></atom-icon>
+    </div>
+  </div>
+
+  <div class="ui-section">
+    <h2>Avatar y Badge</h2>
+    <div class="ui-row">
+      <atom-avatar [src]="avatarUrl" [size]="48"></atom-avatar>
+      <atom-badge text="Nuevo" color="success"></atom-badge>
+      <atom-badge color="warning">Pendiente</atom-badge>
+    </div>
+  </div>
+
+  <div class="ui-section">
+    <h2>Spinners</h2>
+    <div class="ui-row">
+      <atom-spinner name="crescent" size="small"></atom-spinner>
+      <atom-spinner name="circles" size="default"></atom-spinner>
+      <atom-spinner name="dots" size="large"></atom-spinner>
+    </div>
+  </div>
+
+  <div class="ui-section">
+    <h2>Estado</h2>
+    <div class="ui-row">
+      <atom-status-indicator status="ok" label="Activo"></atom-status-indicator>
+      <atom-status-indicator status="warning" label="Aviso"></atom-status-indicator>
+      <atom-status-indicator status="error" label="Error"></atom-status-indicator>
+      <atom-status-indicator status="neutral" label="Neutral"></atom-status-indicator>
+    </div>
+  </div>
+
+  <div class="ui-section">
+    <h2>Moléculas</h2>
+    <div class="ui-column">
+      <mol-form-field label="Campo básico" helperText="Texto de ayuda">
+        <atom-input
+          placeholder="Nombre"
+          name="nombre"
+          [(ngModel)]="demoText"
+        ></atom-input>
+      </mol-form-field>
+
+      <mol-password-input
+        label="Contraseña"
+        placeholder="••••••"
+        name="demo-password"
+        [(ngModel)]="demoPassword"
+        [invalid]="passwordInvalid"
+        errorText="La contraseña es requerida"
+      ></mol-password-input>
+
+      <mol-stat-item label="Total lecturas" [value]="statValue"></mol-stat-item>
+
+      <mol-action-button
+        label="Acción rápida"
+        icon="add-outline"
+        (action)="handleActionClick()"
+      ></mol-action-button>
+
+      <mol-client-selector
+        [items]="clientOptions"
+        [(ngModel)]="selectedClient"
+        (search)="handleClientSearch($event)"
+        (loadMore)="handleClientLoadMore($event)"
+      ></mol-client-selector>
+    </div>
+  </div>
+
+  <app-cache-debug></app-cache-debug>
+</ion-content>

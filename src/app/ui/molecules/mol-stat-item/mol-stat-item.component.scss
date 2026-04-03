@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.mol-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.mol-stat-item__label {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.mol-stat-item__value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ion-color-dark);
+}
+
+.mol-stat-item__helper {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}

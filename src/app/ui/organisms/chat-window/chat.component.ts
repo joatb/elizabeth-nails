@@ -1,0 +1,171 @@
+import { CommonModule } from "@angular/common";
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  Output,
+  EventEmitter,
+  AfterViewInit,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { Subscription } from "rxjs";
+import { ChatProvider } from "../../../providers/chat/chat.provider";
+import { WhatsAppService } from "../../../services/whatsapp.service";
+import { Client } from "../../../providers/clients/models/client";
+import { ChatMessage } from "./models/chat-message";
+import {
+  LucideAngularModule,
+  ChevronLeft,
+  ChevronRight,
+  Users,
+} from "lucide-angular";
+
+@Component({
+  selector: "app-chat-messages",
+  templateUrl: "./chat.component.html",
+  styleUrls: ["./chat.component.scss"],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
+})
+export class ChatComponent
+  implements OnInit, OnDestroy, OnChanges, AfterViewInit
+{
+  @Input() selectedClient: Client | null = null;
+  @Output() toggleMenu = new EventEmitter<void>();
+
+  // Iconos
+  chevronLeft = ChevronLeft;
+  chevronRight = ChevronRight;
+  users = Users;
+
+  chatHistory?: ChatMessage[];
+  messages: {
+    content: string;
+    timestamp: Date;
+    sent: boolean;
+    client: string;
+    read: boolean;
+  }[] = [];
+  newMessage: string = "";
+  isTyping: boolean = false;
+  recipientName: string = "";
+  recipientAvatar: string = "assets/default-avatar.png";
+  isOnline: boolean = false;
+  private subscriptions: Subscription[] = [];
+
+  constructor(
+    private whatsAppService: WhatsAppService,
+    private chatProvider: ChatProvider,
+  ) {}
+
+  ngOnChanges(changes: SimpleChanges) {
+    const nextClient = changes["selectedClient"]?.currentValue as Client | null;
+    if (nextClient) {
+      this.recipientName = nextClient.name;
+      this.loadChatHistory();
+      this.setupWebhook();
+    }
+  }
+
+  ngOnInit() {
+    // No cargar historial aquí para evitar duplicados
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+  }
+
+  private async loadChatHistory() {
+    if (!this.selectedClient) {
+      return;
+    }
+
+    // TODO: Implementar carga de historial desde backend
+    this.chatHistory = (
+      await this.chatProvider.getMessages(this.selectedClient.$id)
+    ).documents;
+    this.messages = this.chatHistory.map((message) => ({
+      content: message.content,
+      timestamp: new Date(message.timestamp),
+      sent: message.sent,
+      client: message.client,
+      read: message.read,
+    }));
+
+    this.messages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+    // Scroll al final después de cargar los mensajes
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 100);
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      const messagesContainer = document.querySelector(".messages-container");
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }, 100);
+  }
+
+  ngAfterViewInit() {
+    // Forzar el cálculo de altura después de la inicialización
+    setTimeout(() => {
+      const container = document.querySelector(".messages-container");
+      if (container) {
+        const parent = container.parentElement;
+        if (parent) {
+          const parentHeight = parent.clientHeight;
+          const header = parent.querySelector(".chat-header");
+          const headerHeight = header ? header.clientHeight : 0;
+          (container as HTMLElement).style.maxHeight =
+            `${parentHeight - headerHeight}px`;
+        }
+      }
+    }, 200);
+  }
+
+  private setupWebhook() {
+    // TODO: Implementar configuración de webhook para recibir mensajes
+  }
+
+  sendMessage() {
+    const client = this.selectedClient;
+    if (!this.newMessage.trim() || !client) {
+      return;
+    }
+
+    const sub = this.whatsAppService
+      .sendMessage(client.phone_country + client.phone, this.newMessage)
+      .subscribe({
+        next: () => {
+          this.messages.push({
+            content: this.newMessage,
+            timestamp: new Date(),
+            sent: true,
+            client: client.$id,
+            read: false,
+          });
+          this.chatProvider.sendMessage({
+            content: this.newMessage,
+            sent: true,
+            client: client.$id,
+            read: false,
+          });
+          this.newMessage = "";
+
+          // Scroll al final después de enviar el mensaje
+          setTimeout(() => {
+            this.scrollToBottom();
+          }, 100);
+        },
+        error: (error) => {
+          console.error("Error al enviar mensaje:", error);
+        },
+      });
+    this.subscriptions.push(sub);
+  }
+}

@@ -1,0 +1,10 @@
+<tpl-auth-template
+  title="Elizabeth Nails"
+  subtitle="Inicia sesión para acceder a tu cuenta"
+>
+  <org-login-form
+    [(email)]="email"
+    [(password)]="password"
+    (loginSubmit)="login($event.email, $event.password)"
+  ></org-login-form>
+</tpl-auth-template>

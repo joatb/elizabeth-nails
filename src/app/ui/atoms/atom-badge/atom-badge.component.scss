@@ -1,0 +1,10 @@
+/* Estilos base del badge */
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+ion-badge {
+  font-weight: 600;
+  text-transform: none;
+}

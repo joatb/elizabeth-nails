@@ -1,0 +1,44 @@
+<form class="login-form" (ngSubmit)="handleSubmit()">
+  <ion-item lines="none" class="custom-input">
+    <ion-input
+      type="email"
+      placeholder="Correo electrónico"
+      [disabled]="disabled"
+      [(ngModel)]="email"
+      name="email"
+      required
+      (ngModelChange)="handleEmailChange($event)"
+    >
+    </ion-input>
+  </ion-item>
+
+  <ion-item lines="none" class="custom-input">
+    <ion-input
+      [type]="showPassword ? 'text' : 'password'"
+      placeholder="Contraseña"
+      [disabled]="disabled"
+      [(ngModel)]="password"
+      name="password"
+      required
+      (ngModelChange)="handlePasswordChange($event)"
+    >
+    </ion-input>
+    <ion-icon
+      slot="end"
+      [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+      (click)="togglePassword()"
+      class="toggle-password"
+    >
+    </ion-icon>
+  </ion-item>
+
+  <ion-button
+    class="login-button"
+    type="submit"
+    [disabled]="isSubmitDisabled"
+    expand="block"
+    shape="round"
+  >
+    {{ submitLabel }}
+  </ion-button>
+</form>

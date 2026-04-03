@@ -1,0 +1,10 @@
+<div class="action-buttons">
+  <ion-fab-button
+    *ngFor="let button of buttons"
+    [color]="button.color ? button.color : 'primary'"
+    (click)="buttonClicked(button.action)"
+    size="small"
+  >
+    <ion-icon [name]="button.icon"></ion-icon>
+  </ion-fab-button>
+</div>

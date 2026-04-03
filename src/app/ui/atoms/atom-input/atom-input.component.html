@@ -1,0 +1,18 @@
+<ion-item class="atom-input" [class.atom-input--invalid]="invalid">
+  <ion-label *ngIf="label" position="stacked">{{ label }}</ion-label>
+  <ion-input
+    [type]="type"
+    [placeholder]="placeholder"
+    [value]="value"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [required]="required"
+    [name]="name"
+    [autocomplete]="autocomplete"
+    (ionInput)="handleInput($event)"
+    (ionBlur)="handleBlur()">
+  </ion-input>
+</ion-item>
+
+<p class="atom-input__helper" *ngIf="helperText && !invalid">{{ helperText }}</p>
+<p class="atom-input__error" *ngIf="invalid && errorText">{{ errorText }}</p>

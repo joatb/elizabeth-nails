@@ -1,0 +1,7 @@
+<div style="display:flex; justify-content: center;" *ngFor="let button of buttons">
+  <ion-button [color]="button.color ? button.color : 'primary'" (click)="buttonClicked(button.action)">
+    <ion-icon *ngIf="button.icon && !button.label" slot="icon-only" [name]="button.icon"></ion-icon>
+    <ion-icon *ngIf="button.icon && button.label" slot="start" [name]="button.icon"></ion-icon>
+    {{ button.label }}
+  </ion-button>
+</div>

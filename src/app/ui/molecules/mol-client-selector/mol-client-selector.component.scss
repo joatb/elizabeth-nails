@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.mol-client-selector {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.mol-client-selector--invalid {
+  --highlight-color-focused: var(--ion-color-danger);
+  --highlight-color-invalid: var(--ion-color-danger);
+}
+
+.mol-client-selector__error {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ion-color-danger);
+}

@@ -1,0 +1,7 @@
+<div
+  class="status-indicator"
+  [class.status-indicator--with-label]="!!label"
+>
+  <span class="status-indicator__dot" [class]="statusClass"></span>
+  <span class="status-indicator__label" *ngIf="label">{{ label }}</span>
+</div>

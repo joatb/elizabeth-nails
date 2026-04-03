@@ -1,0 +1,56 @@
+ion-item {
+  cursor: pointer;
+}
+
+ion-item:hover {
+  --background: var(--ion-color-light);
+}
+
+ion-list {
+  padding: 0;
+}
+
+.theme-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--ion-color-medium);
+}
+
+.selected-theme {
+  --background: var(--ion-color-primary-tint);
+  --background-opacity: 0.1;
+  color: var(--ion-color-primary-contrast);
+}
+
+.selected-theme:hover {
+  color: var(--ion-text-color);
+}
+
+.config-header {
+  --background: linear-gradient(
+    135deg,
+    var(--ion-color-primary),
+    var(--ion-color-primary-tint)
+  );
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Forzar contraste del texto del header (evita .sc-ion-label-md-s > p) */
+.config-header ion-label h2,
+.config-header ion-label p {
+  color: var(--ion-color-primary-contrast) !important;
+  margin: 0;
+}
+
+.config-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.config-subtitle {
+  opacity: 0.9;
+  font-size: 0.9rem;
+}

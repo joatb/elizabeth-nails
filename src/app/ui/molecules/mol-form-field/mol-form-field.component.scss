@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.mol-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mol-form-field__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+}
+
+.mol-form-field__control {
+  display: block;
+}
+
+.mol-form-field__helper {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.mol-form-field__error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ion-color-danger);
+}

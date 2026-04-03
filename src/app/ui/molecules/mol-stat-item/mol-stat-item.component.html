@@ -1,0 +1,7 @@
+<div class="mol-stat-item">
+  <span class="mol-stat-item__label">{{ label }}</span>
+  <span class="mol-stat-item__value" [style.color]="valueColor">
+    {{ value }}
+  </span>
+</div>
+<p class="mol-stat-item__helper" *ngIf="helperText">{{ helperText }}</p>

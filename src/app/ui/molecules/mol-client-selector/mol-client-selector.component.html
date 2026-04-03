@@ -1,0 +1,29 @@
+<ion-item
+  class="mol-client-selector"
+  lines="none"
+  [class.mol-client-selector--invalid]="invalid"
+>
+  <ionic-selectable
+    [items]="items"
+    [placeholder]="placeholder"
+    [itemValueField]="itemValueField"
+    [itemTextField]="itemTextField"
+    [canSearch]="canSearch"
+    [hasInfiniteScroll]="hasInfiniteScroll"
+    [closeButtonText]="closeButtonText"
+    [searchPlaceholder]="searchPlaceholder"
+    [disabled]="disabled"
+    [(ngModel)]="value"
+    (onChange)="handleChange($event)"
+    (onSearch)="handleSearch($event)"
+    (onInfiniteScroll)="handleInfiniteScroll($event)"
+  >
+    <ng-template ionicSelectableItemTemplate let-item="item">
+      {{ getItemText(item) }}
+    </ng-template>
+  </ionic-selectable>
+</ion-item>
+
+<p class="mol-client-selector__error" *ngIf="invalid && errorText">
+  {{ errorText }}
+</p>

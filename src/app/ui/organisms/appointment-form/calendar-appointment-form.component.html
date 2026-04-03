@@ -1,0 +1,100 @@
+<form *ngIf="form" (ngSubmit)="submit()" [formGroup]="form">
+  <div class="input-group">
+    <ion-card>
+      <ion-item>
+        <ion-label>Inicio</ion-label>
+        <ion-datetime-button datetime="startTime"></ion-datetime-button>
+      </ion-item>
+      <ion-item
+        lines="none"
+        *ngIf="isControlInvalid('startTime')"
+        class="ion-no-padding error-message"
+      >
+        <ion-text color="danger">
+          <small>La fecha de inicio es obligatoria</small>
+        </ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-label>Final</ion-label>
+        <ion-datetime-button datetime="endTime"></ion-datetime-button>
+      </ion-item>
+      <ion-item
+        lines="none"
+        *ngIf="isControlInvalid('endTime')"
+        class="ion-no-padding error-message"
+      >
+        <ion-text color="danger">
+          <small>La fecha de fin es obligatoria</small>
+        </ion-text>
+      </ion-item>
+      <ion-item>
+        <ion-textarea
+          aria-label="Nota"
+          type="text"
+          placeholder="Nota"
+          formControlName="note"
+        ></ion-textarea>
+      </ion-item>
+      <ion-item>
+        <ionic-selectable
+          formControlName="client"
+          [placeholder]="'Seleccionar cliente'"
+          [items]="selectableClientsOptions"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          [hasInfiniteScroll]="true"
+          closeButtonText="Cerrar"
+          searchPlaceholder="Buscar cliente..."
+          noItemsFoundText="No se encontraron clientes"
+          (onChange)="onClientChange($event)"
+          (onSearch)="onClientSearch($event)"
+          (onInfiniteScroll)="onClientLoadMore($event)"
+        >
+          <ng-template ionicSelectableItemTemplate let-item="item">
+            {{ item.name }}
+          </ng-template>
+          <ng-template ionicSelectableIconTemplate>
+            <ion-icon name="add-circle"></ion-icon>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+      <ion-item
+        lines="none"
+        *ngIf="isControlInvalid('client')"
+        class="ion-no-padding error-message"
+      >
+        <ion-text color="danger">
+          <small>Es necesario seleccionar un cliente</small>
+        </ion-text>
+      </ion-item>
+    </ion-card>
+  </div>
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime
+        locale="es-ES"
+        presentation="date-time"
+        showDefaultButtons="true"
+        hourCycle="h23"
+        formControlName="startTime"
+        id="startTime"
+      >
+      </ion-datetime>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [keepContentsMounted]="true">
+    <ng-template>
+      <ion-datetime
+        locale="es-ES"
+        presentation="date-time"
+        showDefaultButtons="true"
+        hourCycle="h23"
+        formControlName="endTime"
+        id="endTime"
+      >
+      </ion-datetime>
+    </ng-template>
+  </ion-modal>
+</form>

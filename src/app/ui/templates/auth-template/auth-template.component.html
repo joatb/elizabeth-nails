@@ -1,0 +1,10 @@
+<div [class]="containerClass">
+  <div class="auth-template__header" *ngIf="title || subtitle || logoUrl">
+    <img *ngIf="logoUrl" class="auth-template__logo" [src]="logoUrl" [alt]="logoAlt" />
+    <h1 *ngIf="title">{{ title }}</h1>
+    <p *ngIf="subtitle">{{ subtitle }}</p>
+  </div>
+  <div class="auth-template__content">
+    <ng-content></ng-content>
+  </div>
+</div>

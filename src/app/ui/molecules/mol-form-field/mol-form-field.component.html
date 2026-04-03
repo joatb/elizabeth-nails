@@ -1,0 +1,8 @@
+<div class="mol-form-field">
+  <label *ngIf="label" class="mol-form-field__label">{{ label }}</label>
+  <div class="mol-form-field__control">
+    <ng-content></ng-content>
+  </div>
+  <p class="mol-form-field__helper" *ngIf="helperText && !invalid">{{ helperText }}</p>
+  <p class="mol-form-field__error" *ngIf="invalid && errorText">{{ errorText }}</p>
+</div>

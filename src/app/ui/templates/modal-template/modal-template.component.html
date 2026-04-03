@@ -1,0 +1,17 @@
+<div class="modal-template">
+  <div class="modal-template__header" *ngIf="title || showClose">
+    <h2 class="modal-template__title" *ngIf="title">{{ title }}</h2>
+    <button
+      *ngIf="showClose"
+      type="button"
+      class="modal-template__close"
+      [attr.aria-label]="closeAriaLabel"
+      (click)="handleClose()"
+    >
+      ×
+    </button>
+  </div>
+  <div class="modal-template__content">
+    <ng-content></ng-content>
+  </div>
+</div>

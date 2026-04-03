@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.atom-input {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+.atom-input--invalid {
+  --highlight-color-focused: var(--ion-color-danger);
+  --highlight-color-invalid: var(--ion-color-danger);
+}
+
+.atom-input__helper {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ion-color-medium);
+}
+
+.atom-input__error {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ion-color-danger);
+}
