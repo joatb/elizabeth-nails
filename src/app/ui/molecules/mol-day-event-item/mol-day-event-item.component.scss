@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.timeline-event {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  position: relative;
+  gap: 8px;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -23px;
+  top: 4px;
+}
+
+.timeline-content {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 10px 16px;
+  margin-left: 10px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.timeline-time {
+  font-weight: bold;
+  color: var(--ion-color-primary);
+  margin-bottom: 2px;
+}
+
+.timeline-title {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.timeline-note {
+  font-size: 0.98em;
+  color: #555;
+}
+
+.timeline-event ion-button {
+  margin-left: 8px;
+  margin-top: 4px;
+  --background: transparent;
+  --color: var(--ion-color-danger);
+  --box-shadow: none;
+  --border-radius: 50%;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 10;
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+}
+
+.timeline-event ion-button:hover {
+  --background: rgba(var(--ion-color-danger-rgb), 0.15);
+  transform: scale(1.1);
+}
+
+.timeline-event ion-button:active {
+  transform: scale(0.95);
+}
+
+.timeline-event ion-button i-lucide {
+  font-size: 1.4em;
+  color: var(--ion-color-danger);
+  display: block;
+}

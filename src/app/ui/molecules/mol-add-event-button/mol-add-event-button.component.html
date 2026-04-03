@@ -1,0 +1,11 @@
+<ion-button
+  class="add-event-btn"
+  [expand]="expand"
+  [color]="color"
+  [disabled]="disabled"
+  [type]="type"
+  (click)="handleClick()"
+>
+  <ion-icon [name]="icon"></ion-icon>
+  <ion-text class="button-label">{{ label }}</ion-text>
+</ion-button>

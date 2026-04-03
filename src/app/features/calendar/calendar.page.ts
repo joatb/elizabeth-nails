@@ -28,8 +28,8 @@ import { SchedulesProvider } from "../../providers/schedules/schedules.provider"
 import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
-import { CalendarAppointmentModalComponent } from "./components/calendar-appointment-modal/calendar-appointment-modal";
-import { CalendarEventInfoComponent } from "./components/calendar-event-info/calendar-event-info.component";
+import { CalendarAppointmentModalComponent } from "../../ui/organisms/appointment-modal/calendar-appointment-modal";
+import { CalendarEventInfoComponent } from "../../ui/organisms/event-info/calendar-event-info.component";
 import { CalendarScheduleComponent } from "../../ui/organisms/calendar-schedule-grid/calendar-schedule.component";
 import { ConfigModalComponent } from "../../components/modals/config-modal/config-modal.component";
 
@@ -339,7 +339,7 @@ export class CalendarPage {
       );
       const modal = await this.modalController.create({
         component: (
-          await import("./components/calendar-day-events-modal/calendar-day-events-modal")
+          await import("../../ui/organisms/day-events-modal/calendar-day-events-modal")
         ).CalendarDayEventsModalComponent,
         initialBreakpoint: 0.5,
         breakpoints: [0, 0.25, 0.5, 0.75, 1],

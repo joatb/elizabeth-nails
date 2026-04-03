@@ -1,0 +1,23 @@
+.add-event-btn {
+  --color: #fff;
+  --box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.25);
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  border: none;
+}
+
+.add-event-btn ion-icon {
+  font-size: 1.4em;
+  margin-right: 0.5em;
+}
+
+.add-event-btn .button-label {
+  margin-left: 0;
+  font-size: 1em;
+  font-weight: 600;
+}

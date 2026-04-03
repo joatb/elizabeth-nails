@@ -1,0 +1,25 @@
+<div class="day-events-timeline">
+  <div class="add-event-content-btn-wrapper" *ngIf="showAddButton">
+    <mol-add-event-button (action)="handleAddEvent()"></mol-add-event-button>
+  </div>
+
+  <div *ngIf="!loading && !hasEvents" class="timeline-empty">
+    {{ emptyText }}
+  </div>
+
+  <div class="timeline-container" *ngIf="!loading && hasEvents">
+    <mol-day-event-item
+      *ngFor="let event of events"
+      [event]="event"
+      [showDelete]="showDelete"
+      (delete)="handleDeleteEvent($event)"
+    ></mol-day-event-item>
+  </div>
+
+  <atom-spinner
+    *ngIf="loading"
+    name="crescent"
+    size="small"
+    class="timeline-loading"
+  ></atom-spinner>
+</div>

@@ -1,15 +1,14 @@
 import { Component, Input } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-
 import { ModalController } from "@ionic/angular/standalone";
-import { Day } from "../../../../models/day";
-import { SharedModule } from "../../../../modules/shared.module";
-import { EventService } from "../../../../services/event.service";
-import { CalendarAppointmentFormComponent } from "../../../../ui/organisms/appointment-form/calendar-appointment-form.component";
+import { Day } from "../../../models/day";
+import { SharedModule } from "../../../modules/shared.module";
+import { EventService } from "../../../services/event.service";
+import { CalendarAppointmentFormComponent } from "../appointment-form/calendar-appointment-form.component";
 
 @Component({
   selector: "app-calendar-appointment-modal",
-  templateUrl: "calendar-appointment-modal.html",
+  templateUrl: "./calendar-appointment-modal.html",
   imports: [FormsModule, SharedModule, CalendarAppointmentFormComponent],
 })
 export class CalendarAppointmentModalComponent {

@@ -1,0 +1,12 @@
+<div class="timeline-event">
+  <atom-timeline-dot class="timeline-dot"></atom-timeline-dot>
+  <div class="timeline-content">
+    <div class="timeline-time">{{ event.start_time | date: 'HH:mm' }} - {{ event.end_time | date: 'HH:mm' }}</div>
+    <div class="timeline-title">{{ event.client.name }}</div>
+    <div class="timeline-note">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
+    <div class="timeline-note" *ngIf="event.note">{{ event.note }}</div>
+  </div>
+  <ion-button *ngIf="showDelete" fill="clear" size="small" color="danger" (click)="handleDelete()">
+    <i-lucide [img]="Trash"></i-lucide>
+  </ion-button>
+</div>

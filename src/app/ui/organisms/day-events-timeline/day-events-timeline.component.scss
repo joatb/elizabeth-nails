@@ -1,0 +1,28 @@
+.day-events-timeline {
+  display: block;
+}
+
+.add-event-content-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.timeline-container {
+  position: relative;
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 2px solid #e0e0e0;
+}
+
+.timeline-empty {
+  text-align: center;
+  color: #888;
+  margin: 2rem 0;
+}
+
+.day-events-timeline ion-spinner {
+  display: block;
+  margin: 1.5rem auto 0;
+}

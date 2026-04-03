@@ -21,7 +21,7 @@ import { Client } from "../../providers/clients/models/client";
 import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
-import { ClientFormPage } from "./components/client-form/client-form-page";
+import { ClientFormPage } from "../../ui/organisms/client-form/client-form-page";
 
 interface ClientsRowData {
   id: string;

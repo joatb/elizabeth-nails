@@ -6,8 +6,8 @@ import {
   Validators,
 } from "@angular/forms";
 import { ModalController } from "@ionic/angular/standalone";
-import { SharedModule } from "../../../../modules/shared.module";
-import { AlertService } from "../../../../services/alert.service";
+import { SharedModule } from "../../../modules/shared.module";
+import { AlertService } from "../../../services/alert.service";
 
 @Component({
   selector: "app-client-form",
