@@ -12,6 +12,7 @@
 // FONTS
 // ---------------------------------------------------
 @use "theme/font.ibm-plex-sans";
+@use "theme/full-calendar";
 
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
@@ -39,9 +40,6 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
-
-
-@import "theme/full-calendar.scss";
 
 @import 'tippy.js/dist/tippy.css';
 
@@ -127,4 +125,3 @@ ion-button {
     height: auto;
     min-height: 600px;
   }
-
