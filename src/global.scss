@@ -102,7 +102,7 @@ ion-button {
  }
 
  ion-fab-button::part(native){
-    background-image: linear-gradient(to right, var(--ion-color-primary) 0%, #eceff4  51%, var(--ion-color-primary)  100%)
+    background-image: var(--app-gradient-primary);
  }
 
  ion-fab-button::part(native) {

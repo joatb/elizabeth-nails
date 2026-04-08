@@ -55,15 +55,15 @@
             width: 50%;
 
             ion-fab-button {
-                --background: var(--ion-color-primary);
+                --background: var(--app-gradient-primary);
                 --border-radius: 50%;
                 margin-top: -90px;
                 height: 78px;
                 width: 78px;
 
-                --background-activated: var(--ion-color-primary);
-                --background-focused: var(--ion-color-primary);
-                --background-hover: var(--ion-color-primary);
+                --background-activated: var(--app-gradient-primary);
+                --background-focused: var(--app-gradient-primary);
+                --background-hover: var(--app-gradient-primary);
 
                 ion-icon {
                     color: white;

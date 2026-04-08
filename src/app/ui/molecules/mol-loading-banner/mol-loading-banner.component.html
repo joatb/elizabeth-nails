@@ -1,0 +1,4 @@
+<div class="loading-banner" [class.loading-banner--primary]="variant === 'primary'">
+  <ion-spinner *ngIf="showSpinner" name="crescent"></ion-spinner>
+  <span class="loading-banner__text">{{ text }}</span>
+</div>

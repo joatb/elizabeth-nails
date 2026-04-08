@@ -5,6 +5,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from "@angular/forms";
+import { ModalController } from "@ionic/angular/standalone";
 import { IonNav } from "@ionic/angular/standalone";
 import { SharedModule } from "../../../modules/shared.module";
 import { SchedulesProvider } from "../../../providers/schedules/schedules.provider";
@@ -51,6 +52,7 @@ export class CalendarScheduleFormComponent {
     private schedulesPvd: SchedulesProvider,
     private alertService: AlertService,
     private cdr: ChangeDetectorRef,
+    private modalCtrl: ModalController,
   ) {
     this.form = new FormGroup<ScheduleFormGroup>({
       startTime: new FormControl<string>("2025-01-01T08:00:00", {
@@ -79,7 +81,11 @@ export class CalendarScheduleFormComponent {
   }
 
   goBack() {
-    this.nav.pop();
+    if (this.nav && typeof this.nav.pop === "function") {
+      this.nav.pop();
+      return;
+    }
+    void this.modalCtrl.dismiss();
   }
 
   toggleDay(day: string): void {
@@ -136,7 +142,11 @@ export class CalendarScheduleFormComponent {
       await this.schedulesPvd.createSchedule(schedule);
       await this.alertService.presentToast("Horario creado", 2500);
       this.schedules = await this.schedulesPvd.listSchedules();
-      this.nav.pop();
+      if (this.nav && typeof this.nav.pop === "function") {
+        this.nav.pop();
+      } else {
+        await this.modalCtrl.dismiss();
+      }
     } else {
       // Mostrar error
       await this.alertService.presentToast("Horario inválido", 2500);

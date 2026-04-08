@@ -1,67 +1,22 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Clientes
-    </ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="authService.logout()" color="none" fill="solid">
-        <i-lucide [img]="LogOut"></i-lucide>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<org-clients-toolbar
+  title="Clientes"
+  [logoutIcon]="LogOut"
+  (logout)="authService.logout()"
+></org-clients-toolbar>
 
 <ion-content [fullscreen]="true">
-  <div class="grid-container">
-    <ag-grid-angular
-      #agGrid
-      class="ag-theme-alpine"
-      [rowData]="rowData"
-      [columnDefs]="colDefs"
-      [localeText]="localeText"
-      [undoRedoCellEditing]="true"
-      [domLayout]="'autoHeight'"
-      [suppressHorizontalScroll]="true"
-      [enableCellTextSelection]="true"
-      [animateRows]="true"
-      (gridReady)="onGridReady($event)"
-    />
-
-    <!-- Indicador de carga para más clientes -->
-    <div class="loading-more" *ngIf="isLoadingMore">
-      <ion-spinner name="crescent"></ion-spinner>
-      <span>Cargando más clientes...</span>
-    </div>
-
-    <!-- Indicador de carga automática por búsqueda -->
-    <div class="loading-search" *ngIf="isLoadingAll">
-      <ion-spinner name="crescent"></ion-spinner>
-      <span>Cargando todos los clientes para búsqueda...</span>
-    </div>
-
-    <!-- Información de paginación -->
-    <div class="pagination-info" *ngIf="rowData.length > 0">
-      <span>Mostrando {{ rowData.length }} de {{ totalClients }} clientes</span>
-      <div class="button-group">
-        <ion-button
-          *ngIf="currentOffset < totalClients && !isLoadingMore"
-          (click)="loadMoreClients()"
-          fill="outline"
-          size="small"
-          color="primary"
-          class="load-more-btn">
-          Cargar más
-        </ion-button>
-        <ion-button
-          *ngIf="!allClientsLoaded && !isLoadingAll"
-          (click)="loadAllClients()"
-          fill="solid"
-          size="small"
-          color="primary"
-          class="load-all-btn">
-          Cargar todos
-        </ion-button>
-      </div>
-    </div>
-  </div>
+  <org-clients-grid-panel
+    [rowData]="rowData"
+    [colDefs]="colDefs"
+    [localeText]="localeText"
+    [isLoadingMore]="isLoadingMore"
+    [isLoadingAll]="isLoadingAll"
+    [currentCount]="rowData.length"
+    [totalCount]="totalClients"
+    [showLoadMore]="hasMoreClients && !isLoadingMore"
+    [showLoadAll]="!allClientsLoaded && !isLoadingAll"
+    (gridReady)="onGridReady($event)"
+    (loadMore)="loadMoreClients()"
+    (loadAll)="loadAllClients()"
+  ></org-clients-grid-panel>
 </ion-content>

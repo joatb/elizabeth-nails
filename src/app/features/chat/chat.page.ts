@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Search, Users } from "lucide-angular";
 import { SharedModule } from "../../modules/shared.module";
 import { ClientsProvider } from "../../providers/clients/clients.provider";
 import { Client } from "../../providers/clients/models/client";
-import { ChatComponent } from "../../ui/organisms/chat-window/chat.component";
+import { ChatComponent } from "../../ui";
 
 @Component({
   selector: "app-chat",

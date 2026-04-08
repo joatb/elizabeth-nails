@@ -1,0 +1,37 @@
+<div class="grid-container">
+  <ag-grid-angular
+    #agGrid
+    [class]="gridClass"
+    [rowData]="rowData"
+    [columnDefs]="colDefs"
+    [localeText]="localeText"
+    [undoRedoCellEditing]="undoRedoCellEditing"
+    [domLayout]="domLayout"
+    [suppressHorizontalScroll]="suppressHorizontalScroll"
+    [enableCellTextSelection]="enableCellTextSelection"
+    [animateRows]="animateRows"
+    (gridReady)="handleGridReady($event)"
+  ></ag-grid-angular>
+
+  <mol-loading-banner
+    *ngIf="isLoadingMore"
+    text="Cargando más clientes..."
+    variant="neutral"
+  ></mol-loading-banner>
+
+  <mol-loading-banner
+    *ngIf="isLoadingAll"
+    text="Cargando todos los clientes para búsqueda..."
+    variant="primary"
+  ></mol-loading-banner>
+
+  <mol-pagination-info
+    *ngIf="currentCount > 0"
+    [currentCount]="currentCount"
+    [totalCount]="totalCount"
+    [showLoadMore]="showLoadMore"
+    [showLoadAll]="showLoadAll"
+    (loadMore)="handleLoadMore()"
+    (loadAll)="handleLoadAll()"
+  ></mol-pagination-info>
+</div>

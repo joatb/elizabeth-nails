@@ -1,0 +1,13 @@
+<ion-modal #modal [trigger]="triggerId">
+  <ng-template>
+    <ion-content fullscreen class="modal-fullscreen">
+      <tpl-modal-template
+        [title]="title"
+        (close)="handleClose()"
+        class="modal-layout"
+      >
+        <app-calendar-schedule class="modal-schedule"></app-calendar-schedule>
+      </tpl-modal-template>
+    </ion-content>
+  </ng-template>
+</ion-modal>

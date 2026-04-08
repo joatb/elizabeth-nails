@@ -1,0 +1,31 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>{{ title }}</ion-title>
+    <ion-buttons slot="end" class="calendar-toolbar__actions">
+      <ion-button
+        *ngIf="showLogoutButton"
+        (click)="handleLogout()"
+        color="none"
+        fill="solid"
+      >
+        <i-lucide [img]="logoutIcon"></i-lucide>
+      </ion-button>
+      <ion-button
+        *ngIf="showScheduleButton"
+        [id]="scheduleButtonId"
+        color="none"
+        fill="solid"
+      >
+        <i-lucide [img]="scheduleIcon"></i-lucide>
+      </ion-button>
+      <ion-button
+        *ngIf="showConfigButton"
+        [id]="configButtonId"
+        color="none"
+        fill="solid"
+      >
+        <i-lucide [img]="configIcon"></i-lucide>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

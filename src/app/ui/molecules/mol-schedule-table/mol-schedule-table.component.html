@@ -1,0 +1,40 @@
+<ion-content class="mol-schedule-table__content" [fullscreen]="true">
+  <!-- Estado de carga -->
+  <div class="mol-schedule-table__loading" *ngIf="isLoading">
+    <atom-spinner name="crescent" size="large"></atom-spinner>
+    <div class="mol-schedule-table__loading-text">Cargando horarios...</div>
+  </div>
+
+  <!-- Tabla de horarios (AG Grid) -->
+  <div *ngIf="!isLoading" class="mol-schedule-table__grid-wrapper">
+    <ag-grid-angular
+      #agGrid
+      class="ag-theme-alpine mol-schedule-table__grid"
+      style="width: 100%; height: 100%;"
+      [rowData]="rowData"
+      [columnDefs]="colDefs"
+      [localeText]="localeText"
+      [defaultColDef]="defaultColDef"
+      [components]="components"
+      (gridReady)="onGridReady($event)"
+    ></ag-grid-angular>
+
+    <!-- Estado cuando no hay datos -->
+    <div class="mol-schedule-table__empty" *ngIf="!rowData || rowData.length === 0">
+      <ion-card class="mol-schedule-table__empty-card">
+        <ion-card-content class="ion-text-center">
+          <h3>No hay horarios</h3>
+          <p>Por</p> ahora no se han configurado horarios. Pulsa el botón para añadir uno.</p>
+          <ion-button color="primary" (click)="onAdd()">Añadir horario</ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- FAB: acción para añadir un horario -->
+  <mol-fab-button
+    class="mol-schedule-table__fab"
+    icon="add-outline"
+    (main)="onAdd()"
+  ></mol-fab-button>
+</ion-content>

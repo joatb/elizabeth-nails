@@ -1,0 +1,39 @@
+<!--
+  Molécula: mol-fab-button
+  Plantilla reutilizable para un FAB (Floating Action Button) con soporte para:
+    - icono principal y etiqueta
+    - lista de acciones secundarias (fab-list)
+    - bindings esperados (definidos en el componente TS):
+        @Input() icon?: string;
+        @Input() label?: string;
+        @Input() color?: string;
+        @Input() vertical: 'top' | 'bottom' = 'bottom';
+        @Input() horizontal: 'start' | 'center' | 'end' = 'end';
+        @Input() actions?: Array<{ icon?: string; color?: string; action: string }>;
+        @Output() action = new EventEmitter<string>();
+        @Output() main = new EventEmitter<void>();
+-->
+<ion-fab [vertical]="vertical" [horizontal]="horizontal" class="mol-fab" slot="fixed">
+  <!-- Botón principal -->
+  <ion-fab-button
+    [color]="color"
+    (click)="main.emit()"
+    [attr.aria-label]="label ? label : (icon ? icon : 'Acción principal')"
+    >
+    <ion-icon *ngIf="icon" [name]="icon" aria-hidden="true"></ion-icon>
+    <span *ngIf="label" class="mol-fab__label">{{ label }}</span>
+  </ion-fab-button>
+
+  <!-- Lista de acciones secundarias (opcional) -->
+  <ion-fab-list *ngIf="actions?.length">
+    <ng-container *ngFor="let a of actions">
+      <ion-fab-button
+        [color]="a.color || 'secondary'"
+        (click)="action.emit(a.action)"
+        [attr.aria-label]="a.label || a.action"
+      >
+        <ion-icon *ngIf="a.icon" [name]="a.icon" aria-hidden="true"></ion-icon>
+      </ion-fab-button>
+    </ng-container>
+  </ion-fab-list>
+</ion-fab>

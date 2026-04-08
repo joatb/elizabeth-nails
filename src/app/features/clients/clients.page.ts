@@ -21,9 +21,15 @@ import { Client } from "../../providers/clients/models/client";
 import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
-import { ClientFormPage } from "../../ui/organisms/client-form/client-form-page";
+import {
+  ClientsToolbarComponent,
+  ClientsGridPanelComponent,
+  ClientFormPage,
+  MolLoadingBannerComponent,
+  MolPaginationInfoComponent,
+} from "../../ui";
 
-interface ClientsRowData {
+interface ClientsRowData extends Record<string, unknown> {
   id: string;
   name: string;
   phone: string;
@@ -132,12 +138,12 @@ class CustomButtonComponent implements ICellRendererAngularComp {
   selector: "app-clients",
   templateUrl: "clients.page.html",
   styleUrls: ["clients.page.scss"],
-  imports: [SharedModule, AgGridAngular],
+  imports: [SharedModule, ClientsToolbarComponent, ClientsGridPanelComponent],
 })
 export class ClientsPage {
   readonly LogOut = LogOut;
 
-  @ViewChild("agGrid") agGrid!: AgGridAngular;
+  private gridApi: any;
   @ViewChild("agGrid", { read: ElementRef }) agGridElement!: ElementRef;
 
   // Row Data: The data to be displayed.
@@ -150,6 +156,7 @@ export class ClientsPage {
   isLoadingMore = false;
   allClientsLoaded = false;
   isLoadingAll = false;
+  hasMoreClients = false;
 
   // Column Definitions: Defines the columns to be displayed.
   colDefs: ColDef[] = [
@@ -265,15 +272,18 @@ export class ClientsPage {
   }
 
   onGridReady(event: any) {
+    this.gridApi = event?.api;
     // Configurar listener para detectar cuando se activa la búsqueda
-    event.api.addEventListener("filterChanged", () => {
-      this.onFilterChanged();
-    });
+    if (event?.api && typeof event.api.addEventListener === "function") {
+      event.api.addEventListener("filterChanged", () => {
+        this.onFilterChanged();
+      });
 
-    // Configurar listener para detectar cuando se ordena
-    event.api.addEventListener("sortChanged", () => {
-      this.onFilterChanged();
-    });
+      // Configurar listener para detectar cuando se ordena
+      event.api.addEventListener("sortChanged", () => {
+        this.onFilterChanged();
+      });
+    }
 
     // Verificar si hi ha filtres actius quan el grid està llest
     setTimeout(() => {
@@ -282,9 +292,9 @@ export class ClientsPage {
   }
 
   private async checkForActiveFilters() {
-    if (!this.agGrid?.api) return;
+    if (!this.gridApi) return;
 
-    const filterModel = this.agGrid.api.getFilterModel();
+    const filterModel = this.gridApi?.getFilterModel();
     const hasActiveFilters = filterModel && Object.keys(filterModel).length > 0;
 
     // Si hi ha filtres actius i no tenim tots els clients carregats, carregar-los
@@ -295,13 +305,14 @@ export class ClientsPage {
 
   private async onFilterChanged() {
     // Verificar si hay algún filtro activo (texto, número, fecha, etc.)
-    const filterModel = this.agGrid.api?.getFilterModel();
+    const filterModel = this.gridApi?.getFilterModel();
     const hasActiveFilters = filterModel && Object.keys(filterModel).length > 0;
 
     // Verificar si hay algún ordenamiento activo
-    const columnState = this.agGrid.api?.getColumnState();
+    const columnState = this.gridApi?.getColumnState();
     const hasActiveSorting =
-      columnState && columnState.some((col) => col.sort !== null);
+      columnState &&
+      columnState.some((col: { sort: string | null }) => col.sort !== null);
 
     // Cargar todos los clientes si hay filtros o ordenamiento activo
     if (
@@ -334,14 +345,15 @@ export class ClientsPage {
         this.currentOffset,
       );
 
-      this.totalClients = paginatedResult.total;
-      this.currentOffset = this.pageSize;
+      this.totalClients = Math.max(paginatedResult.total, paginatedResult.documents.length);
+      this.currentOffset = paginatedResult.documents.length;
+      this.hasMoreClients = paginatedResult.hasMore;
 
       paginatedResult.documents.forEach((client: Client) => {
         this.rowData.push(this.mapClientToRowData(client));
       });
 
-      this.agGrid.api?.setGridOption("rowData", this.rowData);
+      this.gridApi?.setGridOption("rowData", this.rowData);
       this.cdr.detectChanges(); // Forzar la detección de cambios
     } catch (error) {
       console.error("❌ Error cargando clientes:", error);
@@ -351,7 +363,10 @@ export class ClientsPage {
       this.clients?.documents.forEach((client: Client) => {
         this.rowData.push(this.mapClientToRowData(client));
       });
-      this.agGrid.api?.setGridOption("rowData", this.rowData);
+      this.totalClients = Math.max(this.totalClients, this.rowData.length);
+      this.currentOffset = this.rowData.length;
+      this.hasMoreClients = false;
+      this.gridApi?.setGridOption("rowData", this.rowData);
       this.cdr.detectChanges();
     }
   }
@@ -376,7 +391,7 @@ export class ClientsPage {
   }
 
   async loadMoreClients() {
-    if (this.isLoadingMore || this.currentOffset >= this.totalClients) return;
+    if (this.isLoadingMore || !this.hasMoreClients) return;
 
     this.isLoadingMore = true;
 
@@ -391,10 +406,12 @@ export class ClientsPage {
         this.rowData.push(this.mapClientToRowData(client));
       });
 
-      this.currentOffset += this.pageSize;
+      this.currentOffset += paginatedResult.documents.length;
+      this.totalClients = Math.max(paginatedResult.total, this.rowData.length);
+      this.hasMoreClients = paginatedResult.hasMore;
 
       // Actualizar la grilla
-      this.agGrid.api?.setGridOption("rowData", this.rowData);
+      this.gridApi?.setGridOption("rowData", this.rowData);
       this.cdr.detectChanges();
     } catch (error) {
       console.error("❌ Error cargando más clientes:", error);
@@ -419,9 +436,11 @@ export class ClientsPage {
 
       this.allClientsLoaded = true;
       this.currentOffset = allClients.length;
+      this.totalClients = allClients.length;
+      this.hasMoreClients = false;
 
       // Actualizar la grilla
-      this.agGrid.api?.setGridOption("rowData", this.rowData);
+      this.gridApi?.setGridOption("rowData", this.rowData);
       this.cdr.detectChanges();
 
       // Mostrar mensaje informativo
@@ -468,7 +487,13 @@ export class ClientsPage {
       });
       await this.alertService.presentToast("Cliente actualizado", 2500);
     } catch (error) {
-      event.api.undoCellEditing();
+      try {
+        if (event?.api && typeof event.api.undoCellEditing === "function") {
+          event.api.undoCellEditing();
+        }
+      } catch {
+        // noop - proteger contra errores al intentar deshacer edición en la celda
+      }
       await this.alertService.presentToast(
         "Error al actualizar el cliente",
         2500,

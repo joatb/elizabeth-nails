@@ -1,0 +1,31 @@
+<!--
+  Molécula: mol-custom-button
+  Plantilla reutilizable para renderizar uno o varios botones personalizados.
+  - Espera una entrada `buttons: Array<{ label?: string; icon?: string; color?: string; action: string }>`
+  - Dispara `onClick(action)` en el componente TypeScript cuando se pulsa un botón.
+-->
+<div class="mol-custom-button">
+  <ng-container *ngFor="let button of buttons">
+    <div class="mol-custom-button__item" style="display:flex; justify-content:center; margin: 4px 0;">
+      <ion-button
+        [color]="button.color ?? 'primary'"
+        (click)="onClick(button.action)"
+        [attr.aria-label]="button.label ? button.label : (button.icon ? button.icon : 'boton')"
+      >
+        <ion-icon
+          *ngIf="button.icon && !button.label"
+          slot="icon-only"
+          [name]="button.icon"
+        ></ion-icon>
+
+        <ion-icon
+          *ngIf="button.icon && button.label"
+          slot="start"
+          [name]="button.icon"
+        ></ion-icon>
+
+        <span *ngIf="button.label">{{ button.label }}</span>
+      </ion-button>
+    </div>
+  </ng-container>
+</div>

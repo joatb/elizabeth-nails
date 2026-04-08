@@ -4,10 +4,16 @@
   (willPresent)="onWillPresent()"
 >
   <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Ajustes</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="modalClose()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
     <ion-content>
-      <tpl-modal-template title="Ajustes" (close)="modalClose()">
-        <ion-nav #nav></ion-nav>
-      </tpl-modal-template>
+      <ion-nav #nav></ion-nav>
     </ion-content>
   </ng-template>
 </ion-modal>

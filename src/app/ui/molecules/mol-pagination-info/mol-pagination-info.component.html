@@ -1,0 +1,25 @@
+<div class="pagination-info">
+  <span>{{ infoText }}</span>
+  <div class="button-group">
+    <ion-button
+      *ngIf="showLoadMore"
+      (click)="handleLoadMore()"
+      fill="outline"
+      size="small"
+      color="primary"
+      [disabled]="disabled"
+    >
+      {{ loadMoreLabel }}
+    </ion-button>
+    <ion-button
+      *ngIf="showLoadAll"
+      (click)="handleLoadAll()"
+      fill="solid"
+      size="small"
+      color="primary"
+      [disabled]="disabled"
+    >
+      {{ loadAllLabel }}
+    </ion-button>
+  </div>
+</div>

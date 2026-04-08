@@ -1,0 +1,56 @@
+.grid-container {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ag-theme-alpine {
+  width: 100%;
+  height: 100%;
+
+  .ag-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ag-header-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .grid-container {
+    padding: 8px;
+  }
+
+  .ag-theme-alpine {
+    .ag-header-cell {
+      font-size: 12px;
+    }
+
+    .ag-cell {
+      font-size: 12px;
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .grid-container {
+    padding: 4px;
+  }
+
+  .ag-theme-alpine {
+    .ag-header-cell {
+      font-size: 11px;
+    }
+
+    .ag-cell {
+      font-size: 11px;
+    }
+  }
+}

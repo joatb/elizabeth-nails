@@ -1,7 +1,14 @@
 import { CommonModule } from "@angular/common";
 import { Component, Input } from "@angular/core";
-import { AlertController, IonicModule } from "@ionic/angular";
-import { ModalController } from "@ionic/angular/standalone";
+import {
+  AlertController,
+  ModalController,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
+  IonContent,
+} from "@ionic/angular/standalone";
 import { DayEventsTimelineComponent } from "../day-events-timeline/day-events-timeline.component";
 import { DateTime } from "luxon";
 import { AppointmentsProvider } from "../../../providers/appointments/appointments.provider";
@@ -13,9 +20,17 @@ import { DayEventItem } from "../../molecules/mol-day-event-item/mol-day-event-i
 @Component({
   selector: "app-calendar-day-events-modal",
   templateUrl: "./calendar-day-events-modal.html",
-  styleUrl: "./calendary-day-events-modal.scss",
+  styleUrls: ["./calendary-day-events-modal.scss"],
   standalone: true,
-  imports: [IonicModule, CommonModule, DayEventsTimelineComponent],
+  imports: [
+    CommonModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonButtons,
+    IonContent,
+    DayEventsTimelineComponent,
+  ],
 })
 export class CalendarDayEventsModalComponent {
   @Input() date!: Date;

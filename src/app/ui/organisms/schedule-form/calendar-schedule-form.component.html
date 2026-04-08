@@ -1,11 +1,17 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="goBack()">Cancelar</ion-button>
+    </ion-buttons>
+    <ion-title>Nuevo horario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="saveSchedule()" [disabled]="!form.valid">
+        Guardar
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
 <ion-content class="ion-padding" [fullscreen]="true">
-  @if(form){  
-    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-      <ion-fab-button color="success" (click)="saveSchedule()">
-        <ion-icon name="save-outline"></ion-icon>
-    </ion-fab-button>
-    </ion-fab>
-  }
   <form [formGroup]="form">
     <ion-list>
       <ion-item>

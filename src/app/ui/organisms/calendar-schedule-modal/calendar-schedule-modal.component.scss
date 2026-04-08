@@ -1,0 +1,53 @@
+:host {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Forzar que el ion-content del modal ocupe toda la altura disponible */
+.modal-fullscreen {
+  height: 100%;
+  min-height: 100%;
+  --padding-top: 0;
+  --padding-bottom: 0;
+  box-sizing: border-box;
+}
+
+/* Aplicado al tpl-modal-template (se pasa como clase 'modal-layout') */
+.modal-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+/* Hacer que la zona de contenido del template crezca y haga scroll interno */
+.modal-layout .modal-template__content {
+  flex: 1 1 auto;
+  min-height: 0; /* necesario para que flex child pueda hacer scroll en WebKit */
+  overflow: auto;
+  padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Ajustes para el componente con la tabla de horarios */
+.modal-schedule {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Asegurar que la cabecera del template sea fija y visible */
+.modal-layout .modal-template__header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--ion-background-color, #fff);
+}
+
+/* Pequeño ajuste en el botón de cerrar para mantener área clicable */
+.modal-layout .modal-template__close {
+  padding: 0.25rem;
+}

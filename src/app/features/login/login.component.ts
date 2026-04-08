@@ -3,8 +3,7 @@ import { AuthService } from "../../services/auth.service";
 import { Router } from "@angular/router";
 import { LoadingController } from "@ionic/angular/standalone";
 import { ToastController } from "@ionic/angular/standalone";
-import { LoginFormComponent } from "../../ui/organisms/login-form/login-form.component";
-import { AuthTemplateComponent } from "../../ui/templates/auth-template/auth-template.component";
+import { LoginFormComponent, AuthTemplateComponent } from "../../ui";
 
 @Component({
   selector: "login-page",

@@ -1,6 +1,5 @@
 import { Component, OnDestroy } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { CacheDebugComponent } from "../../ui/organisms/cache-debug/cache-debug.component";
 import { SharedModule } from "../../modules/shared.module";
 import {
   AtomAvatarComponent,
@@ -10,15 +9,14 @@ import {
   AtomInputComponent,
   AtomSpinnerComponent,
   AtomStatusIndicatorComponent,
-} from "../../ui/atoms";
-import {
   ClientSelectorInfiniteScrollEvent,
   MolActionButtonComponent,
   MolClientSelectorComponent,
   MolFormFieldComponent,
   MolPasswordInputComponent,
   MolStatItemComponent,
-} from "../../ui/molecules";
+  CacheDebugComponent,
+} from "../../ui";
 
 @Component({
   selector: "app-ui-testing",

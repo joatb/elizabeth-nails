@@ -1,16 +1,23 @@
 <div class="modal-template">
-  <div class="modal-template__header" *ngIf="title || showClose">
-    <h2 class="modal-template__title" *ngIf="title">{{ title }}</h2>
-    <button
-      *ngIf="showClose"
-      type="button"
-      class="modal-template__close"
-      [attr.aria-label]="closeAriaLabel"
-      (click)="handleClose()"
-    >
-      ×
-    </button>
-  </div>
+  <ion-header class="modal-template__header" *ngIf="title || showClose">
+    <ion-toolbar>
+      <ion-title class="modal-template__title" *ngIf="title">
+        {{ title }}
+      </ion-title>
+      <ion-buttons slot="end" *ngIf="showClose">
+        <ion-button
+          class="modal-template__close"
+          type="button"
+          fill="solid"
+          color="none"
+          [attr.aria-label]="closeAriaLabel"
+          (click)="handleClose()"
+        >
+          ×
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
   <div class="modal-template__content">
     <ng-content></ng-content>
   </div>

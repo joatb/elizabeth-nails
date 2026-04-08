@@ -7,6 +7,7 @@ import { EventService } from "../../../services/event.service";
 import { CalendarAppointmentFormComponent } from "../appointment-form/calendar-appointment-form.component";
 
 @Component({
+  standalone: true,
   selector: "app-calendar-appointment-modal",
   templateUrl: "./calendar-appointment-modal.html",
   imports: [FormsModule, SharedModule, CalendarAppointmentFormComponent],

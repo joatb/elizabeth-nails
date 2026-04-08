@@ -66,5 +66,11 @@
 
   --ion-font-family: IBM Plex Sans, sans-serif;
 
+  --app-gradient-primary: linear-gradient(
+    135deg,
+    var(--ion-color-primary),
+    var(--ion-color-primary-tint)
+  );
+
   --app-segment-height: 69px;
 }

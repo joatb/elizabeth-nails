@@ -75,11 +75,22 @@ export class PaginationService {
       });
     }
 
+    const totalFromApi = typeof result.total === 'number' ? result.total : 0;
+    const isTotalReliable =
+      totalFromApi > offset + result.documents.length ||
+      (totalFromApi === offset + result.documents.length && result.documents.length < limit);
+    const hasMore = isTotalReliable
+      ? offset + limit < totalFromApi
+      : result.documents.length === limit;
+    const effectiveTotal = isTotalReliable
+      ? totalFromApi
+      : Math.max(totalFromApi, offset + result.documents.length);
+
     return {
       documents: result.documents,
-      total: result.total,
-      hasMore: offset + limit < result.total,
-      nextOffset: offset + limit < result.total ? offset + limit : undefined,
+      total: effectiveTotal,
+      hasMore,
+      nextOffset: hasMore ? offset + result.documents.length : undefined,
       fromCache: false
     };
   }
