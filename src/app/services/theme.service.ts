@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { account } from '../../lib/appwrite';
-import { AuthService } from './auth.service';
 import { UserPreferences } from '../models/user-preferences';
+import { AuthService } from './auth.service';
 
 export interface ColorTheme {
   name: string;
@@ -25,31 +24,44 @@ export class ThemeService {
   private styleElement: HTMLStyleElement | null = null;
 
   private defaultThemes: Record<string, ColorTheme> = {
+    graphite: {
+      name: 'Graphite',
+      primary: '#1f2937',
+      primaryRgb: '31, 41, 55',
+      primaryContrast: '#ffffff',
+      primaryShade: '#111827',
+      primaryTint: '#374151',
+      secondary: '#ffffff',
+      secondaryRgb: '255, 255, 255',
+      secondaryContrast: '#1f2937',
+      secondaryShade: '#e5e7eb',
+      secondaryTint: '#f9fafb'
+    },
     nord: {
       name: 'Nord',
       primary: '#5e81ac',
       primaryRgb: '94, 129, 172',
-      primaryContrast: '#ffffff',
+      primaryContrast: '#eceff4',
       primaryShade: '#4c6a96',
       primaryTint: '#81a1c1',
-      secondary: '#a3be8c',
-      secondaryRgb: '163, 190, 140',
-      secondaryContrast: '#ffffff',
-      secondaryShade: '#8fa97a',
-      secondaryTint: '#b6d1a3'
+      secondary: '#5e81ac',
+      secondaryRgb: '94, 129, 172',
+      secondaryContrast: '#eceff4',
+      secondaryShade: '#4c6a96',
+      secondaryTint: '#81a1c1'
     },
     ocean: {
       name: 'Ocean',
-      primary: '#0066cc',
-      primaryRgb: '0, 102, 204',
+      primary: '#4f8fc9',
+      primaryRgb: '79, 143, 201',
       primaryContrast: '#ffffff',
-      primaryShade: '#0055aa',
-      primaryTint: '#1a75d9',
-      secondary: '#00b3b3',
-      secondaryRgb: '0, 179, 179',
+      primaryShade: '#3f79b1',
+      primaryTint: '#6ea4d5',
+      secondary: '#6ea4d5',
+      secondaryRgb: '110, 164, 213',
       secondaryContrast: '#ffffff',
-      secondaryShade: '#009999',
-      secondaryTint: '#1abbbb'
+      secondaryShade: '#5e8fbd',
+      secondaryTint: '#8ab8df'
     },
     forest: {
       name: 'Forest',
@@ -108,7 +120,7 @@ export class ThemeService {
    * Obtiene un tema por clave
    */
   getTheme(themeKey: string): ColorTheme {
-    return this.defaultThemes[themeKey] || this.defaultThemes['nord'];
+    return this.defaultThemes[themeKey] || this.defaultThemes['graphite'];
   }
 
   /**
@@ -148,6 +160,28 @@ export class ThemeService {
         --ion-color-secondary-contrast-rgb: ${this.hexToRgb(theme.secondaryContrast)} !important;
         --ion-color-secondary-shade: ${theme.secondaryShade} !important;
         --ion-color-secondary-tint: ${theme.secondaryTint} !important;
+
+        --ion-color-dark: ${theme.primaryShade} !important;
+        --ion-color-dark-rgb: ${this.hexToRgb(theme.primaryShade)} !important;
+        --ion-color-dark-contrast: ${theme.primaryContrast} !important;
+        --ion-color-dark-contrast-rgb: ${this.hexToRgb(theme.primaryContrast)} !important;
+        --ion-color-dark-shade: ${theme.primaryShade} !important;
+        --ion-color-dark-tint: ${theme.primary} !important;
+
+        --ion-color-medium: ${theme.primaryTint} !important;
+        --ion-color-medium-rgb: ${this.hexToRgb(theme.primaryTint)} !important;
+        --ion-color-medium-contrast: ${theme.primaryContrast} !important;
+        --ion-color-medium-contrast-rgb: ${this.hexToRgb(theme.primaryContrast)} !important;
+        --ion-color-medium-shade: ${theme.primary} !important;
+        --ion-color-medium-tint: ${theme.secondaryShade} !important;
+
+        --ion-color-light: ${theme.secondaryTint} !important;
+        --ion-color-light-rgb: ${this.hexToRgb(theme.secondaryTint)} !important;
+        --ion-color-light-contrast: ${theme.secondaryContrast} !important;
+        --ion-color-light-contrast-rgb: ${this.hexToRgb(theme.secondaryContrast)} !important;
+        --ion-color-light-shade: ${theme.secondary} !important;
+        --ion-color-light-tint: ${theme.secondaryTint} !important;
+        --app-gradient-primary: linear-gradient(135deg, ${theme.primary}, ${theme.primaryTint}) !important;
       }
 
       ion-app {
@@ -162,6 +196,25 @@ export class ThemeService {
         --ion-color-secondary-contrast: ${theme.secondaryContrast} !important;
         --ion-color-secondary-shade: ${theme.secondaryShade} !important;
         --ion-color-secondary-tint: ${theme.secondaryTint} !important;
+
+        --ion-color-dark: ${theme.primaryShade} !important;
+        --ion-color-dark-rgb: ${this.hexToRgb(theme.primaryShade)} !important;
+        --ion-color-dark-contrast: ${theme.primaryContrast} !important;
+        --ion-color-dark-shade: ${theme.primaryShade} !important;
+        --ion-color-dark-tint: ${theme.primary} !important;
+
+        --ion-color-medium: ${theme.primaryTint} !important;
+        --ion-color-medium-rgb: ${this.hexToRgb(theme.primaryTint)} !important;
+        --ion-color-medium-contrast: ${theme.primaryContrast} !important;
+        --ion-color-medium-shade: ${theme.primary} !important;
+        --ion-color-medium-tint: ${theme.secondaryShade} !important;
+
+        --ion-color-light: ${theme.secondaryTint} !important;
+        --ion-color-light-rgb: ${this.hexToRgb(theme.secondaryTint)} !important;
+        --ion-color-light-contrast: ${theme.secondaryContrast} !important;
+        --ion-color-light-shade: ${theme.secondary} !important;
+        --ion-color-light-tint: ${theme.secondaryTint} !important;
+        --app-gradient-primary: linear-gradient(135deg, ${theme.primary}, ${theme.primaryTint}) !important;
       }
     `;
 
@@ -180,6 +233,28 @@ export class ThemeService {
     root.style.setProperty('--ion-color-secondary-contrast', theme.secondaryContrast);
     root.style.setProperty('--ion-color-secondary-shade', theme.secondaryShade);
     root.style.setProperty('--ion-color-secondary-tint', theme.secondaryTint);
+
+    root.style.setProperty('--ion-color-dark', theme.primaryShade);
+    root.style.setProperty('--ion-color-dark-rgb', this.hexToRgb(theme.primaryShade));
+    root.style.setProperty('--ion-color-dark-contrast', theme.primaryContrast);
+    root.style.setProperty('--ion-color-dark-contrast-rgb', this.hexToRgb(theme.primaryContrast));
+    root.style.setProperty('--ion-color-dark-shade', theme.primaryShade);
+    root.style.setProperty('--ion-color-dark-tint', theme.primary);
+
+    root.style.setProperty('--ion-color-medium', theme.primaryTint);
+    root.style.setProperty('--ion-color-medium-rgb', this.hexToRgb(theme.primaryTint));
+    root.style.setProperty('--ion-color-medium-contrast', theme.primaryContrast);
+    root.style.setProperty('--ion-color-medium-contrast-rgb', this.hexToRgb(theme.primaryContrast));
+    root.style.setProperty('--ion-color-medium-shade', theme.primary);
+    root.style.setProperty('--ion-color-medium-tint', theme.secondaryShade);
+
+    root.style.setProperty('--ion-color-light', theme.secondaryTint);
+    root.style.setProperty('--ion-color-light-rgb', this.hexToRgb(theme.secondaryTint));
+    root.style.setProperty('--ion-color-light-contrast', theme.secondaryContrast);
+    root.style.setProperty('--ion-color-light-contrast-rgb', this.hexToRgb(theme.secondaryContrast));
+    root.style.setProperty('--ion-color-light-shade', theme.secondary);
+    root.style.setProperty('--ion-color-light-tint', theme.secondaryTint);
+    root.style.setProperty('--app-gradient-primary', `linear-gradient(135deg, ${theme.primary}, ${theme.primaryTint})`);
   }
 
   /**
@@ -206,18 +281,18 @@ export class ThemeService {
           this.applyTheme(theme);
         } else {
           // Si no hay tema guardado, aplicar el tema por defecto
-          this.applyTheme(this.defaultThemes['nord']);
-          this.authService.saveUserPreferences({ theme: 'nord' });
+          this.applyTheme(this.defaultThemes['graphite']);
+          this.authService.saveUserPreferences({ theme: 'graphite' });
         }
       } else {
         // Si no hay usuario o preferencias, aplicar tema por defecto
-        this.applyTheme(this.defaultThemes['nord']);
-        this.authService.saveUserPreferences({ theme: 'nord' });
+        this.applyTheme(this.defaultThemes['graphite']);
+        this.authService.saveUserPreferences({ theme: 'graphite' });
       }
     } catch (error) {
       // Aplicar tema por defecto
-      this.applyTheme(this.defaultThemes['nord']);
-      this.authService.saveUserPreferences({ theme: 'nord' });
+      this.applyTheme(this.defaultThemes['graphite']);
+      this.authService.saveUserPreferences({ theme: 'graphite' });
     }
   }
 

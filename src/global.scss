@@ -39,7 +39,7 @@
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
 
 @import 'tippy.js/dist/tippy.css';
 
@@ -51,11 +51,12 @@ ion-toolbar {
 
 ion-header {
     box-shadow: none!important;
-    filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
-    -webkit-filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
+    filter: drop-shadow(0 1px 6px rgba(15, 23, 42, 0.08));
+    -webkit-filter: drop-shadow(0 1px 6px rgba(15, 23, 42, 0.08));
     ion-toolbar {
         padding: 0 .5rem;
-        background: var(--ion-color-primary);  /* fallback for old browsers */
+        background: var(--ion-color-secondary);
+        border-bottom: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
     }
     ion-title {
         font-weight: 600;
@@ -75,6 +76,7 @@ ion-toast.custom-toast {
     --background: var(--ion-color-secondary);
     --box-shadow: 3px 3px 10px 0 rgba(0, 0, 0, 0.2);
     --color: var(--ion-color-secondary-contrast);
+    border: 1px solid rgba(var(--ion-color-medium-rgb), 0.2);
 }
 
 ion-toast.custom-toast::part(button) {
@@ -89,17 +91,17 @@ ion-button {
    text-transform: uppercase;
    transition: 0.5s;
    background-size: 200% auto;
-   color: white;
    border-radius: 4px;
    --opacity: 1;
    font-weight: 400;
+   --background: var(--ion-color-primary);
+   --color: var(--ion-color-primary-contrast);
  }
-
+ 
  ion-button:hover {
    background-position: right center; /* change the direction of the change here */
-   color: #fff;
    text-decoration: none;
- }
+  }
 
  ion-fab-button::part(native){
     background-image: var(--app-gradient-primary);
@@ -110,8 +112,8 @@ ion-button {
     text-transform: uppercase;
     transition: 0.5s;
     background-size: 200% auto;
-    color: white;
-    box-shadow: 0 0 20px #eee;
+    color: var(--ion-color-primary-contrast);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
     display: block;
  }
 

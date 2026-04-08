@@ -1,68 +1,68 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
 :root {
-  --ion-color-primary: #5e81ac; // nord blue
-  --ion-color-primary-rgb: 94, 129, 172;
-  --ion-color-primary-contrast: #eceff4; // nord polar night
-  --ion-color-primary-contrast-rgb: 236, 239, 244;
-  --ion-color-primary-shade: #4c6a96;
-  --ion-color-primary-tint: #81a1c1;
+  --ion-color-primary: #1f2937;
+  --ion-color-primary-rgb: 31, 41, 55;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #111827;
+  --ion-color-primary-tint: #374151;
 
-  --ion-color-secondary: #a3be8c; // nord green
-  --ion-color-secondary-rgb: 163, 190, 140;
-  --ion-color-secondary-contrast: #2e3440;
-  --ion-color-secondary-contrast-rgb: 46, 52, 64;
-  --ion-color-secondary-shade: #8fa97a;
-  --ion-color-secondary-tint: #b6d1a3;
+  --ion-color-secondary: #ffffff;
+  --ion-color-secondary-rgb: 255, 255, 255;
+  --ion-color-secondary-contrast: #1f2937;
+  --ion-color-secondary-contrast-rgb: 31, 41, 55;
+  --ion-color-secondary-shade: #e5e7eb;
+  --ion-color-secondary-tint: #f9fafb;
 
-  --ion-color-success: #b48ead; // nord purple
-  --ion-color-success-rgb: 180, 142, 173;
-  --ion-color-success-contrast: #eceff4;
-  --ion-color-success-contrast-rgb: 236, 239, 244;
-  --ion-color-success-shade: #9b7492;
-  --ion-color-success-tint: #c6a7c0;
+  --ion-color-success: #4b5563;
+  --ion-color-success-rgb: 75, 85, 99;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #374151;
+  --ion-color-success-tint: #6b7280;
 
-  --ion-color-warning: #ebcb8b; // nord yellow
-  --ion-color-warning-rgb: 235, 203, 139;
-  --ion-color-warning-contrast: #2e3440;
-  --ion-color-warning-contrast-rgb: 46, 52, 64;
-  --ion-color-warning-shade: #c9ad77;
-  --ion-color-warning-tint: #f0d9a8;
+  --ion-color-warning: #6b7280;
+  --ion-color-warning-rgb: 107, 114, 128;
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #4b5563;
+  --ion-color-warning-tint: #9ca3af;
 
-  --ion-color-danger: #bf616a; // nord red
-  --ion-color-danger-rgb: 191, 97, 106;
-  --ion-color-danger-contrast: #eceff4;
-  --ion-color-danger-contrast-rgb: 236, 239, 244;
-  --ion-color-danger-shade: #a14f57;
-  --ion-color-danger-tint: #d47b85;
+  --ion-color-danger: #b45353;
+  --ion-color-danger-rgb: 180, 83, 83;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #9f3f3f;
+  --ion-color-danger-tint: #c36b6b;
 
-  --ion-color-info: #88c0d0; // nord cyan
-  --ion-color-info-rgb: 136, 192, 208;
-  --ion-color-info-contrast: #2e3440;
-  --ion-color-info-contrast-rgb: 46, 52, 64;
-  --ion-color-info-shade: #6fa1b0;
-  --ion-color-info-tint: #a3d3e2;
+  --ion-color-info: #64748b;
+  --ion-color-info-rgb: 100, 116, 139;
+  --ion-color-info-contrast: #ffffff;
+  --ion-color-info-contrast-rgb: 255, 255, 255;
+  --ion-color-info-shade: #475569;
+  --ion-color-info-tint: #94a3b8;
 
-  --ion-color-dark: #2e3440; // nord polar night
-  --ion-color-dark-rgb: 46, 52, 64;
-  --ion-color-dark-contrast: #eceff4;
-  --ion-color-dark-contrast-rgb: 236, 239, 244;
-  --ion-color-dark-shade: #232730;
-  --ion-color-dark-tint: #434c5e;
+  --ion-color-dark: #111827;
+  --ion-color-dark-rgb: 17, 24, 39;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #030712;
+  --ion-color-dark-tint: #374151;
 
-  --ion-color-medium: #4c566a; // nord polar night
-  --ion-color-medium-rgb: 76, 86, 106;
-  --ion-color-medium-contrast: #eceff4;
-  --ion-color-medium-contrast-rgb: 236, 239, 244;
-  --ion-color-medium-shade: #3b4252;
-  --ion-color-medium-tint: #5e81ac;
+  --ion-color-medium: #6b7280;
+  --ion-color-medium-rgb: 107, 114, 128;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #4b5563;
+  --ion-color-medium-tint: #9ca3af;
 
-  --ion-color-light: #eceff4; // nord snow storm
-  --ion-color-light-rgb: 236, 239, 244;
-  --ion-color-light-contrast: #2e3440;
-  --ion-color-light-contrast-rgb: 46, 52, 64;
-  --ion-color-light-shade: #d8dee9;
-  --ion-color-light-tint: #e5e9f0;
+  --ion-color-light: #f9fafb;
+  --ion-color-light-rgb: 249, 250, 251;
+  --ion-color-light-contrast: #1f2937;
+  --ion-color-light-contrast-rgb: 31, 41, 55;
+  --ion-color-light-shade: #f3f4f6;
+  --ion-color-light-tint: #ffffff;
 
   --ion-font-family: IBM Plex Sans, sans-serif;
 

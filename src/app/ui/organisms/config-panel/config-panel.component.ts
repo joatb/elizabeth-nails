@@ -15,7 +15,7 @@ import { LoadingController } from "@ionic/angular/standalone";
 })
 export class ConfigComponent implements OnInit {
   availableThemes: Array<{ key: string; theme: ColorTheme }> = [];
-  selectedTheme: string = "nord";
+  selectedTheme: string = "graphite";
 
   constructor(
     private themeService: ThemeService,
