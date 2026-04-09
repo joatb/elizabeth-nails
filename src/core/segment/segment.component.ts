@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../app/modules/shared.module';
 import { EventService } from '../../app/services/event.service';
-import { MessageCircle, UsersRound, CalendarDays } from 'lucide-angular';
+import { MessageCircle, UsersRound, CalendarDays, DollarSign } from 'lucide-angular';
 
 @Component({
     selector: 'app-segment',
@@ -14,7 +14,8 @@ import { MessageCircle, UsersRound, CalendarDays } from 'lucide-angular';
 export class SegmentComponent implements OnInit {
     readonly MessageCircle =  MessageCircle;
     readonly UsersRound =  UsersRound;
-    readonly CalendarDays =  CalendarDays;
+  readonly CalendarDays = CalendarDays;
+  readonly DollarSign = DollarSign;
     
     selectedSegment: string = 'home';
     chatMessages: { sender: string, message: string }[] = [];

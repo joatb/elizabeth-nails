@@ -26,7 +26,8 @@ export class AppwriteCacheService {
     clients: { ttl: 86400, prefix: 'clients' }, // 24h
     appointments: { ttl: 1800, prefix: 'appointments' }, // 30 min
     messages: { ttl: 300, prefix: 'messages' }, // 5 min
-    schedules: { ttl: 86400, prefix: 'schedules' } // 24h
+    schedules: { ttl: 86400, prefix: 'schedules' }, // 24h
+    services: { ttl: 86400, prefix: 'services' } // 24h
   };
 
   constructor() {

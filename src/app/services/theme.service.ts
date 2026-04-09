@@ -21,6 +21,7 @@ export interface ColorTheme {
   providedIn: 'root'
 })
 export class ThemeService {
+  private currentTheme: ColorTheme | null = null;
   private styleElement: HTMLStyleElement | null = null;
 
   private defaultThemes: Record<string, ColorTheme> = {
@@ -277,8 +278,8 @@ export class ThemeService {
       if (user && user.prefs) {
         const preferences = user.prefs as UserPreferences;
         if (preferences.theme) {
-          const theme = this.getTheme(preferences.theme);
-          this.applyTheme(theme);
+          this.currentTheme = this.getTheme(preferences.theme);
+          this.applyTheme(this.currentTheme);
         } else {
           // Si no hay tema guardado, aplicar el tema por defecto
           this.applyTheme(this.defaultThemes['graphite']);
@@ -306,6 +307,13 @@ export class ThemeService {
     await this.authService.saveUserPreferences(preferences);
     const theme = this.getTheme(themeKey);
     this.applyTheme(theme);
+  }
+  
+  /** 
+   * Tema actual del usuario 
+   */
+  public getCurrentTheme(): ColorTheme {
+    return this.currentTheme || this.defaultThemes['graphite'];
   }
 }
 

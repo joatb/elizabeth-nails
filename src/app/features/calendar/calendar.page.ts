@@ -45,6 +45,8 @@ import { AppointmentsProvider } from "../../providers/appointments/appointments.
 import { Appointment } from "../../providers/appointments/models/appointment";
 import { Schedule } from "../../providers/schedules/models/schedule";
 import { SchedulesProvider } from "../../providers/schedules/schedules.provider";
+import { ServicesProvider } from "../../providers/services/services.provider";
+import { Service } from "../../providers/services/models/service";
 import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
@@ -82,6 +84,8 @@ export class CalendarPage implements OnDestroy {
   // Datos para agenda
   schedules: Models.DocumentList<Schedule> | null = null;
   appointments: Models.DocumentList<Appointment> | null = null;
+  services: Models.DocumentList<Service> | null = null;
+  private servicesById = new Map<string, Service>();
 
   calendarOptions?: CalendarOptions;
 
@@ -99,6 +103,7 @@ export class CalendarPage implements OnDestroy {
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
     private appointmentsPvd: AppointmentsProvider,
+    private servicesPvd: ServicesProvider,
     private actionSheetCtrl: ActionSheetController,
     private alertCtrl: AlertController,
     private alertService: AlertService,
@@ -192,6 +197,7 @@ export class CalendarPage implements OnDestroy {
   }
 
   private async initialize(): Promise<void> {
+    await this.fetchServices();
     await Promise.all([this.fetchAppointments(), this.fetchSchedules()]);
     this.updateTodayButtonVisibility();
   }
@@ -234,6 +240,19 @@ export class CalendarPage implements OnDestroy {
       if (this.calendarOptions) {
         this.calendarOptions.businessHours = [];
       }
+    }
+  }
+
+  private async fetchServices(): Promise<void> {
+    try {
+      this.services = await this.servicesPvd.listServices();
+      this.servicesById = new Map(
+        (this.services?.documents ?? []).map((service) => [service.$id, service]),
+      );
+    } catch (err) {
+      console.error("Error cargando services:", err);
+      this.services = null;
+      this.servicesById = new Map();
     }
   }
 
@@ -290,17 +309,33 @@ export class CalendarPage implements OnDestroy {
       );
 
       const events: EventInput[] = Array.isArray(this.appointments?.documents)
-        ? this.appointments!.documents.map((appointment: any) => ({
-            title: appointment.client?.name ?? "—",
-            start: appointment.start_time,
-            end: appointment.end_time,
-            extendedProps: {
-              id: appointment.$id,
-              description: appointment.note,
-              phone_country: appointment.client?.phone_country,
-              phone: appointment.client?.phone,
-            },
-          }))
+        ? this.appointments!.documents.map((appointment: Appointment) => {
+            const service = this.resolveService(appointment);
+            return {
+              title:
+                typeof appointment.client === "string"
+                  ? "—"
+                  : appointment.client?.name ?? "—",
+              start: appointment.start_time,
+              end: appointment.end_time,
+              color: service?.color ?? "var(--ion-color-primary)",
+              extendedProps: {
+                id: appointment.$id,
+                description: appointment.note,
+                phone_country:
+                  typeof appointment.client === "string"
+                    ? ""
+                    : appointment.client?.phone_country,
+                phone:
+                  typeof appointment.client === "string"
+                    ? ""
+                    : appointment.client?.phone,
+                serviceId: service?.$id,
+                serviceName: service?.name,
+                serviceColor: service?.color,
+              },
+            };
+          })
         : [];
 
       if (this.calendarOptions) {
@@ -400,9 +435,16 @@ export class CalendarPage implements OnDestroy {
     const dateObj = new Date(dateStr);
     const dayStr = dateObj.toISOString().substring(0, 10);
     const eventsForDay = Array.isArray(this.appointments?.documents)
-      ? this.appointments!.documents.filter((ev: any) =>
-          String(ev.start_time).startsWith(dayStr),
-        )
+      ? this.appointments!.documents
+          .filter((ev: Appointment) => String(ev.start_time).startsWith(dayStr))
+          .map((ev: Appointment) => {
+            const service = this.resolveService(ev);
+            return {
+              ...ev,
+              service_name: service?.name ?? null,
+              service_color: service?.color ?? null,
+            };
+          })
       : [];
     // Abrir modal (uso de import estático del componente)
     const modal = await this.modalController.create({
@@ -653,10 +695,31 @@ export class CalendarPage implements OnDestroy {
     start_time: string;
     end_time: string;
     client: string;
+    services?: string;
   }): Promise<void> {
     await this.appointmentsPvd.createAppointment(appointment);
     await this.alertService.presentToast("Cita creada", 2500);
     this.reload();
+  }
+
+  private resolveService(appointment: Appointment): Service | null {
+    const rawService = appointment.services;
+    if (!rawService) return null;
+
+    if (Array.isArray(rawService)) {
+      const first = rawService[0];
+      if (!first) return null;
+      if (typeof first === "string") {
+        return this.servicesById.get(first) ?? null;
+      }
+      return this.servicesById.get(first.$id) ?? first;
+    }
+
+    if (typeof rawService === "string") {
+      return this.servicesById.get(rawService) ?? null;
+    }
+
+    return this.servicesById.get(rawService.$id) ?? rawService;
   }
 
   private subscribeToEvents(): void {

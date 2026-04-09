@@ -1,0 +1,163 @@
+<org-clients-toolbar
+  title="Servicios"
+  [logoutIcon]="LogOut"
+  (logout)="authService.logout()"
+></org-clients-toolbar>
+
+<ion-content [fullscreen]="true" class="ion-padding services-content">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Servicios - {{totalServices}}</ion-card-title>
+      <ion-card-subtitle>Listado y gestión</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list lines="full" *ngIf="services.length > 0; else emptyServices">
+        <ion-item *ngFor="let service of services; trackBy: trackByServiceId">
+          <div class="service-color" [style.background]="service.color"></div>
+          <ion-label>
+            <h2>{{ service.name }}</h2>
+            <p *ngIf="service.description">{{ service.description }}</p>
+            <p>{{ service.price | currency: "EUR":"symbol":"1.2-2" }}</p>
+          </ion-label>
+          <ion-button fill="clear" color="primary" (click)="editService(service)">
+            <ion-icon name="create-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" color="danger" (click)="deleteService(service)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+      <ng-template #emptyServices>
+        <div *ngIf="!isLoading" class="empty-state">No hay servicios creados todavía.</div>
+        <div *ngIf="isLoading" class="loading-state"><atom-spinner name="circles" size="default"></atom-spinner></div>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card class="stats-filter-card">
+    <ion-card-content class="filter-content">
+      <div class="filter-header-row">
+        <span class="filter-title">Filtro de estadísticas</span>
+        <ion-button
+          *ngIf="hasDateFilter"
+          class="filter-clear"
+          fill="clear"
+          color="medium"
+          size="small"
+          (click)="clearDateFilter()"
+        >
+          Limpiar
+        </ion-button>
+      </div>
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label>Desde</label>
+          <input
+            type="date"
+            lang="es-ES"
+            class="filter-date-input"
+            [value]="filterStartDate"
+            (change)="onFilterStartChange($event)"
+          />
+        </div>
+        <div class="filter-field">
+          <label>Hasta</label>
+          <input
+            type="date"
+            lang="es-ES"
+            class="filter-date-input"
+            [value]="filterEndDate"
+            (change)="onFilterEndChange($event)"
+          />
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-grid class="stats-grid">
+    <ion-row>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <span class="label">Más usado</span>
+            <strong>{{ topServiceName }}</strong>
+            <small>{{ topServiceCount }} citas</small>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <span class="label">Ganado</span>
+            <strong [style.color]="earnedColor">{{ totalEarned | currency: "EUR":"symbol":"1.2-2" }}</strong>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <span class="label">Por ganar</span>
+            <strong [style.color]="pendingColor">{{ totalPending | currency: "EUR":"symbol":"1.2-2" }}</strong>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="6">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <span class="label">Top cliente</span>
+            <strong>{{ topClientName }} - {{topClientPhone}}</strong>
+            <small>{{ topClientCount }} citas</small>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  
+  <ion-grid class="charts-grid">
+    <ion-row>
+      <ion-col size="12" sizeMd="6">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Servicios más usados</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="chart-wrapper">
+              <canvas #usageChartCanvas></canvas>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" sizeMd="6">
+         <ion-card>
+          <ion-card-header>
+            <ion-card-title>Ganado vs por ganar</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <div class="chart-wrapper">
+              <canvas #revenueChartCanvas></canvas>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size="12" sizeMd="6">
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Ranking de clientes</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none" *ngIf="clientRanking.length > 0; else emptyRanking">
+              <ion-item *ngFor="let row of clientRanking; let i = index">
+                <ion-label>{{ i + 1 }}. {{ row.clientName }} - {{row.clientPhone}}</ion-label>
+                <ion-note slot="end">{{ row.count }} citas</ion-note>
+              </ion-item>
+            </ion-list>
+            <ng-template #emptyRanking>
+              <div *ngIf="!isLoading" class="empty-state">No hay datos de citas para ranking.</div>
+              <div *ngIf="isLoading" class="loading-state"><atom-spinner name="circles" size="default"></atom-spinner></div>
+            </ng-template>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

@@ -13,13 +13,17 @@ import { Models } from "appwrite";
 import { Client } from "../../../providers/clients/models/client";
 import { Subscription } from "rxjs";
 import { EventService } from "../../../services/event.service";
+import { ServicesProvider } from "../../../providers/services/services.provider";
+import { Service } from "../../../providers/services/models/service";
 
 type ClientOption = { id: string; name: string };
+type ServiceOption = { id: string; name: string; color: string; price: number };
 type AppointmentSubmit = {
   start_time: string;
   end_time: string;
   note: string;
   client: string;
+  services?: string;
 };
 type ClientSearchEvent = { text: string };
 type ClientInfiniteScrollEvent = {
@@ -46,6 +50,8 @@ export class CalendarAppointmentFormComponent {
 
   protected clients: Models.DocumentList<Client> | null = null;
   protected selectableClientsOptions: ClientOption[] = [];
+  protected services: Models.DocumentList<Service> | null = null;
+  protected selectableServicesOptions: ServiceOption[] = [];
   private eventsSubscription: Subscription | null = null;
   formSubmitted = false;
 
@@ -60,6 +66,7 @@ export class CalendarAppointmentFormComponent {
     private fb: FormBuilder,
     private modalCtrl: ModalController,
     private clientsPvd: ClientsProvider,
+    private servicesPvd: ServicesProvider,
     private events: EventService,
   ) {}
 
@@ -76,11 +83,12 @@ export class CalendarAppointmentFormComponent {
     this.form = this.fb.group({
       note: [""],
       client: ["", [Validators.required]],
+      services: [""],
       startTime: [this.startTime, [Validators.required]],
       endTime: [this.endTime, [Validators.required]],
     });
 
-    await this.loadInitialClients();
+    await Promise.all([this.loadInitialClients(), this.loadServices()]);
   }
 
   ngOnDestroy() {
@@ -112,6 +120,10 @@ export class CalendarAppointmentFormComponent {
     this.form.controls["client"].setValue(event.value);
   }
 
+  onServiceChange(event: { value: ServiceOption }): void {
+    this.form.controls["services"].setValue(event.value);
+  }
+
   /**
    * Carga los clientes iniciales
    */
@@ -131,6 +143,22 @@ export class CalendarAppointmentFormComponent {
     } catch (error) {
       console.error("Error loading initial clients:", error);
       this.selectableClientsOptions = [];
+    }
+  }
+
+  private async loadServices(): Promise<void> {
+    try {
+      this.services = await this.servicesPvd.listServices();
+      this.selectableServicesOptions =
+        this.services?.documents.map((service) => ({
+          id: service.$id,
+          name: service.name,
+          color: service.color,
+          price: Number(service.price) || 0,
+        })) || [];
+    } catch (error) {
+      console.error("Error loading services:", error);
+      this.selectableServicesOptions = [];
     }
   }
 
@@ -233,6 +261,8 @@ export class CalendarAppointmentFormComponent {
           if (this.form.valid) {
             const selectedClient = this.form.controls["client"]
               .value as ClientOption;
+            const selectedService = this.form.controls["services"]
+              .value as ServiceOption | "";
             const appointment: AppointmentSubmit = {
               start_time: this.convertToUTC(
                 this.form.controls["startTime"].value,
@@ -240,6 +270,10 @@ export class CalendarAppointmentFormComponent {
               end_time: this.convertToUTC(this.form.controls["endTime"].value),
               note: this.form.controls["note"].value,
               client: selectedClient.id,
+              services:
+                selectedService && typeof selectedService !== "string"
+                  ? selectedService.id
+                  : undefined,
             };
             this.submitEvent.emit(appointment);
           }

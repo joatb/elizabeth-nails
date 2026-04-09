@@ -1,12 +1,12 @@
 <form *ngIf="form" (ngSubmit)="submit()" [formGroup]="form">
   <div class="input-group">
     <ion-card>
-      <ion-item>
+      <ion-item lines="full">
         <ion-label>Inicio</ion-label>
         <ion-datetime-button datetime="startTime"></ion-datetime-button>
       </ion-item>
       <ion-item
-        lines="none"
+        lines="full"
         *ngIf="isControlInvalid('startTime')"
         class="ion-no-padding error-message"
       >
@@ -14,12 +14,12 @@
           <small>La fecha de inicio es obligatoria</small>
         </ion-text>
       </ion-item>
-      <ion-item>
+      <ion-item lines="full">
         <ion-label>Final</ion-label>
         <ion-datetime-button datetime="endTime"></ion-datetime-button>
       </ion-item>
       <ion-item
-        lines="none"
+        lines="full"
         *ngIf="isControlInvalid('endTime')"
         class="ion-no-padding error-message"
       >
@@ -27,7 +27,7 @@
           <small>La fecha de fin es obligatoria</small>
         </ion-text>
       </ion-item>
-      <ion-item>
+      <ion-item lines="full">
         <ion-textarea
           aria-label="Nota"
           type="text"
@@ -35,7 +35,7 @@
           formControlName="note"
         ></ion-textarea>
       </ion-item>
-      <ion-item>
+      <ion-item lines="full">
         <ionic-selectable
           formControlName="client"
           [placeholder]="'Seleccionar cliente'"
@@ -60,12 +60,44 @@
         </ionic-selectable>
       </ion-item>
       <ion-item
-        lines="none"
+        lines="full"
         *ngIf="isControlInvalid('client')"
         class="ion-no-padding error-message"
       >
         <ion-text color="danger">
           <small>Es necesario seleccionar un cliente</small>
+        </ion-text>
+      </ion-item>
+      <ion-item lines="full">
+        <ionic-selectable
+          formControlName="services"
+          [placeholder]="'Seleccionar servicio'"
+          [items]="selectableServicesOptions"
+          itemValueField="id"
+          itemTextField="name"
+          [canSearch]="true"
+          [hasInfiniteScroll]="false"
+          closeButtonText="Cerrar"
+          searchPlaceholder="Buscar servicio..."
+          noItemsFoundText="No se encontraron servicios"
+          (onChange)="onServiceChange($event)"
+        >
+          <ng-template ionicSelectableItemTemplate let-item="item">
+            <span class="service-option-color" [style.background]="item.color"></span>
+            {{ item.name }} - {{ item.price | currency: "EUR":"symbol":"1.2-2" }}
+          </ng-template>
+          <ng-template ionicSelectableIconTemplate>
+            <ion-icon name="briefcase-outline"></ion-icon>
+          </ng-template>
+        </ionic-selectable>
+      </ion-item>
+      <ion-item
+        lines="full"
+        *ngIf="selectableServicesOptions.length === 0"
+        class="ion-no-padding"
+      >
+        <ion-text color="medium">
+          <small>No hay servicios creados todavía</small>
         </ion-text>
       </ion-item>
     </ion-card>

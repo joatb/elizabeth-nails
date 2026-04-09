@@ -17,6 +17,10 @@
             </ion-fab-button>
         </div>
         <div class="right">
+            <div class="item" [class.active]="selectedSegment === 'services'" (click)="onChangeSegment('services')">
+                <i-lucide [img]="DollarSign"></i-lucide>
+                <ion-label>Servicios</ion-label>
+            </div>
             <div class="item" [class.active]="selectedSegment === 'chat'" (click)="onChangeSegment('chat')">
                 <i-lucide [img]="MessageCircle"></i-lucide>
                 <ion-label>Chat</ion-label>

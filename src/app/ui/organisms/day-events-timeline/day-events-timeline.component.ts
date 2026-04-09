@@ -25,9 +25,11 @@ export class DayEventsTimelineComponent {
   @Input() emptyText: string = "No hay citas para este día.";
   @Input() showAddButton: boolean = true;
   @Input() showDelete: boolean = true;
+  @Input() showEdit: boolean = true;
 
   @Output() addEvent = new EventEmitter<void>();
   @Output() deleteEvent = new EventEmitter<DayEventItem>();
+  @Output() editEvent = new EventEmitter<DayEventItem>();
 
   get hasEvents(): boolean {
     return this.events.length > 0;
@@ -39,5 +41,9 @@ export class DayEventsTimelineComponent {
 
   handleDeleteEvent(event: DayEventItem): void {
     this.deleteEvent.emit(event);
+  }
+
+  handleEditEvent(event: DayEventItem): void {
+    this.editEvent.emit(event);
   }
 }

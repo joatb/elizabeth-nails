@@ -1,11 +1,29 @@
 <div class="timeline-event">
-  <atom-timeline-dot class="timeline-dot"></atom-timeline-dot>
+  <atom-timeline-dot
+    class="timeline-dot"
+    [color]="event.service_color || 'var(--ion-color-primary)'"
+  ></atom-timeline-dot>
   <div class="timeline-content">
-    <div class="timeline-time">{{ event.start_time | date: 'HH:mm' }} - {{ event.end_time | date: 'HH:mm' }}</div>
-    <div class="timeline-title">{{ event.client.name }}</div>
-    <div class="timeline-note">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
+    <div class="timeline-time">{{ startTimeLabel }} - {{ endTimeLabel }}</div>
+    <div class="timeline-title">{{ event.client.name || 'Cliente eliminado' }}</div>
+    <div class="timeline-note" *ngIf="event.service_name">
+      Servicio: {{ event.service_name }}
+      <span *ngIf="event.service_price !== null && event.service_price !== undefined">
+        - {{ event.service_price | currency: "EUR":"symbol":"1.2-2" }}
+      </span>
+    </div>
+    <div class="timeline-note" *ngIf="hasPhone">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
     <div class="timeline-note" *ngIf="event.note">{{ event.note }}</div>
   </div>
+  <ion-button
+    *ngIf="showEdit"
+    fill="clear"
+    size="small"
+    color="primary"
+    (click)="handleEdit()"
+  >
+    <i-lucide [img]="Pencil"></i-lucide>
+  </ion-button>
   <ion-button *ngIf="showDelete" fill="clear" size="small" color="danger" (click)="handleDelete()">
     <i-lucide [img]="Trash"></i-lucide>
   </ion-button>

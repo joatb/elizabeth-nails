@@ -37,7 +37,8 @@ export class DBService {
             'clients': 'clients',
             'appointments': 'appointments',
             'messages': 'messages',
-            'schedules': 'schedules'
+            'schedules': 'schedules',
+            'services': 'services'
         };
 
         const dataType = tableToDataType[tableId];
@@ -93,7 +94,8 @@ export class DBService {
             'clients': 'clients',
             'appointments': 'appointments',
             'messages': 'messages',
-            'schedules': 'schedules'
+            'schedules': 'schedules',
+            'services': 'services'
         };
 
         const dataType = tableToDataType[tableId] || 'clients';

@@ -62,6 +62,18 @@ export class AppointmentsProvider {
         return this.dbService.createDocument(this.DATABASE_ID, this.TABLE_ID, appointment);
     }
 
+    listAllAppointments() {
+        return this.dbService.listDocuments<Appointment>(this.DATABASE_ID, this.TABLE_ID, [
+            Query.select(['*', 'client.*']),
+            Query.limit(2500),
+            Query.orderDesc('start_time')
+        ]);
+    }
+
+    updateAppointment(appointmentId: string, data: any) {
+        return this.dbService.updateDocument(this.DATABASE_ID, this.TABLE_ID, appointmentId, data);
+    }
+
     deleteAppointment(appointmentId: string) {
         return this.dbService.deleteDocument(this.DATABASE_ID, this.TABLE_ID, appointmentId);
     }

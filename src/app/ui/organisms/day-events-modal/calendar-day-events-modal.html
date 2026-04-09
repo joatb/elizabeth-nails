@@ -1,15 +1,16 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>Eventos del día ({{ events.length }})</ion-title>
+    <ion-title>Eventos del día ({{ timelineEvents.length }})</ion-title>
     <ion-buttons slot="end"> </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
   <org-day-events-timeline
-    [events]="events"
+    [events]="timelineEvents"
     [loading]="loading"
     (addEvent)="addEvent()"
+    (editEvent)="editEvent($event)"
     (deleteEvent)="deleteEvent($event)"
   ></org-day-events-timeline>
 </ion-content>

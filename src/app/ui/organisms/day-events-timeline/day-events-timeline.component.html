@@ -11,7 +11,9 @@
     <mol-day-event-item
       *ngFor="let event of events"
       [event]="event"
+      [showEdit]="showEdit"
       [showDelete]="showDelete"
+      (edit)="handleEditEvent($event)"
       (delete)="handleDeleteEvent($event)"
     ></mol-day-event-item>
   </div>

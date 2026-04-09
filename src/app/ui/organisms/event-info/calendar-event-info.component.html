@@ -36,6 +36,13 @@
         <p>+{{ event.extendedProps.phone_country }} {{ event.extendedProps.phone }}</p>
       </ion-label>
     </ion-item>
+
+    <ion-item *ngIf="event.extendedProps.serviceName">
+      <ion-label>
+        <h2>Servicio</h2>
+        <p>{{ event.extendedProps.serviceName }}</p>
+      </ion-label>
+    </ion-item>
   </ion-list>
 </ion-content>
 

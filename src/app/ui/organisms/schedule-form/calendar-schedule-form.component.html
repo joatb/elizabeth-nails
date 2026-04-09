@@ -14,12 +14,12 @@
 <ion-content class="ion-padding" [fullscreen]="true">
   <form [formGroup]="form">
     <ion-list>
-      <ion-item>
+      <ion-item lines="full">
         <ion-grid>
           <ion-row>
             <ion-col>
               <ion-list>
-                <ion-item lines="none" *ngFor="let day of daysOfWeek.slice(0, 4)">
+                <ion-item lines="full" *ngFor="let day of daysOfWeek.slice(0, 4)">
                   <ion-checkbox slot="start" [checked]="form.controls['days'].value.includes(day.value)" (ionChange)="toggleDay(day.value)"></ion-checkbox>
                   <ion-label>{{ day.name }}</ion-label>
                 </ion-item>
@@ -27,7 +27,7 @@
             </ion-col>
             <ion-col>
               <ion-list>
-                <ion-item lines="none" *ngFor="let day of daysOfWeek.slice(4)">
+                <ion-item lines="full" *ngFor="let day of daysOfWeek.slice(4)">
                   <ion-checkbox slot="start" [checked]="form.controls['days'].value.includes(day.value)" (ionChange)="toggleDay(day.value)"></ion-checkbox>
                   <ion-label>{{ day.name }}</ion-label>
                 </ion-item>
@@ -36,7 +36,7 @@
           </ion-row>
         </ion-grid>
       </ion-item>
-      <ion-item class="schedule-form-item" lines="none">
+      <ion-item class="schedule-form-item" lines="full">
           <ion-datetime
           formControlName="startTime"
           presentation="time"
