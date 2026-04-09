@@ -68,7 +68,7 @@
           <small>Es necesario seleccionar un cliente</small>
         </ion-text>
       </ion-item>
-      <ion-item lines="full">
+      <ion-item lines="full" *ngIf="selectableServicesOptions.length > 0">
         <ionic-selectable
           formControlName="services"
           [placeholder]="'Seleccionar servicio'"
@@ -94,7 +94,6 @@
       <ion-item
         lines="full"
         *ngIf="selectableServicesOptions.length === 0"
-        class="ion-no-padding"
       >
         <ion-text color="medium">
           <small>No hay servicios creados todavía</small>
