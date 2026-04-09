@@ -23,6 +23,14 @@ export interface ColorTheme {
 export class ThemeService {
   private currentTheme: ColorTheme | null = null;
   private styleElement: HTMLStyleElement | null = null;
+  private readonly lightPalette = {
+    color: '#f9fafb',
+    rgb: '249, 250, 251',
+    contrast: '#1f2937',
+    contrastRgb: '31, 41, 55',
+    shade: '#f3f4f6',
+    tint: '#ffffff'
+  };
 
   private defaultThemes: Record<string, ColorTheme> = {
     graphite: {
@@ -138,6 +146,8 @@ export class ThemeService {
    * Aplica un tema a la aplicación usando CSS variables
    */
   applyTheme(theme: ColorTheme): void {
+    const light = this.lightPalette;
+
     // Crear o actualizar el elemento style dinámico
     if (!this.styleElement) {
       this.styleElement = document.createElement('style');
@@ -176,12 +186,12 @@ export class ThemeService {
         --ion-color-medium-shade: ${theme.primary} !important;
         --ion-color-medium-tint: ${theme.secondaryShade} !important;
 
-        --ion-color-light: ${theme.secondaryTint} !important;
-        --ion-color-light-rgb: ${this.hexToRgb(theme.secondaryTint)} !important;
-        --ion-color-light-contrast: ${theme.secondaryContrast} !important;
-        --ion-color-light-contrast-rgb: ${this.hexToRgb(theme.secondaryContrast)} !important;
-        --ion-color-light-shade: ${theme.secondary} !important;
-        --ion-color-light-tint: ${theme.secondaryTint} !important;
+        --ion-color-light: ${light.color} !important;
+        --ion-color-light-rgb: ${light.rgb} !important;
+        --ion-color-light-contrast: ${light.contrast} !important;
+        --ion-color-light-contrast-rgb: ${light.contrastRgb} !important;
+        --ion-color-light-shade: ${light.shade} !important;
+        --ion-color-light-tint: ${light.tint} !important;
         --app-gradient-primary: linear-gradient(135deg, ${theme.primary}, ${theme.primaryTint}) !important;
       }
 
@@ -210,11 +220,11 @@ export class ThemeService {
         --ion-color-medium-shade: ${theme.primary} !important;
         --ion-color-medium-tint: ${theme.secondaryShade} !important;
 
-        --ion-color-light: ${theme.secondaryTint} !important;
-        --ion-color-light-rgb: ${this.hexToRgb(theme.secondaryTint)} !important;
-        --ion-color-light-contrast: ${theme.secondaryContrast} !important;
-        --ion-color-light-shade: ${theme.secondary} !important;
-        --ion-color-light-tint: ${theme.secondaryTint} !important;
+        --ion-color-light: ${light.color} !important;
+        --ion-color-light-rgb: ${light.rgb} !important;
+        --ion-color-light-contrast: ${light.contrast} !important;
+        --ion-color-light-shade: ${light.shade} !important;
+        --ion-color-light-tint: ${light.tint} !important;
         --app-gradient-primary: linear-gradient(135deg, ${theme.primary}, ${theme.primaryTint}) !important;
       }
     `;
@@ -249,12 +259,12 @@ export class ThemeService {
     root.style.setProperty('--ion-color-medium-shade', theme.primary);
     root.style.setProperty('--ion-color-medium-tint', theme.secondaryShade);
 
-    root.style.setProperty('--ion-color-light', theme.secondaryTint);
-    root.style.setProperty('--ion-color-light-rgb', this.hexToRgb(theme.secondaryTint));
-    root.style.setProperty('--ion-color-light-contrast', theme.secondaryContrast);
-    root.style.setProperty('--ion-color-light-contrast-rgb', this.hexToRgb(theme.secondaryContrast));
-    root.style.setProperty('--ion-color-light-shade', theme.secondary);
-    root.style.setProperty('--ion-color-light-tint', theme.secondaryTint);
+    root.style.setProperty('--ion-color-light', light.color);
+    root.style.setProperty('--ion-color-light-rgb', light.rgb);
+    root.style.setProperty('--ion-color-light-contrast', light.contrast);
+    root.style.setProperty('--ion-color-light-contrast-rgb', light.contrastRgb);
+    root.style.setProperty('--ion-color-light-shade', light.shade);
+    root.style.setProperty('--ion-color-light-tint', light.tint);
     root.style.setProperty('--app-gradient-primary', `linear-gradient(135deg, ${theme.primary}, ${theme.primaryTint})`);
   }
 
