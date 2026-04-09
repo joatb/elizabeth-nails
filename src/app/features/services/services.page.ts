@@ -92,11 +92,11 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
 
   async ngAfterViewInit(): Promise<void> {
     this.subscribeToEvents();
-    await this.loadData();
   }
 
-  ionViewDidEnter(): void {
+  async ionViewDidEnter(): Promise<void> {
     this.subscribeToEvents();
+    await this.loadData();
   }
 
   ionViewDidLeave(): void {
@@ -399,6 +399,11 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
       .subscribe((event: { name: string }) => {
         if (event?.name === "add.event") {
           void this.addService();
+          return;
+        }
+
+        if (event?.name === "appointment.created") {
+          void this.loadData();
         }
       });
   }

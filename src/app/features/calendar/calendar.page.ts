@@ -698,6 +698,7 @@ export class CalendarPage implements OnDestroy {
     services?: string;
   }): Promise<void> {
     await this.appointmentsPvd.createAppointment(appointment);
+    this.events.push("appointment.created", appointment);
     await this.alertService.presentToast("Cita creada", 2500);
     this.reload();
   }

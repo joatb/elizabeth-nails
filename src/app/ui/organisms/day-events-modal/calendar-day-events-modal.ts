@@ -19,6 +19,7 @@ import { CalendarAppointmentModalComponent } from "../appointment-modal/calendar
 import { DayEventItem } from "../../molecules/mol-day-event-item/mol-day-event-item.component";
 import { ServicesProvider } from "../../../providers/services/services.provider";
 import { Service } from "../../../providers/services/models/service";
+import { EventService } from "../../../services/event.service";
 
 type AppointmentWithServiceMeta = Appointment & {
   service_name?: string | null;
@@ -84,6 +85,7 @@ export class CalendarDayEventsModalComponent {
     private modalCtrl: ModalController,
     private appointmentsPvd: AppointmentsProvider,
     private servicesPvd: ServicesProvider,
+    private eventService: EventService,
     private alertService: AlertService,
     private alertCtrl: AlertController,
     private actionSheetCtrl: ActionSheetController,
@@ -247,6 +249,7 @@ export class CalendarDayEventsModalComponent {
     services?: string;
   }) {
     await this.appointmentsPvd.createAppointment(appointment);
+    this.eventService.push("appointment.created", appointment);
     await this.alertService.presentToast("Cita creada", 2500);
     this.loadEvents();
   }
