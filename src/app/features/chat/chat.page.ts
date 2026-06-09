@@ -3,8 +3,8 @@ import { Component } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ChevronLeft, ChevronRight, Search, Users } from "lucide-angular";
 import { SharedModule } from "../../modules/shared.module";
-import { ClientsProvider } from "../../providers/clients/clients.provider";
 import { Client } from "../../providers/clients/models/client";
+import { ClientsStateService } from "../../services/clients-state.service";
 import { ChatComponent } from "../../ui";
 
 @Component({
@@ -31,7 +31,7 @@ export class ChatPage {
   users = Users;
   search = Search;
 
-  constructor(private clientsProvider: ClientsProvider) {}
+  constructor(private clientsState: ClientsStateService) {}
 
   ionViewDidEnter() {
     this.loadClients();
@@ -39,8 +39,7 @@ export class ChatPage {
 
   async loadClients() {
     try {
-      // Sempre carregar TOTS els clients per poder buscar entre tots
-      const allClients = await this.clientsProvider.loadAllClientsForSearch();
+      const allClients = await this.clientsState.ensureLoaded();
       if (allClients && allClients.length > 0) {
         this.clients = allClients;
         this.clients.forEach((client) => {

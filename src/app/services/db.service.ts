@@ -4,7 +4,6 @@ import { AlertController } from '@ionic/angular/standalone';
 import { Client, TablesDB, ID, Query } from "appwrite";
 import { environment } from "../../environments/environment";
 import { Models } from 'appwrite';
-import { AppwriteCacheService } from './appwrite-cache.service';
 
 @Injectable({
     providedIn: 'root',
@@ -13,46 +12,58 @@ export class DBService {
     private client: Client;
     private tablesDB: TablesDB;
     private limit: number = 2500;
-    private totalRowsRead: number = 0;
+
+    // L1 in-memory cache: evita round trips a Appwrite entre navegaciones
+    private memoryCache = new Map<string, { data: any; expiresAt: number }>();
+
+    // TTL en segundos por tabla
+    private ttlByTable: Record<string, number> = {
+        clients: 86400,       // 24h
+        appointments: 1800,   // 30min
+        messages: 300,        // 5min
+        schedules: 86400,     // 24h
+        services: 86400       // 24h
+    };
 
     constructor(
         private router: Router,
         private alertCtrl: AlertController,
-        private appwriteCache: AppwriteCacheService
     ) {
         this.client = new Client()
-        .setEndpoint(environment.endpoint)
-        .setProject("elizabeth-nails");
+            .setEndpoint(environment.endpoint)
+            .setProject("elizabeth-nails");
 
         this.tablesDB = new TablesDB(this.client);
-        this.setupMonitoring();
     }
 
-    /**
-     * Limpia la caché de listRows para una tabla específica.
-     */
-    private async clearListCache(databaseId: string, tableId: string) {
-        // Mapear tablas a tipos de datos para Redis
-        const tableToDataType: Record<string, keyof typeof this.appwriteCache['cacheConfigs']> = {
-            'clients': 'clients',
-            'appointments': 'appointments',
-            'messages': 'messages',
-            'schedules': 'schedules',
-            'services': 'services'
-        };
+    private buildCacheKey(databaseId: string, tableId: string, queries: string[]): string {
+        return `${databaseId}_${tableId}_${btoa(JSON.stringify(queries))}`;
+    }
 
-        const dataType = tableToDataType[tableId];
-        if (dataType) {
-            await this.appwriteCache.invalidate(dataType);
+    private getFromMemoryCache<T>(key: string): T | null {
+        const entry = this.memoryCache.get(key);
+        if (!entry) return null;
+        if (Date.now() > entry.expiresAt) {
+            this.memoryCache.delete(key);
+            return null;
         }
+        return entry.data as T;
+    }
 
-        // Limpiar también localStorage como fallback
-        const prefix = `dbcache_${databaseId}_${tableId}_`;
-        Object.keys(localStorage).forEach(key => {
-            if (key.startsWith(prefix)) {
-                localStorage.removeItem(key);
-            }
+    private setToMemoryCache(key: string, data: any, ttlSeconds: number): void {
+        this.memoryCache.set(key, {
+            data,
+            expiresAt: Date.now() + ttlSeconds * 1000
         });
+    }
+
+    private clearListCache(databaseId: string, tableId: string): void {
+        const prefix = `${databaseId}_${tableId}_`;
+        for (const key of this.memoryCache.keys()) {
+            if (key.startsWith(prefix)) {
+                this.memoryCache.delete(key);
+            }
+        }
     }
 
     async createDocument(databaseId: string, tableId: string, data: any) {
@@ -62,7 +73,7 @@ export class DBService {
             rowId: ID.unique(),
             data
         });
-        await this.clearListCache(databaseId, tableId);
+        this.clearListCache(databaseId, tableId);
         return result;
     }
 
@@ -75,37 +86,20 @@ export class DBService {
         });
     }
 
-    /**
-     * Obtiene filas (rows) con caché Redis + localStorage como fallback.
-     * Mantiene compatibilidad retornando un objeto similar a DocumentList.
-     */
     async listDocuments<T extends Models.Document>(
         databaseId: string,
         tableId: string,
         queries?: string[],
         forceRefresh: boolean = false,
-        cacheMinutes: number = 1440 // 24 horas por defecto
+        cacheMinutes: number = 1440
     ): Promise<Models.DocumentList<T>> {
         queries = queries || [Query.limit(this.limit)];
-        const cacheKey = `${databaseId}_${tableId}_${btoa(JSON.stringify(queries))}`;
-
-        // Mapear tablas a tipos de datos para Redis
-        const tableToDataType: Record<string, keyof typeof this.appwriteCache['cacheConfigs']> = {
-            'clients': 'clients',
-            'appointments': 'appointments',
-            'messages': 'messages',
-            'schedules': 'schedules',
-            'services': 'services'
-        };
-
-        const dataType = tableToDataType[tableId] || 'clients';
+        const cacheKey = this.buildCacheKey(databaseId, tableId, queries);
+        const ttlSeconds = this.ttlByTable[tableId] ?? (cacheMinutes * 60);
 
         if (!forceRefresh) {
-            // Intentar obtener de caché a través de Appwrite
-            const cachedData = await this.appwriteCache.get<Models.DocumentList<T>>(cacheKey, dataType);
-            if (cachedData) {
-                return cachedData;
-            }
+            const cached = this.getFromMemoryCache<Models.DocumentList<T>>(cacheKey);
+            if (cached) return cached;
         }
 
         const rowList = await this.tablesDB.listRows({
@@ -114,14 +108,14 @@ export class DBService {
             queries
         });
 
-        // Convertir RowList a DocumentList para mantener compatibilidad
         const data: Models.DocumentList<T> = {
             total: rowList.total,
             documents: rowList.rows as unknown as T[]
         } as Models.DocumentList<T>;
 
-        // Almacenar en caché a través de Appwrite
-        await this.appwriteCache.set(cacheKey, data, dataType);
+        if (!forceRefresh) {
+            this.setToMemoryCache(cacheKey, data, ttlSeconds);
+        }
 
         return data;
     }
@@ -133,7 +127,7 @@ export class DBService {
             rowId,
             data
         });
-        await this.clearListCache(databaseId, tableId);
+        this.clearListCache(databaseId, tableId);
         return result;
     }
 
@@ -143,83 +137,15 @@ export class DBService {
             tableId,
             rowId
         });
-        await this.clearListCache(databaseId, tableId);
+        this.clearListCache(databaseId, tableId);
         return result;
     }
 
-    /**
-     * Configura el monitoreo de lecturas
-     */
-    private setupMonitoring() {
-        const originalListRows = this.tablesDB.listRows.bind(this.tablesDB);
-        this.tablesDB.listRows = async (params: any) => {
-            const result = await originalListRows(params);
-            this.totalRowsRead += result.rows.length;
-            return result;
-        };
-    }
-
-    /**
-     * Obtiene estadísticas de lecturas
-     */
-    getReadStats() {
-        return {
-            totalRowsRead: this.totalRowsRead,
-            limit: this.limit
-        };
-    }
-
-    /**
-     * Limpia caché específico por tabla
-     */
     async clearCacheForCollection(databaseId: string, tableId: string) {
-        await this.clearListCache(databaseId, tableId);
+        this.clearListCache(databaseId, tableId);
     }
 
-    /**
-     * Limpia todo el caché
-     */
     async clearAllCache() {
-        await this.appwriteCache.clear();
-    }
-
-    /**
-     * Obtiene estadísticas del caché
-     */
-    async getCacheStats() {
-        const redisStats = await this.appwriteCache.getStats();
-        const localStorageKeys = this.getLocalStorageKeys();
-
-        return {
-            redis: redisStats || { keys: 0 },
-            localStorage: { keys: localStorageKeys }
-        };
-    }
-
-    private getLocalStorageKeys(): number {
-        try {
-            let count = 0;
-            const cacheKeys: string[] = [];
-
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && (key.startsWith('cache_') || key.startsWith('appwrite_cache_'))) {
-                    count++;
-                    cacheKeys.push(key);
-                }
-            }
-
-            return count;
-        } catch (error) {
-            console.warn('Error contando claves de localStorage:', error);
-            return 0;
-        }
-    }
-
-    /**
-     * Verifica la conexión a Redis
-     */
-    async pingRedis() {
-        return await this.appwriteCache.ping();
+        this.memoryCache.clear();
     }
 }

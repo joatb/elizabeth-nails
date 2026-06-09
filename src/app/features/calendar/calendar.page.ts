@@ -93,6 +93,7 @@ export class CalendarPage implements OnDestroy {
 
   private calendarApi?: CalendarApi;
   private eventsSubscription: Subscription | null = null;
+  private loadedMonthKeys = new Set<string>();
   isLoadingEvents = false;
 
   isMonthPickerOpen = false;
@@ -204,6 +205,7 @@ export class CalendarPage implements OnDestroy {
 
   // Recarga completa del calendario (usado externamente)
   public reload(): void {
+    this.loadedMonthKeys.clear();
     void this.initialize();
   }
 
@@ -300,6 +302,13 @@ export class CalendarPage implements OnDestroy {
         nextYear++;
       }
 
+      // Evitar re-fetch si los 3 meses del rango ya están en caché visual
+      const monthKey = `${year}-${month}`;
+      if (this.loadedMonthKeys.has(monthKey) && this.appointments !== null) {
+        this.isLoadingEvents = false;
+        return;
+      }
+
       const startDate = new Date(prevYear, prevMonth - 1, 1);
       const endDate = new Date(nextYear, nextMonth, 0);
 
@@ -307,6 +316,7 @@ export class CalendarPage implements OnDestroy {
         startDate,
         endDate,
       );
+      this.loadedMonthKeys.add(monthKey);
 
       const events: EventInput[] = Array.isArray(this.appointments?.documents)
         ? this.appointments!.documents.map((appointment: Appointment) => {

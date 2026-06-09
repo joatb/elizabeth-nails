@@ -11,7 +11,7 @@ import { PaginationService, PaginatedResult, PaginationOptions } from "../../ser
 export class ClientsProvider {
 
     private database: string = 'core';
-    private tableId: string = 'clients'; // Table ID (migrat de collection a table)
+    private tableId: string = 'clients';
 
     constructor(
         private dbService: DBService,
@@ -23,8 +23,9 @@ export class ClientsProvider {
             Query.select(['*', 'appointments.*'])
         ]);
     }
+
     /**
-     * Lista clientes con paginación inteligente
+     * Lista clientes paginados con appointments expandidos (para la grid de clientes).
      */
     async listClientsPaginated(limit: number = 50, offset: number = 0): Promise<PaginatedResult<Client>> {
         const options: PaginationOptions = {
@@ -49,9 +50,9 @@ export class ClientsProvider {
     }
 
     /**
-     * Lista clientes básico (para compatibilidad)
+     * Lista clientes básico (para compatibilidad).
      */
-    listClients(limit: number = 50, offset: number = 0, forceRefresh: boolean = false) {
+    listClients(limit: number = 50, offset: number = 0) {
         return this.dbService.listDocuments<Client>(
             this.database,
             this.tableId,
@@ -64,7 +65,7 @@ export class ClientsProvider {
     }
 
     /**
-     * Lista todos los clientes (solo para casos especiales)
+     * Lista todos los clientes con appointments expandidos (para grid completa).
      */
     listAllClients() {
         return this.dbService.listDocuments<Client>(
@@ -75,9 +76,29 @@ export class ClientsProvider {
     }
 
     /**
-     * Carga todos los clientes para búsqueda completa
+     * Carga todos los clientes con campos mínimos para búsqueda/chat/analytics.
+     * No expande appointments para reducir lecturas.
      */
     async loadAllClientsForSearch(): Promise<Client[]> {
+        const fetchFunction = async (limit: number, offset: number) => {
+            return this.dbService.listDocuments<Client>(
+                this.database,
+                this.tableId,
+                [
+                    Query.select(['$id', 'name', 'phone', 'phone_country']),
+                    Query.limit(limit),
+                    Query.offset(offset)
+                ]
+            );
+        };
+
+        return this.paginationService.loadAllData(fetchFunction, 'clients_search');
+    }
+
+    /**
+     * Carga todos los clientes con appointments para la grid de clientes.
+     */
+    async loadClientsForGrid(): Promise<Client[]> {
         const fetchFunction = async (limit: number, offset: number) => {
             return this.dbService.listDocuments<Client>(
                 this.database,
@@ -90,7 +111,7 @@ export class ClientsProvider {
             );
         };
 
-        return this.paginationService.loadAllData(fetchFunction, 'clients_search');
+        return this.paginationService.loadAllData(fetchFunction, 'clients_grid');
     }
 
     createClient(client: any) {
@@ -106,8 +127,7 @@ export class ClientsProvider {
     }
 
     /**
-     * Busca clientes por nombre - SIN CACHÉ
-     * Usa DBService con forceRefresh: true para evitar el caché
+     * Busca clientes por nombre usando caché.
      */
     async searchClientsByName(searchTerm: string, limit: number = 50): Promise<Client[]> {
         if (!searchTerm || searchTerm.trim().length === 0) {
@@ -115,16 +135,14 @@ export class ClientsProvider {
         }
 
         try {
-            // Usar DBService con forceRefresh: true para evitar el caché
             const result = await this.dbService.listDocuments<Client>(
                 this.database,
                 this.tableId,
                 [
-                    Query.select(['*', 'appointments.*']),
+                    Query.select(['$id', 'name', 'phone', 'phone_country']),
                     Query.search('name', searchTerm),
                     Query.limit(limit)
-                ],
-                true // forceRefresh: true para evitar caché
+                ]
             );
 
             return result.documents;

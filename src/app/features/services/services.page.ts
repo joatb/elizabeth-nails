@@ -16,8 +16,8 @@ import { ServicesProvider } from "../../providers/services/services.provider";
 import { Service } from "../../providers/services/models/service";
 import { AppointmentsProvider } from "../../providers/appointments/appointments.provider";
 import { Appointment } from "../../providers/appointments/models/appointment";
-import { ClientsProvider } from "../../providers/clients/clients.provider";
 import { Client } from "../../providers/clients/models/client";
+import { ClientsStateService } from "../../services/clients-state.service";
 import { AuthService } from "../../services/auth.service";
 import { AlertService } from "../../services/alert.service";
 import { EventService } from "../../services/event.service";
@@ -82,7 +82,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
     protected authService: AuthService,
     private servicesProvider: ServicesProvider,
     private appointmentsProvider: AppointmentsProvider,
-    private clientsProvider: ClientsProvider,
+    private clientsState: ClientsStateService,
     private alertCtrl: AlertController,
     private alertService: AlertService,
     private modalCtrl: ModalController,
@@ -192,11 +192,18 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
   private async loadData(): Promise<void> {
     this.isLoading = true;
     this.currentTheme = this.themeService.getCurrentTheme();
+
+    // Rango por defecto: último año + próximo año
+    const rangeStart = new Date();
+    rangeStart.setFullYear(rangeStart.getFullYear() - 1);
+    const rangeEnd = new Date();
+    rangeEnd.setFullYear(rangeEnd.getFullYear() + 1);
+
     const [servicesResult, appointmentsResult, clientsResult] = await Promise.all(
       [
         this.servicesProvider.listServices(),
-        this.appointmentsProvider.listAllAppointments(),
-        this.clientsProvider.loadAllClientsForSearch(),
+        this.appointmentsProvider.listAppointmentsInRange(rangeStart, rangeEnd),
+        this.clientsState.ensureLoaded(),
       ],
     );
 

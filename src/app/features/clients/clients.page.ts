@@ -426,7 +426,7 @@ export class ClientsPage {
     this.isLoadingAll = true;
 
     try {
-      const allClients = await this.clientsProvider.loadAllClientsForSearch();
+      const allClients = await this.clientsProvider.loadClientsForGrid();
 
       // Reemplazar todos los datos
       this.rowData = [];
