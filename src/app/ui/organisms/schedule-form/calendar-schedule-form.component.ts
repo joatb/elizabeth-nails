@@ -10,7 +10,6 @@ import { IonNav } from "@ionic/angular/standalone";
 import { SharedModule } from "../../../modules/shared.module";
 import { SchedulesProvider } from "../../../providers/schedules/schedules.provider";
 import { AuthService } from "../../../services/auth.service";
-import { Models } from "appwrite";
 import { AlertService } from "../../../services/alert.service";
 import { Schedule } from "../../../providers/schedules/models/schedule";
 
@@ -45,7 +44,7 @@ export class CalendarScheduleFormComponent {
 
   protected selectedDays: Map<string, boolean> = new Map();
 
-  private schedules: Models.DocumentList<Schedule> | null = null;
+  private schedules: { total: number; documents: Schedule[] } | null = null;
 
   constructor(
     protected authService: AuthService,
@@ -141,7 +140,6 @@ export class CalendarScheduleFormComponent {
       // Guardar el horario
       await this.schedulesPvd.createSchedule(schedule);
       await this.alertService.presentToast("Horario creado", 2500);
-      this.schedules = await this.schedulesPvd.listSchedules();
       if (this.nav && typeof this.nav.pop === "function") {
         this.nav.pop();
       } else {

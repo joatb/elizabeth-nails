@@ -3,7 +3,6 @@ import { CommonModule } from "@angular/common";
 import { ChangeDetectorRef } from "@angular/core";
 import { AgGridAngular } from "ag-grid-angular";
 import { ColDef, ModuleRegistry, AllCommunityModule, GridReadyEvent } from "ag-grid-community";
-import { Models } from "appwrite";
 
 import { AtomSpinnerComponent } from "../../atoms/atom-spinner/atom-spinner.component";
 import { MolFabButtonComponent } from "../mol-fab-button/mol-fab-button.component";
@@ -105,7 +104,7 @@ export class MolScheduleTableComponent implements OnInit {
     },
   ];
 
-  private schedules: Models.DocumentList<Schedule> | null = null;
+  private schedules: { total: number; documents: Schedule[] } | null = null;
 
   constructor(
     private schedulesPvd: SchedulesProvider,
@@ -127,7 +126,7 @@ export class MolScheduleTableComponent implements OnInit {
       const docs = this.schedules?.documents ?? [];
       // Ordenar por fecha de creación (descendente)
       docs.sort((a, b) =>
-        new Date(b["$createdAt"]).getTime() - new Date(a["$createdAt"]).getTime(),
+        new Date(b["created_at"]).getTime() - new Date(a["created_at"]).getTime(),
       );
 
       const dayLabels: Record<string, string> = {
@@ -141,7 +140,7 @@ export class MolScheduleTableComponent implements OnInit {
       };
 
       this.rowData = docs.map<RowData>((s) => ({
-        id: String(s["$id"]),
+        id: String(s["id"]),
         schedule: `${s["start_time"]} - ${s["end_time"]}`,
         days: Array.isArray(s.days)
           ? s.days

@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
-import { DBService } from "../../services/db.service";
-import { Models } from 'appwrite';
+import { supabase } from '../../../lib/supabase';
 import { Schedule } from "./models/schedule";
 
 @Injectable({
@@ -8,20 +7,29 @@ import { Schedule } from "./models/schedule";
 })
 export class SchedulesProvider {
 
-    private database: string = 'core';
-    private tableId: string = 'schedules'; // Table ID (migrat de collection a table)
-
-    constructor(private dbService: DBService) { }
-
-    createSchedule(schedule: any) {
-        return this.dbService.createDocument(this.database, this.tableId, schedule);
-    }
-    
-    listSchedules(): Promise<Models.DocumentList<Schedule>> {
-        return this.dbService.listDocuments<Schedule>(this.database, this.tableId);
+    async createSchedule(schedule: Omit<Schedule, 'id' | 'created_at' | 'updated_at'>) {
+        const { data, error } = await supabase
+            .from('schedules')
+            .insert(schedule)
+            .select()
+            .single();
+        if (error) throw error;
+        return data as Schedule;
     }
 
-    deleteSchedule(scheduleId: string) {
-        return this.dbService.deleteDocument(this.database, this.tableId, scheduleId);
+    async listSchedules(): Promise<{ total: number; documents: Schedule[] }> {
+        const { data, error, count } = await supabase
+            .from('schedules')
+            .select('*', { count: 'exact' });
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Schedule[] };
+    }
+
+    async deleteSchedule(scheduleId: string): Promise<void> {
+        const { error } = await supabase
+            .from('schedules')
+            .delete()
+            .eq('id', scheduleId);
+        if (error) throw error;
     }
 }

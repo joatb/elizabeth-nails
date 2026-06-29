@@ -82,7 +82,7 @@ export class CalendarPage implements OnDestroy {
   readonly EllipsisVertical = EllipsisVertical;
 
   // Datos para agenda
-  schedules: Models.DocumentList<Schedule> | null = null;
+  schedules: { total: number; documents: Schedule[] } | null = null;
   appointments: Models.DocumentList<Appointment> | null = null;
   services: Models.DocumentList<Service> | null = null;
   private servicesById = new Map<string, Service>();
