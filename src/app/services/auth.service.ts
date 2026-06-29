@@ -4,6 +4,7 @@ import { AlertController } from '@ionic/angular/standalone';
 import { Models } from "appwrite";
 import { catchError, firstValueFrom, from, map, Observable, of } from "rxjs";
 import { account } from "../../lib/appwrite";
+import { supabase } from "../../lib/supabase";
 import { UserPreferences } from "../models/user-preferences";
 
 @Injectable({
@@ -29,6 +30,7 @@ export class AuthService {
         try {
             await account.createEmailPasswordSession(email, password);
             this.loggedInUser = from(account.get());
+            await supabase.auth.signInWithPassword({ email, password });
             if(this.loggedInUser != null) {
                 return true;
             }
@@ -53,6 +55,7 @@ export class AuthService {
                     role: 'confirm',
                     handler: async () => {
                         await account.deleteSession('current');
+                        await supabase.auth.signOut();
                         this.loggedInUser = of(null);
                         this.router.navigate(['/login']);
                     },

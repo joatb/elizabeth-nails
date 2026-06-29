@@ -1,5 +1,5 @@
-import { Component, Input } from "@angular/core";
-import { ModalController } from "@ionic/angular/standalone";
+import { Component, Input, ViewChild } from "@angular/core";
+import { ModalController, ViewWillEnter } from "@ionic/angular/standalone";
 import { SharedModule } from "../../../modules/shared.module";
 import { MolScheduleTableComponent } from "../../molecules/mol-schedule-table/mol-schedule-table.component";
 import { CalendarScheduleFormComponent } from "../schedule-form/calendar-schedule-form.component";
@@ -15,20 +15,23 @@ import { localeText } from "../../../../locale/ag-grid.locale";
   ></mol-schedule-table>`,
   imports: [SharedModule, MolScheduleTableComponent],
 })
-export class CalendarScheduleComponent {
+export class CalendarScheduleComponent implements ViewWillEnter {
   @Input() nav?: IonNav;
+  @ViewChild(MolScheduleTableComponent) scheduleTable!: MolScheduleTableComponent;
 
   localeText = localeText;
 
   constructor(private modalCtrl: ModalController) {}
 
+  ionViewWillEnter(): void {
+    this.scheduleTable?.loadSchedules();
+  }
+
   onAdd(): void {
-    // Navegar al formulario de creación/edición de horarios si hay `nav`
     if (this.nav && typeof this.nav.push === "function") {
       this.nav.push(CalendarScheduleFormComponent, { nav: this.nav });
       return;
     }
-    // Fallback: abrir el formulario en un modal cuando no hay `nav`.
     void this.openScheduleFormModal();
   }
 
@@ -37,5 +40,7 @@ export class CalendarScheduleComponent {
       component: CalendarScheduleFormComponent,
     });
     await modal.present();
+    await modal.onDidDismiss();
+    this.scheduleTable?.loadSchedules();
   }
 }
