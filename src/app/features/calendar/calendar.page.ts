@@ -714,7 +714,9 @@ export class CalendarPage implements OnDestroy {
 
   private resolveService(appointment: Appointment): Service | null {
     const rawService = appointment.services;
-    if (!rawService) return null;
+    if (!rawService) {
+      return appointment.service_id ? this.servicesById.get(appointment.service_id) ?? null : null;
+    }
 
     if (Array.isArray(rawService)) {
       const first = rawService[0];

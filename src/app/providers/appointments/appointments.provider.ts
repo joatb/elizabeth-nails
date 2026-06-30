@@ -15,7 +15,7 @@ export class AppointmentsProvider {
 
         const { data, error, count } = await supabase
             .from('appointments')
-            .select('*, client:clients(*)', { count: 'exact' })
+            .select('*, client:clients(*), services(*)', { count: 'exact' })
             .gte('start_time', startDate)
             .lte('start_time', endDate)
             .order('start_time');
@@ -29,7 +29,7 @@ export class AppointmentsProvider {
 
         const { data, error, count } = await supabase
             .from('appointments')
-            .select('*, client:clients(*)', { count: 'exact' })
+            .select('*, client:clients(*), services(*)', { count: 'exact' })
             .gte('start_time', startIso)
             .lte('start_time', endIso)
             .order('start_time');
@@ -40,7 +40,7 @@ export class AppointmentsProvider {
     async listAllAppointments(): Promise<{ total: number; documents: Appointment[] }> {
         const { data, error, count } = await supabase
             .from('appointments')
-            .select('*, client:clients(*)', { count: 'exact' })
+            .select('*, client:clients(*), services(*)', { count: 'exact' })
             .order('start_time', { ascending: false });
         if (error) throw error;
         return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
@@ -50,7 +50,7 @@ export class AppointmentsProvider {
         const { data, error } = await supabase
             .from('appointments')
             .insert(appointment)
-            .select('*, client:clients(*)')
+            .select('*, client:clients(*), services(*)')
             .single();
         if (error) throw error;
         return data as Appointment;
@@ -61,7 +61,7 @@ export class AppointmentsProvider {
             .from('appointments')
             .update(data)
             .eq('id', appointmentId)
-            .select('*, client:clients(*)')
+            .select('*, client:clients(*), services(*)')
             .single();
         if (error) throw error;
         return updated as Appointment;
