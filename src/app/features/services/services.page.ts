@@ -9,8 +9,10 @@ import {
 import { AlertController, ModalController } from "@ionic/angular/standalone";
 import { Chart, registerables } from "chart.js";
 import { LogOut } from "lucide-angular";
+import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
 import { AtomSpinnerComponent, ClientsToolbarComponent } from "../../ui";
+import { MonthPickerModalComponent } from "../../ui/organisms/month-picker-modal/month-picker-modal.component";
 import { SharedModule } from "../../modules/shared.module";
 import { ServicesProvider } from "../../providers/services/services.provider";
 import { Service } from "../../providers/services/models/service";
@@ -42,7 +44,14 @@ type ClientRanking = {
   selector: "app-services",
   templateUrl: "services.page.html",
   styleUrls: ["services.page.scss"],
-  imports: [CommonModule, SharedModule, ClientsToolbarComponent, CurrencyPipe, AtomSpinnerComponent],
+  imports: [
+    CommonModule,
+    SharedModule,
+    ClientsToolbarComponent,
+    CurrencyPipe,
+    AtomSpinnerComponent,
+    MonthPickerModalComponent,
+  ],
 })
 export class ServicesPage implements AfterViewInit, OnDestroy {
   readonly LogOut = LogOut;
@@ -69,9 +78,28 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
   topClientCount = 0;
   currentTheme: ColorTheme | null = null;
   isLoading = false;
-  filterStartDate = "";
-  filterEndDate = "";
-  private filteredAppointments: Appointment[] = [];
+  filterMonth = ServicesPage.currentMonthStr();
+  isMonthPickerOpen = false;
+  monthPickerValue = `${ServicesPage.currentMonthStr()}-01`;
+
+  private static currentMonthStr(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  private monthRange(): { start: Date; end: Date } {
+    const [year, month] = this.filterMonth.split("-").map(Number);
+    return {
+      start: new Date(year, month - 1, 1, 0, 0, 0),
+      end: new Date(year, month, 0, 23, 59, 59, 999),
+    };
+  }
+
+  get filterMonthLabel(): string {
+    const dt = DateTime.fromISO(`${this.filterMonth}-01`).setLocale("es");
+    const label = dt.isValid ? dt.toFormat("LLLL yyyy") : this.filterMonth;
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
 
   private usageChart: Chart | null = null;
   private revenueChart: Chart | null = null;
@@ -193,16 +221,12 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.currentTheme = this.themeService.getCurrentTheme();
 
-    // Rango por defecto: último año + próximo año
-    const rangeStart = new Date();
-    rangeStart.setFullYear(rangeStart.getFullYear() - 1);
-    const rangeEnd = new Date();
-    rangeEnd.setFullYear(rangeEnd.getFullYear() + 1);
+    const { start, end } = this.monthRange();
 
     const [servicesResult, appointmentsResult, clientsResult] = await Promise.all(
       [
         this.servicesProvider.listServices(),
-        this.appointmentsProvider.listAppointmentsInRange(rangeStart, rangeEnd),
+        this.appointmentsProvider.listAppointmentsInRange(start, end),
         this.clientsState.ensureLoaded(),
       ],
     );
@@ -210,57 +234,44 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
     this.services = servicesResult.documents;
     this.appointments = appointmentsResult.documents;
     this.clientsById = new Map(clientsResult.map((client) => [client.id, client]));
-    this.applyDateFilter();
 
     this.computeMetrics();
     this.renderCharts();
     this.isLoading = false;
   }
 
-  onFilterStartChange(event: Event): void {
-    const input = event.target as HTMLInputElement | null;
-    this.filterStartDate = input?.value ?? "";
-    this.refreshStats();
-  }
-
-  onFilterEndChange(event: Event): void {
-    const input = event.target as HTMLInputElement | null;
-    this.filterEndDate = input?.value ?? "";
-    this.refreshStats();
-  }
-
-  clearDateFilter(): void {
-    this.filterStartDate = "";
-    this.filterEndDate = "";
-    this.refreshStats();
-  }
-
   get hasDateFilter(): boolean {
-    return Boolean(this.filterStartDate || this.filterEndDate);
+    return this.filterMonth !== ServicesPage.currentMonthStr();
   }
 
-  private refreshStats(): void {
-    this.applyDateFilter();
-    this.computeMetrics();
-    this.renderCharts();
+  resetToCurrentMonth(): void {
+    this.filterMonth = ServicesPage.currentMonthStr();
+    void this.loadData();
   }
 
-  private applyDateFilter(): void {
-    const start = this.filterStartDate ? new Date(`${this.filterStartDate}T00:00:00`) : null;
-    const end = this.filterEndDate ? new Date(`${this.filterEndDate}T23:59:59.999`) : null;
+  openMonthPicker(): void {
+    this.monthPickerValue = `${this.filterMonth}-01`;
+    this.isMonthPickerOpen = true;
+  }
 
-    if (!start && !end) {
-      this.filteredAppointments = [...this.appointments];
-      return;
-    }
+  cancelMonthPicker(): void {
+    this.isMonthPickerOpen = false;
+  }
 
-    this.filteredAppointments = this.appointments.filter((appointment) => {
-      const appointmentDate = new Date(appointment.start_time);
-      if (Number.isNaN(appointmentDate.getTime())) return false;
-      if (start && appointmentDate < start) return false;
-      if (end && appointmentDate > end) return false;
-      return true;
-    });
+  onMonthPickerDismiss(): void {
+    this.isMonthPickerOpen = false;
+  }
+
+  confirmMonthPicker(selectedValue: string | null): void {
+    this.isMonthPickerOpen = false;
+    if (!selectedValue) return;
+
+    const iso = selectedValue.length === 7 ? `${selectedValue}-01` : selectedValue;
+    const dt = DateTime.fromISO(iso);
+    if (!dt.isValid) return;
+
+    this.filterMonth = dt.toFormat("yyyy-LL");
+    void this.loadData();
   }
 
   private computeMetrics(): void {
@@ -273,8 +284,8 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
 
     const now = new Date();
 
-    for (const appointment of this.filteredAppointments) {
-      const serviceId = this.resolveServiceId(appointment);
+    for (const appointment of this.appointments) {
+      const serviceId = this.resolveServiceId(appointment, serviceById);
       if (serviceId) {
         usageByService.set(serviceId, (usageByService.get(serviceId) ?? 0) + 1);
       }
@@ -377,9 +388,13 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
     this.revenueChart = null;
   }
 
-  private resolveServiceId(appointment: Appointment): string | null {
+  private resolveServiceId(appointment: Appointment, serviceById: Map<string, Service>): string | null {
     const raw = appointment.services;
-    if (!raw) return null;
+    if (!raw) {
+      return appointment.service_id && serviceById.has(appointment.service_id)
+        ? appointment.service_id
+        : null;
+    }
 
     if (Array.isArray(raw)) {
       const first = raw[0];

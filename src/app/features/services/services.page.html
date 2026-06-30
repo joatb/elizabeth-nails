@@ -44,31 +44,17 @@
           fill="clear"
           color="medium"
           size="small"
-          (click)="clearDateFilter()"
+          (click)="resetToCurrentMonth()"
         >
-          Limpiar
+          Mes actual
         </ion-button>
       </div>
       <div class="filter-grid">
         <div class="filter-field">
-          <label>Desde</label>
-          <input
-            type="date"
-            lang="es-ES"
-            class="filter-date-input"
-            [value]="filterStartDate"
-            (change)="onFilterStartChange($event)"
-          />
-        </div>
-        <div class="filter-field">
-          <label>Hasta</label>
-          <input
-            type="date"
-            lang="es-ES"
-            class="filter-date-input"
-            [value]="filterEndDate"
-            (change)="onFilterEndChange($event)"
-          />
+          <label>Mes</label>
+          <button type="button" class="filter-month-trigger" (click)="openMonthPicker()">
+            {{ filterMonthLabel }}
+          </button>
         </div>
       </div>
     </ion-card-content>
@@ -160,4 +146,14 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+
+  <org-month-picker-modal
+    title="Seleccionar mes"
+    [isOpen]="isMonthPickerOpen"
+    [value]="monthPickerValue"
+    (valueChange)="monthPickerValue = $event ?? monthPickerValue"
+    (cancel)="cancelMonthPicker()"
+    (confirm)="confirmMonthPicker($event)"
+    (dismiss)="onMonthPickerDismiss()"
+  ></org-month-picker-modal>
 </ion-content>
