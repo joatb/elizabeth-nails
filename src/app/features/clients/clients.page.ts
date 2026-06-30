@@ -8,7 +8,6 @@ import { AlertController, ModalController } from "@ionic/angular/standalone";
 import { AgGridAngular, ICellRendererAngularComp } from "ag-grid-angular"; // Angular Data Grid Component
 import type { ColDef, ICellRendererParams } from "ag-grid-community"; // Column Definition Type Interface
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
-import { Models } from "appwrite";
 import { LogOut } from "lucide-angular";
 import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
@@ -241,7 +240,7 @@ export class ClientsPage {
 
   localeText = localeText;
 
-  private clients: Models.DocumentList<Client> | null = null;
+  private clients: { total: number; documents: Client[] } | null = null;
 
   private eventsSubscription: Subscription | null = null;
 
@@ -373,20 +372,20 @@ export class ClientsPage {
 
   private mapClientToRowData(client: Client): ClientsRowData {
     return {
-      id: client.$id,
+      id: client.id,
       name: client.name,
       phone: client.phone,
       phone_country: client.phone_country,
       next_appointment:
-        client.appointments.length > 0
-          ? client.appointments.sort(
+        (client.appointments ?? []).length > 0
+          ? (client.appointments ?? []).sort(
               (a: Appointment, b: Appointment) =>
                 DateTime.fromISO(b.start_time).toMillis() -
                 DateTime.fromISO(a.start_time).toMillis(),
             )[0].start_time
           : "No hay citas",
-      appointments: client.appointments.length,
-      tsinsert: client["$createdAt"],
+      appointments: (client.appointments ?? []).length,
+      tsinsert: client["created_at"],
     };
   }
 

@@ -7,18 +7,14 @@ import {
 import { SegmentComponent } from "../../../core/segment/segment.component";
 import { SharedModule } from "../../modules/shared.module";
 import { EventService } from "../../services/event.service";
-import { CacheDebugComponent } from "../../ui/organisms/cache-debug/cache-debug.component";
-import { environment } from "../../../environments/environment";
-
 @Component({
   selector: "app-tabs",
   templateUrl: "tabs.page.html",
   styleUrls: ["tabs.page.scss"],
-  imports: [SharedModule, SegmentComponent, CacheDebugComponent],
+  imports: [SharedModule, SegmentComponent],
 })
 export class TabsPage implements OnDestroy {
   public environmentInjector = inject(EnvironmentInjector);
-  public environment = environment;
 
   constructor(private events: EventService) {}
 

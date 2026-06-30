@@ -2,7 +2,7 @@ import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import { SharedModule } from "../../../modules/shared.module";
 import { ColorTheme, ThemeService } from "../../../services/theme.service";
-import { account } from "../../../../lib/appwrite";
+import { supabase } from "../../../../lib/supabase";
 import { UserPreferences } from "../../../models/user-preferences";
 import { LoadingController } from "@ionic/angular/standalone";
 
@@ -29,12 +29,10 @@ export class ConfigComponent implements OnInit {
 
   async loadCurrentTheme(): Promise<void> {
     try {
-      const user = await account.get();
-      if (user && user.prefs) {
-        const preferences = user.prefs as UserPreferences;
-        if (preferences.theme) {
-          this.selectedTheme = preferences.theme;
-        }
+      const { data } = await supabase.auth.getUser();
+      const meta = data.user?.user_metadata as UserPreferences | undefined;
+      if (meta?.theme) {
+        this.selectedTheme = meta.theme;
       }
     } catch (error) {
       // Error silencioso al cargar tema actual

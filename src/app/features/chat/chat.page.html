@@ -20,7 +20,7 @@
       <div class="client-item" 
            *ngFor="let client of filteredClients" 
            (click)="selectClient(client)"
-           [class.selected]="selectedClient?.$id === client.$id">
+           [class.selected]="selectedClient?.id === client.id">
         <!--
         <img [src]="client.avatar || 'assets/default-avatar.png'" class="avatar" />
         !-->

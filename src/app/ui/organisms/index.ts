@@ -1,5 +1,4 @@
 export * from "./login-form/login-form.component";
-export * from "./cache-debug/cache-debug.component";
 export * from "./config-panel/config-panel.component";
 export * from "./calendar-toolbar/calendar-toolbar.component";
 export * from "./clients-toolbar/clients-toolbar.component";

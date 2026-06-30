@@ -84,13 +84,13 @@ export class ChatComponent
 
     // TODO: Implementar carga de historial desde backend
     this.chatHistory = (
-      await this.chatProvider.getMessages(this.selectedClient.$id)
+      await this.chatProvider.getMessages(this.selectedClient.id)
     ).documents;
     this.messages = this.chatHistory.map((message) => ({
       content: message.content,
       timestamp: new Date(message.timestamp),
       sent: message.sent,
-      client: message.client,
+      client: message.client_id,
       read: message.read,
     }));
 
@@ -146,13 +146,13 @@ export class ChatComponent
             content: this.newMessage,
             timestamp: new Date(),
             sent: true,
-            client: client.$id,
+            client: client.id,
             read: false,
           });
           this.chatProvider.sendMessage({
             content: this.newMessage,
             sent: true,
-            client: client.$id,
+            client_id: client.id,
             read: false,
           });
           this.newMessage = "";

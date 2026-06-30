@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { account } from '../../lib/appwrite';
+import { supabase } from '../../lib/supabase';
 import { UserPreferences } from '../models/user-preferences';
 import { AuthService } from './auth.service';
 
@@ -284,9 +284,10 @@ export class ThemeService {
    */
   async loadUserTheme(): Promise<void> {
     try {
-      const user = await account.get();
-      if (user && user.prefs) {
-        const preferences = user.prefs as UserPreferences;
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      if (user?.user_metadata) {
+        const preferences = user.user_metadata as UserPreferences;
         if (preferences.theme) {
           this.currentTheme = this.getTheme(preferences.theme);
           this.applyTheme(this.currentTheme);

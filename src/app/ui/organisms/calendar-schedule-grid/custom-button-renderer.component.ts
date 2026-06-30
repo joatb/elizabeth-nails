@@ -96,7 +96,7 @@ export class CustomButtonRendererComponent implements ICellRendererAngularComp {
    */
   private async deleteSchedule(): Promise<void> {
     const data = this.params.data as Record<string, unknown> | null;
-    const id = data?.["$id"] ?? data?.["id"];
+    const id = data?.["id"];
     if (!id || typeof id !== "string") {
       return;
     }
