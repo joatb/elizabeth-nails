@@ -9,7 +9,6 @@ import { ModalController } from "@ionic/angular/standalone";
 import { SharedModule } from "../../../modules/shared.module";
 import { IonicSelectableComponent } from "ionic-selectable";
 import { ClientsProvider } from "../../../providers/clients/clients.provider";
-import { Models } from "appwrite";
 import { Client } from "../../../providers/clients/models/client";
 import { Subscription } from "rxjs";
 import { EventService } from "../../../services/event.service";
@@ -22,8 +21,8 @@ type AppointmentSubmit = {
   start_time: string;
   end_time: string;
   note: string;
-  client: string;
-  services?: string;
+  client_id: string;
+  service_id?: string;
 };
 type ClientSearchEvent = { text: string };
 type ClientInfiniteScrollEvent = {
@@ -48,9 +47,9 @@ export class CalendarAppointmentFormComponent {
   @Input() endTime: string = "";
   @Output() submitEvent = new EventEmitter<AppointmentSubmit>();
 
-  protected clients: Models.DocumentList<Client> | null = null;
+  protected clients: { total: number; documents: Client[] } | null = null;
   protected selectableClientsOptions: ClientOption[] = [];
-  protected services: Models.DocumentList<Service> | null = null;
+  protected services: { total: number; documents: Service[] } | null = null;
   protected selectableServicesOptions: ServiceOption[] = [];
   private eventsSubscription: Subscription | null = null;
   formSubmitted = false;
@@ -132,7 +131,7 @@ export class CalendarAppointmentFormComponent {
       this.clients = await this.clientsPvd.listClients(this.limit, 0);
       this.selectableClientsOptions =
         this.clients?.documents.map((client) => ({
-          id: client.$id,
+          id: client.id,
           name: client.name,
         })) || [];
 
@@ -151,7 +150,7 @@ export class CalendarAppointmentFormComponent {
       this.services = await this.servicesPvd.listServices();
       this.selectableServicesOptions =
         this.services?.documents.map((service) => ({
-          id: service.$id,
+          id: service.id,
           name: service.name,
           color: service.color,
           price: Number(service.price) || 0,
@@ -180,7 +179,7 @@ export class CalendarAppointmentFormComponent {
       const searchResults =
         await this.clientsPvd.searchClientsByName(searchTerm);
       this.selectableClientsOptions = searchResults.map((client) => ({
-        id: client.$id,
+        id: client.id,
         name: client.name,
       }));
 
@@ -219,7 +218,7 @@ export class CalendarAppointmentFormComponent {
 
       if (moreClients && moreClients.documents.length > 0) {
         const newOptions = moreClients.documents.map((client) => ({
-          id: client.$id,
+          id: client.id,
           name: client.name,
         }));
 
@@ -269,8 +268,8 @@ export class CalendarAppointmentFormComponent {
               ),
               end_time: this.convertToUTC(this.form.controls["endTime"].value),
               note: this.form.controls["note"].value,
-              client: selectedClient.id,
-              services:
+              client_id: selectedClient.id,
+              service_id:
                 selectedService && typeof selectedService !== "string"
                   ? selectedService.id
                   : undefined,

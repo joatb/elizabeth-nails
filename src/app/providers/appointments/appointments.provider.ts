@@ -1,80 +1,77 @@
 import { Injectable } from "@angular/core";
-import { Query } from "appwrite";
-import { DBService } from "../../services/db.service";
+import { supabase } from '../../../lib/supabase';
 import { Appointment } from "./models/appointment";
 
 @Injectable({
     providedIn: 'root',
 })
 export class AppointmentsProvider {
-    private readonly DATABASE_ID = 'core';
-    private readonly TABLE_ID = 'appointments'; // Table ID (migrat de collection a table)
 
-    constructor(
-        private dbService: DBService
-    ) { }
-
-    listAppointments(month: number, year: number) {
-        // Asegurarse de que el mes tenga dos dígitos
+    async listAppointments(month: number, year: number): Promise<{ total: number; documents: Appointment[] }> {
         const monthStr = month.toString().padStart(2, '0');
-
-        // Calcular el último día del mes
         const lastDay = new Date(year, month, 0).getDate();
-        const lastDayStr = lastDay.toString().padStart(2, '0');
-
-        // Crear fechas en formato ISO 8601
         const startDate = `${year}-${monthStr}-01T00:00:00.000Z`;
-        const endDate = `${year}-${monthStr}-${lastDayStr}T23:59:59.999Z`;
+        const endDate = `${year}-${monthStr}-${lastDay.toString().padStart(2, '0')}T23:59:59.999Z`;
 
-        return this.dbService.listDocuments<Appointment>(this.DATABASE_ID, this.TABLE_ID, [
-            Query.and([
-                Query.greaterThanEqual('start_time', startDate),
-                Query.lessThanEqual('end_time', endDate),
-            ]),
-            Query.select(['*', 'client.*']),
-            Query.limit(2500),
-            Query.orderAsc('start_time')
-        ]);
+        const { data, error, count } = await supabase
+            .from('appointments')
+            .select('*, client:clients(*)', { count: 'exact' })
+            .gte('start_time', startDate)
+            .lte('start_time', endDate)
+            .order('start_time');
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
     }
 
-    /**
-     * Obtiene las citas entre dos fechas (incluyendo ambas).
-     * @param startDate Fecha de inicio (Date)
-     * @param endDate Fecha de fin (Date)
-     */
-    listAppointmentsInRange(startDate: Date, endDate: Date) {
-        // Convertir fechas a ISO 8601 string
+    async listAppointmentsInRange(startDate: Date, endDate: Date): Promise<{ total: number; documents: Appointment[] }> {
         const startIso = startDate.toISOString();
-        // Para incluir todo el día final, poner hora máxima
         const endIso = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999).toISOString();
-        return this.dbService.listDocuments<Appointment>(this.DATABASE_ID, this.TABLE_ID, [
-            Query.and([
-                Query.greaterThanEqual('start_time', startIso),
-                Query.lessThanEqual('end_time', endIso),
-            ]),
-            Query.select(['*', 'client.*']),
-            Query.limit(2500),
-            Query.orderAsc('start_time')
-        ]);
+
+        const { data, error, count } = await supabase
+            .from('appointments')
+            .select('*, client:clients(*)', { count: 'exact' })
+            .gte('start_time', startIso)
+            .lte('start_time', endIso)
+            .order('start_time');
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
     }
 
-    createAppointment(appointment: any) {
-        return this.dbService.createDocument(this.DATABASE_ID, this.TABLE_ID, appointment);
+    async listAllAppointments(): Promise<{ total: number; documents: Appointment[] }> {
+        const { data, error, count } = await supabase
+            .from('appointments')
+            .select('*, client:clients(*)', { count: 'exact' })
+            .order('start_time', { ascending: false });
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
     }
 
-    listAllAppointments() {
-        return this.dbService.listDocuments<Appointment>(this.DATABASE_ID, this.TABLE_ID, [
-            Query.select(['*', 'client.*']),
-            Query.limit(2500),
-            Query.orderDesc('start_time')
-        ]);
+    async createAppointment(appointment: any): Promise<Appointment> {
+        const { data, error } = await supabase
+            .from('appointments')
+            .insert(appointment)
+            .select('*, client:clients(*)')
+            .single();
+        if (error) throw error;
+        return data as Appointment;
     }
 
-    updateAppointment(appointmentId: string, data: any) {
-        return this.dbService.updateDocument(this.DATABASE_ID, this.TABLE_ID, appointmentId, data);
+    async updateAppointment(appointmentId: string, data: any): Promise<Appointment> {
+        const { data: updated, error } = await supabase
+            .from('appointments')
+            .update(data)
+            .eq('id', appointmentId)
+            .select('*, client:clients(*)')
+            .single();
+        if (error) throw error;
+        return updated as Appointment;
     }
 
-    deleteAppointment(appointmentId: string) {
-        return this.dbService.deleteDocument(this.DATABASE_ID, this.TABLE_ID, appointmentId);
+    async deleteAppointment(appointmentId: string): Promise<void> {
+        const { error } = await supabase
+            .from('appointments')
+            .delete()
+            .eq('id', appointmentId);
+        if (error) throw error;
     }
 }

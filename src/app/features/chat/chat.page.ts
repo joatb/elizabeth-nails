@@ -43,7 +43,7 @@ export class ChatPage {
       if (allClients && allClients.length > 0) {
         this.clients = allClients;
         this.clients.forEach((client) => {
-          this.chats.set(client.$id, []);
+          this.chats.set(client.id, []);
         });
         this.sortClientsByLastMessage();
         // Inicialitzar filteredClients amb tots els clients
@@ -60,8 +60,8 @@ export class ChatPage {
 
   sortClientsByLastMessage() {
     this.clients.sort((a, b) => {
-      const messagesA = this.chats.get(a.$id) || [];
-      const messagesB = this.chats.get(b.$id) || [];
+      const messagesA = this.chats.get(a.id) || [];
+      const messagesB = this.chats.get(b.id) || [];
 
       const lastMessageA =
         messagesA.length > 0

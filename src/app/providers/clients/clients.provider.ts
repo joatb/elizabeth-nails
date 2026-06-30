@@ -1,155 +1,102 @@
-
 import { Injectable } from "@angular/core";
-import { Query } from "appwrite";
+import { supabase } from '../../../lib/supabase';
 import { Client } from "./models/client";
-import { DBService } from "../../services/db.service";
-import { PaginationService, PaginatedResult, PaginationOptions } from "../../services/pagination.service";
 
 @Injectable({
     providedIn: 'root',
 })
 export class ClientsProvider {
 
-    private database: string = 'core';
-    private tableId: string = 'clients';
-
-    constructor(
-        private dbService: DBService,
-        private paginationService: PaginationService
-    ) { }
-
-    getClient(clientId: string) {
-        return this.dbService.getDocument(this.database, this.tableId, clientId, [
-            Query.select(['*', 'appointments.*'])
-        ]);
+    async getClient(clientId: string): Promise<Client> {
+        const { data, error } = await supabase
+            .from('clients')
+            .select('*, appointments(*)')
+            .eq('id', clientId)
+            .single();
+        if (error) throw error;
+        return data as Client;
     }
 
-    /**
-     * Lista clientes paginados con appointments expandidos (para la grid de clientes).
-     */
-    async listClientsPaginated(limit: number = 50, offset: number = 0): Promise<PaginatedResult<Client>> {
-        const options: PaginationOptions = {
-            limit,
-            offset,
-            cacheKey: 'clients_pagination'
-        };
-
-        const fetchFunction = async (limit: number, offset: number) => {
-            return this.dbService.listDocuments<Client>(
-                this.database,
-                this.tableId,
-                [
-                    Query.select(['*', 'appointments.*']),
-                    Query.limit(limit),
-                    Query.offset(offset)
-                ]
-            );
-        };
-
-        return this.paginationService.paginateData(fetchFunction, options);
+    async listClients(limit: number = 50, offset: number = 0): Promise<{ total: number; documents: Client[] }> {
+        const { data, error, count } = await supabase
+            .from('clients')
+            .select('*, appointments(*)', { count: 'exact' })
+            .range(offset, offset + limit - 1);
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Client[] };
     }
 
-    /**
-     * Lista clientes básico (para compatibilidad).
-     */
-    listClients(limit: number = 50, offset: number = 0) {
-        return this.dbService.listDocuments<Client>(
-            this.database,
-            this.tableId,
-            [
-                Query.select(['*', 'appointments.*']),
-                Query.limit(limit),
-                Query.offset(offset)
-            ]
-        );
+    async listAllClients(): Promise<{ total: number; documents: Client[] }> {
+        const { data, error, count } = await supabase
+            .from('clients')
+            .select('*, appointments(*)', { count: 'exact' });
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Client[] };
     }
 
-    /**
-     * Lista todos los clientes con appointments expandidos (para grid completa).
-     */
-    listAllClients() {
-        return this.dbService.listDocuments<Client>(
-            this.database,
-            this.tableId,
-            [Query.select(['*', 'appointments.*'])]
-        );
-    }
-
-    /**
-     * Carga todos los clientes con campos mínimos para búsqueda/chat/analytics.
-     * No expande appointments para reducir lecturas.
-     */
     async loadAllClientsForSearch(): Promise<Client[]> {
-        const fetchFunction = async (limit: number, offset: number) => {
-            return this.dbService.listDocuments<Client>(
-                this.database,
-                this.tableId,
-                [
-                    Query.select(['$id', 'name', 'phone', 'phone_country']),
-                    Query.limit(limit),
-                    Query.offset(offset)
-                ]
-            );
-        };
-
-        return this.paginationService.loadAllData(fetchFunction, 'clients_search');
+        const { data, error } = await supabase
+            .from('clients')
+            .select('id, name, phone, phone_country');
+        if (error) throw error;
+        return (data ?? []) as Client[];
     }
 
-    /**
-     * Carga todos los clientes con appointments para la grid de clientes.
-     */
     async loadClientsForGrid(): Promise<Client[]> {
-        const fetchFunction = async (limit: number, offset: number) => {
-            return this.dbService.listDocuments<Client>(
-                this.database,
-                this.tableId,
-                [
-                    Query.select(['*', 'appointments.*']),
-                    Query.limit(limit),
-                    Query.offset(offset)
-                ]
-            );
-        };
-
-        return this.paginationService.loadAllData(fetchFunction, 'clients_grid');
+        const { data, error } = await supabase
+            .from('clients')
+            .select('*, appointments(*)');
+        if (error) throw error;
+        return (data ?? []) as Client[];
     }
 
-    createClient(client: any) {
-        return this.dbService.createDocument(this.database, this.tableId, client);
+    async createClient(client: Omit<Client, 'id' | 'created_at' | 'updated_at' | 'appointments'>): Promise<Client> {
+        const { data, error } = await supabase
+            .from('clients')
+            .insert(client)
+            .select()
+            .single();
+        if (error) throw error;
+        return data as Client;
     }
 
-    updateClient(clientId: string, client: any) {
-        return this.dbService.updateDocument(this.database, this.tableId, clientId, client);
+    async updateClient(clientId: string, client: Partial<Omit<Client, 'id' | 'created_at' | 'updated_at' | 'appointments'>>): Promise<Client> {
+        const { data, error } = await supabase
+            .from('clients')
+            .update(client)
+            .eq('id', clientId)
+            .select()
+            .single();
+        if (error) throw error;
+        return data as Client;
     }
 
-    deleteClient(clientId: string) {
-        return this.dbService.deleteDocument(this.database, this.tableId, clientId);
+    async deleteClient(clientId: string): Promise<void> {
+        const { error } = await supabase
+            .from('clients')
+            .delete()
+            .eq('id', clientId);
+        if (error) throw error;
     }
 
-    /**
-     * Busca clientes por nombre usando caché.
-     */
     async searchClientsByName(searchTerm: string, limit: number = 50): Promise<Client[]> {
-        if (!searchTerm || searchTerm.trim().length === 0) {
-            return [];
-        }
-
+        if (!searchTerm || searchTerm.trim().length === 0) return [];
         try {
-            const result = await this.dbService.listDocuments<Client>(
-                this.database,
-                this.tableId,
-                [
-                    Query.select(['$id', 'name', 'phone', 'phone_country']),
-                    Query.search('name', searchTerm),
-                    Query.limit(limit)
-                ]
-            );
-
-            return result.documents;
+            const { data, error } = await supabase
+                .from('clients')
+                .select('id, name, phone, phone_country')
+                .ilike('name', `%${searchTerm}%`)
+                .limit(limit);
+            if (error) throw error;
+            return (data ?? []) as Client[];
         } catch (error) {
             console.error('Error searching clients by name:', error);
             return [];
         }
     }
 
+    async listClientsPaginated(limit: number = 50, offset: number = 0): Promise<{ total: number; documents: Client[]; hasMore: boolean }> {
+        const result = await this.listClients(limit, offset);
+        return { ...result, hasMore: offset + limit < result.total };
+    }
 }

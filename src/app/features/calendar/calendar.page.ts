@@ -34,7 +34,6 @@ import {
   ModalController,
 } from "@ionic/angular";
 
-import { Models } from "appwrite";
 import { LogOut, Clock, EllipsisVertical } from "lucide-angular";
 import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
@@ -83,8 +82,8 @@ export class CalendarPage implements OnDestroy {
 
   // Datos para agenda
   schedules: { total: number; documents: Schedule[] } | null = null;
-  appointments: Models.DocumentList<Appointment> | null = null;
-  services: Models.DocumentList<Service> | null = null;
+  appointments: { total: number; documents: Appointment[] } | null = null;
+  services: { total: number; documents: Service[] } | null = null;
   private servicesById = new Map<string, Service>();
 
   calendarOptions?: CalendarOptions;
@@ -249,7 +248,7 @@ export class CalendarPage implements OnDestroy {
     try {
       this.services = await this.servicesPvd.listServices();
       this.servicesById = new Map(
-        (this.services?.documents ?? []).map((service) => [service.$id, service]),
+        (this.services?.documents ?? []).map((service) => [service.id, service]),
       );
     } catch (err) {
       console.error("Error cargando services:", err);
@@ -330,7 +329,7 @@ export class CalendarPage implements OnDestroy {
               end: appointment.end_time,
               color: service?.color ?? "var(--ion-color-primary)",
               extendedProps: {
-                id: appointment.$id,
+                id: appointment.id,
                 description: appointment.note,
                 phone_country:
                   typeof appointment.client === "string"
@@ -340,7 +339,7 @@ export class CalendarPage implements OnDestroy {
                   typeof appointment.client === "string"
                     ? ""
                     : appointment.client?.phone,
-                serviceId: service?.$id,
+                serviceId: service?.id,
                 serviceName: service?.name,
                 serviceColor: service?.color,
               },
@@ -704,8 +703,8 @@ export class CalendarPage implements OnDestroy {
     note: string;
     start_time: string;
     end_time: string;
-    client: string;
-    services?: string;
+    client_id: string;
+    service_id?: string;
   }): Promise<void> {
     await this.appointmentsPvd.createAppointment(appointment);
     this.events.push("appointment.created", appointment);
@@ -723,14 +722,14 @@ export class CalendarPage implements OnDestroy {
       if (typeof first === "string") {
         return this.servicesById.get(first) ?? null;
       }
-      return this.servicesById.get(first.$id) ?? first;
+      return this.servicesById.get(first.id) ?? first;
     }
 
     if (typeof rawService === "string") {
       return this.servicesById.get(rawService) ?? null;
     }
 
-    return this.servicesById.get(rawService.$id) ?? rawService;
+    return this.servicesById.get(rawService.id) ?? rawService;
   }
 
   private subscribeToEvents(): void {

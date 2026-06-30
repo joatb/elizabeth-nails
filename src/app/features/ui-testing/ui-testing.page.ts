@@ -15,7 +15,6 @@ import {
   MolFormFieldComponent,
   MolPasswordInputComponent,
   MolStatItemComponent,
-  CacheDebugComponent,
 } from "../../ui";
 
 @Component({
@@ -25,7 +24,6 @@ import {
   imports: [
     SharedModule,
     FormsModule,
-    CacheDebugComponent,
     AtomButtonComponent,
     AtomInputComponent,
     AtomIconComponent,

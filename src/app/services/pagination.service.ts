@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Models } from 'appwrite';
+
+type DocumentList<T> = { total: number; documents: T[] };
 
 export interface PaginationOptions {
   limit: number;
@@ -26,8 +27,8 @@ export class PaginationService {
   /**
    * Pagina datos de manera inteligente usando caché
    */
-  async paginateData<T extends Models.Document>(
-    fetchFunction: (limit: number, offset: number) => Promise<Models.DocumentList<T>>,
+  async paginateData<T extends object>(
+    fetchFunction: (limit: number, offset: number) => Promise<DocumentList<T>>,
     options: PaginationOptions
   ): Promise<PaginatedResult<T>> {
     const { limit, offset, cacheKey } = options;
@@ -109,8 +110,8 @@ export class PaginationService {
   /**
    * Carga todos los datos para búsqueda completa
    */
-  async loadAllData<T extends Models.Document>(
-    fetchFunction: (limit: number, offset: number) => Promise<Models.DocumentList<T>>,
+  async loadAllData<T extends object>(
+    fetchFunction: (limit: number, offset: number) => Promise<DocumentList<T>>,
     cacheKey: string
   ): Promise<T[]> {
     // Si ya tenemos todos los datos en caché, devolverlos

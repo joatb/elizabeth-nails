@@ -1,9 +1,8 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import { AlertController } from '@ionic/angular/standalone';
-import { Models } from "appwrite";
+import { User } from "@supabase/supabase-js";
 import { catchError, firstValueFrom, from, map, Observable, of } from "rxjs";
-import { account } from "../../lib/appwrite";
 import { supabase } from "../../lib/supabase";
 import { UserPreferences } from "../models/user-preferences";
 
@@ -11,12 +10,14 @@ import { UserPreferences } from "../models/user-preferences";
     providedIn: 'root',
 })
 export class AuthService {
-    private loggedInUser: Observable<Models.User<Models.Preferences> | null>;
+    private loggedInUser: Observable<User | null>;
 
     constructor(
         private router: Router,
         private alertCtrl: AlertController) {
-        this.loggedInUser = from(account.get());
+        this.loggedInUser = from(supabase.auth.getUser()).pipe(
+            map(({ data }) => data.user)
+        );
     }
 
     isAuthenticated() {
@@ -28,13 +29,10 @@ export class AuthService {
 
     async login(email: string, password: string) {
         try {
-            await account.createEmailPasswordSession(email, password);
-            this.loggedInUser = from(account.get());
-            await supabase.auth.signInWithPassword({ email, password });
-            if(this.loggedInUser != null) {
-                return true;
-            }
-            return false;
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            this.loggedInUser = of(data.user);
+            return data.user != null;
         } catch (error) {
             this.handleError(error);
             return false;
@@ -54,7 +52,6 @@ export class AuthService {
                     text: 'OK',
                     role: 'confirm',
                     handler: async () => {
-                        await account.deleteSession('current');
                         await supabase.auth.signOut();
                         this.loggedInUser = of(null);
                         this.router.navigate(['/login']);
@@ -68,8 +65,7 @@ export class AuthService {
 
     async saveUserPreferences(preferences: UserPreferences) {
       try {
-        console.log('Guardando preferencias de usuario:', preferences);
-        await account.updatePrefs(preferences);
+        await supabase.auth.updateUser({ data: preferences });
       } catch (error) {
         console.error('Error al guardar preferencias de usuario:', error);
         this.handleError(error);

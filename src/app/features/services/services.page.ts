@@ -111,7 +111,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
   }
 
   trackByServiceId(_: number, service: Service): string {
-    return service.$id;
+    return service.id;
   }
 
   async addService(): Promise<void> {
@@ -155,7 +155,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
     if (!data) return;
 
     try {
-      await this.servicesProvider.updateService(service.$id, {
+      await this.servicesProvider.updateService(service.id, {
         name: data.name,
         description: data.description ?? "",
         price: Number(data.price) || 0,
@@ -178,7 +178,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
           text: "Eliminar",
           role: "destructive",
           handler: async () => {
-            await this.servicesProvider.deleteService(service.$id);
+            await this.servicesProvider.deleteService(service.id);
             await this.alertService.presentToast("Servicio eliminado", 2500);
             await this.loadData();
           },
@@ -209,7 +209,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
 
     this.services = servicesResult.documents;
     this.appointments = appointmentsResult.documents;
-    this.clientsById = new Map(clientsResult.map((client) => [client.$id, client]));
+    this.clientsById = new Map(clientsResult.map((client) => [client.id, client]));
     this.applyDateFilter();
 
     this.computeMetrics();
@@ -264,7 +264,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
   }
 
   private computeMetrics(): void {
-    const serviceById = new Map(this.services.map((service) => [service.$id, service]));
+    const serviceById = new Map(this.services.map((service) => [service.id, service]));
     const usageByService = new Map<string, number>();
     const rankingByClient = new Map<string, number>();
 
@@ -335,7 +335,7 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
             label: "Usos",
             data: this.serviceUsage.map((item) => item.count),
             backgroundColor: this.serviceUsage.map((item) => {
-              const service = this.services.find((s) => s.$id === item.serviceId);
+              const service = this.services.find((s) => s.id === item.serviceId);
               return service?.color ?? this.currentTheme?.primary;
             }),
             borderRadius: 8,
@@ -385,17 +385,15 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
       const first = raw[0];
       if (!first) return null;
       if (typeof first === "string") return first;
-      return first.$id ?? null;
+      return first.id ?? null;
     }
 
     if (typeof raw === "string") return raw;
-    return raw.$id ?? null;
+    return raw.id ?? null;
   }
 
   private resolveClientId(appointment: Appointment): string | null {
-    if (!appointment.client) return null;
-    if (typeof appointment.client === "string") return appointment.client;
-    return appointment.client.$id ?? null;
+    return appointment.client_id ?? null;
   }
 
   private subscribeToEvents(): void {

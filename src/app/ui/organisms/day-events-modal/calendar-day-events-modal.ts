@@ -68,7 +68,7 @@ export class CalendarDayEventsModalComponent {
         const client = this.resolveClient(event);
 
         return {
-          $id: event.$id,
+          id: event.id,
           start_time: this.resolveDateValue(event.start_time),
           end_time: this.resolveDateValue(event.end_time),
           note: event.note,
@@ -118,7 +118,7 @@ export class CalendarDayEventsModalComponent {
     try {
       const servicesResult = await this.servicesPvd.listServices();
       this.servicesById = new Map(
-        servicesResult.documents.map((service) => [service.$id, service]),
+        servicesResult.documents.map((service) => [service.id, service]),
       );
       this.rebuildTimelineEvents();
     } catch (error) {
@@ -127,10 +127,10 @@ export class CalendarDayEventsModalComponent {
   }
 
   async deleteEvent(event: DayEventItem) {
-    if (!event.$id) {
+    if (!event.id) {
       return;
     }
-    const appointmentId = event.$id;
+    const appointmentId = event.id;
     const confirmAlert = await this.alertCtrl.create({
       header: "Confirmar eliminación",
       message: "¿Estás seguro de que deseas eliminar esta cita?",
@@ -163,7 +163,7 @@ export class CalendarDayEventsModalComponent {
   }
 
   async editEvent(event: DayEventItem) {
-    if (!event.$id) return;
+    if (!event.id) return;
 
     const services = [...this.servicesById.values()];
     if (services.length === 0) {
@@ -179,8 +179,8 @@ export class CalendarDayEventsModalComponent {
           role: "destructive",
           handler: async () => {
             try {
-              await this.appointmentsPvd.updateAppointment(event.$id!, {
-                services: null,
+              await this.appointmentsPvd.updateAppointment(event.id!, {
+                service_id: null,
               });
               await this.alertService.presentToast("Servicio eliminado de la cita", 2500);
               await this.loadEvents();
@@ -196,8 +196,8 @@ export class CalendarDayEventsModalComponent {
           text: `${service.name} - ${Number(service.price || 0).toFixed(2)}€`,
           handler: async () => {
             try {
-              await this.appointmentsPvd.updateAppointment(event.$id!, {
-                services: service.$id,
+              await this.appointmentsPvd.updateAppointment(event.id!, {
+                service_id: service.id,
               });
               await this.alertService.presentToast("Servicio de cita actualizado", 2500);
               await this.loadEvents();
@@ -245,8 +245,8 @@ export class CalendarDayEventsModalComponent {
     note: string;
     start_time: string;
     end_time: string;
-    client: string;
-    services?: string;
+    client_id: string;
+    service_id?: string;
   }) {
     await this.appointmentsPvd.createAppointment(appointment);
     this.eventService.push("appointment.created", appointment);
@@ -288,10 +288,10 @@ export class CalendarDayEventsModalComponent {
       const first = rawService[0];
       if (!first) return null;
       if (typeof first === "string") return first;
-      return first.$id ?? null;
+      return first.id ?? null;
     }
 
     if (typeof rawService === "string") return rawService;
-    return rawService.$id ?? null;
+    return rawService.id ?? null;
   }
 }

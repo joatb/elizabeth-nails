@@ -11,6 +11,7 @@ type DayEventClient = {
 };
 
 export type DayEventItem = {
+  id?: string;
   start_time: string | Date;
   end_time: string | Date;
   client: DayEventClient;
@@ -19,7 +20,6 @@ export type DayEventItem = {
   service_name?: string | null;
   service_price?: number | null;
   service_color?: string | null;
-  $id?: string;
 };
 
 @Component({

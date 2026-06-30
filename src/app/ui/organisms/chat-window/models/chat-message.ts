@@ -1,9 +1,9 @@
-import { Models } from "appwrite";
+import { SupabaseRecord } from '../../../../models/supabase-record';
 
-export interface ChatMessage extends Models.Document {
+export interface ChatMessage extends SupabaseRecord {
+    client_id: string;
     content: string;
-    timestamp: Date;
+    timestamp: string;
     sent: boolean;
-    client: string;
     read: boolean;
 }

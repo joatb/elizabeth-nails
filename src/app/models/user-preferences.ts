@@ -1,5 +1,3 @@
-import { Models } from "appwrite";
-
-export interface UserPreferences extends Models.Preferences {
+export interface UserPreferences {
   theme?: string;
 }
