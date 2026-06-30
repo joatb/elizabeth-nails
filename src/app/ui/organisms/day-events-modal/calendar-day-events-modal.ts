@@ -51,6 +51,7 @@ export class CalendarDayEventsModalComponent {
   timelineEvents: DayEventItem[] = [];
   private _events: Appointment[] = [];
   private servicesById = new Map<string, Service>();
+  private changed = false;
 
   private rebuildTimelineEvents(): void {
     this.timelineEvents = this._events
@@ -90,6 +91,12 @@ export class CalendarDayEventsModalComponent {
     private alertCtrl: AlertController,
     private actionSheetCtrl: ActionSheetController,
   ) {}
+
+  ionViewWillLeave(): void {
+    if (this.changed) {
+      this.eventService.push("appointments.changed", {});
+    }
+  }
 
   async ngOnInit() {
     await this.loadServices();
@@ -144,6 +151,7 @@ export class CalendarDayEventsModalComponent {
           handler: async () => {
             try {
               await this.appointmentsPvd.deleteAppointment(appointmentId);
+              this.changed = true;
               await this.alertService.presentToast(
                 "Cita eliminada correctamente",
                 2500,
@@ -182,6 +190,7 @@ export class CalendarDayEventsModalComponent {
               await this.appointmentsPvd.updateAppointment(event.id!, {
                 service_id: null,
               });
+              this.changed = true;
               await this.alertService.presentToast("Servicio eliminado de la cita", 2500);
               await this.loadEvents();
             } catch (error) {
@@ -199,6 +208,7 @@ export class CalendarDayEventsModalComponent {
               await this.appointmentsPvd.updateAppointment(event.id!, {
                 service_id: service.id,
               });
+              this.changed = true;
               await this.alertService.presentToast("Servicio de cita actualizado", 2500);
               await this.loadEvents();
             } catch (error) {
@@ -249,6 +259,7 @@ export class CalendarDayEventsModalComponent {
     service_id?: string;
   }) {
     await this.appointmentsPvd.createAppointment(appointment);
+    this.changed = true;
     this.eventService.push("appointment.created", appointment);
     await this.alertService.presentToast("Cita creada", 2500);
     this.loadEvents();

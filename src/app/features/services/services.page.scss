@@ -48,7 +48,7 @@
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   align-items: start;
 }
@@ -64,7 +64,8 @@
   color: var(--ion-color-medium);
 }
 
-.filter-date-input {
+.filter-date-input,
+.filter-month-trigger {
   width: 100%;
   border: 1px solid rgba(var(--ion-color-medium-rgb), 0.3);
   border-radius: 8px;
@@ -72,6 +73,17 @@
   padding: 6px 8px;
   background: #fff;
   color: var(--ion-color-dark);
+}
+
+.filter-month-trigger {
+  text-align: left;
+  font: inherit;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+.filter-month-trigger:active {
+  background: rgba(var(--ion-color-medium-rgb), 0.08);
 }
 
 .stats-grid {
