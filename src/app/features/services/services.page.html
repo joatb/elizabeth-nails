@@ -11,7 +11,7 @@
       <ion-card-subtitle>Listado y gestión</ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
-      <ion-list lines="full" *ngIf="services.length > 0; else emptyServices">
+      <ion-list lines="full" class="services-list" *ngIf="services.length > 0; else emptyServices">
         <ion-item *ngFor="let service of services; trackBy: trackByServiceId">
           <div class="service-color" [style.background]="service.color"></div>
           <ion-label>

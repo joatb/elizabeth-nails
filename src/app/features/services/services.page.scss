@@ -13,6 +13,11 @@
   color: var(--ion-color-medium);
 }
 
+.services-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
 .service-color {
   width: 14px;
   height: 14px;
