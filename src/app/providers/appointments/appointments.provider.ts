@@ -37,6 +37,22 @@ export class AppointmentsProvider {
         return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
     }
 
+    async listAppointmentsByClient(
+        clientId: string,
+        limit: number = 20,
+        offset: number = 0,
+    ): Promise<{ documents: Appointment[]; total: number; hasMore: boolean }> {
+        const { data, error, count } = await supabase
+            .from('appointments')
+            .select('*, client:clients(*), services(*), employee:employees(*)', { count: 'exact' })
+            .eq('client_id', clientId)
+            .order('start_time', { ascending: false })
+            .range(offset, offset + limit - 1);
+        if (error) throw error;
+        const total = count ?? 0;
+        return { documents: (data ?? []) as Appointment[], total, hasMore: offset + limit < total };
+    }
+
     async listAllAppointments(): Promise<{ total: number; documents: Appointment[] }> {
         const { data, error, count } = await supabase
             .from('appointments')

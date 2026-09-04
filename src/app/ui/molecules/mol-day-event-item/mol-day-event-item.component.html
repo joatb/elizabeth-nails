@@ -14,8 +14,10 @@
     [class.with-accent-bar]="!showTimelineDot"
     [style.border-left-color]="!showTimelineDot ? (event.service_color || 'var(--ion-color-primary)') : null"
   >
-    <div class="timeline-time">{{ startTimeLabel }} - {{ endTimeLabel }}</div>
-    <div class="timeline-title">
+    <div class="timeline-time">
+      <span *ngIf="showDate">{{ dateLabel }} · </span>{{ startTimeLabel }} - {{ endTimeLabel }}
+    </div>
+    <div class="timeline-title" *ngIf="showClientName">
       <atom-timeline-dot
         class="employee-inline-dot"
         [size]="10"

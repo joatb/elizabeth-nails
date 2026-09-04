@@ -5,7 +5,7 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { provideHttpClient } from '@angular/common/http';
 import { ErrorHandler } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, eyeOutline, eyeOffOutline, lockClosed, logOutOutline, person, saveOutline, trashOutline, closeOutline, radioButtonOn, radioButtonOff, checkmarkCircle, createOutline } from 'ionicons/icons';
+import { add, addOutline, chevronUpCircle, ellipsisVertical, eye, eyeOutline, eyeOffOutline, lockClosed, logOutOutline, person, saveOutline, trashOutline, closeOutline, radioButtonOn, radioButtonOff, checkmarkCircle, createOutline, timeOutline } from 'ionicons/icons';
 import { Settings } from 'luxon';
 import { AppComponent } from './app/app.component';
 import { routes } from './app/app.routes';
@@ -44,7 +44,8 @@ addIcons({
   radioButtonOn,
   radioButtonOff,
   checkmarkCircle,
-  createOutline
+  createOutline,
+  timeOutline
 })
 
 Settings.defaultZone = 'UTC'; // or any other time zone, e.g., 'America/New_York'
