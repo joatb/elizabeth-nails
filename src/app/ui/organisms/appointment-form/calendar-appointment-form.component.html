@@ -1,30 +1,71 @@
 <form *ngIf="form" (ngSubmit)="submit()" [formGroup]="form">
   <div class="input-group">
     <ion-card>
-      <ion-item lines="full">
-        <ion-label>Inicio</ion-label>
-        <ion-datetime-button datetime="startTime"></ion-datetime-button>
+      <ion-item lines="full" class="date-time-item">
+        <ion-label position="stacked">Fecha inicio</ion-label>
+        <input
+          aria-label="Fecha inicio"
+          class="date-time-input"
+          type="date"
+          formControlName="startDate"
+        />
+      </ion-item>
+      <ion-item lines="full" class="date-time-item">
+        <ion-label position="stacked">Hora inicio</ion-label>
+        <input
+          aria-label="Hora inicio"
+          class="date-time-input"
+          type="text"
+          inputmode="numeric"
+          placeholder="HH:mm"
+          maxlength="5"
+          formControlName="startTimeOfDay"
+          (input)="onTimeInput('startTimeOfDay', $event)"
+        />
       </ion-item>
       <ion-item
         lines="full"
-        *ngIf="isControlInvalid('startTime')"
+        *ngIf="isControlInvalid('startDate') || isControlInvalid('startTimeOfDay')"
         class="ion-no-padding error-message"
       >
         <ion-text color="danger">
-          <small>La fecha de inicio es obligatoria</small>
+          <small>La fecha y hora de inicio son obligatorias</small>
         </ion-text>
       </ion-item>
-      <ion-item lines="full">
-        <ion-label>Final</ion-label>
-        <ion-datetime-button datetime="endTime"></ion-datetime-button>
+      <ion-item lines="full" class="date-time-item">
+        <ion-label position="stacked">Fecha fin</ion-label>
+        <input
+          aria-label="Fecha fin"
+          class="date-time-input"
+          type="date"
+          formControlName="endDate"
+        />
+      </ion-item>
+      <ion-item lines="full" class="date-time-item">
+        <ion-label position="stacked">Hora fin</ion-label>
+        <input
+          aria-label="Hora fin"
+          class="date-time-input"
+          type="text"
+          inputmode="numeric"
+          placeholder="HH:mm"
+          maxlength="5"
+          formControlName="endTimeOfDay"
+          (input)="onTimeInput('endTimeOfDay', $event)"
+        />
       </ion-item>
       <ion-item
         lines="full"
-        *ngIf="isControlInvalid('endTime')"
+        *ngIf="isControlInvalid('endDate') || isControlInvalid('endTimeOfDay')"
         class="ion-no-padding error-message"
       >
         <ion-text color="danger">
-          <small>La fecha de fin es obligatoria</small>
+          <small>La fecha y hora de fin son obligatorias</small>
+        </ion-text>
+      </ion-item>
+      <ion-item lines="full" *ngIf="form.errors?.['dateRangeInvalid']" class="ion-no-padding error-message">
+        <ion-text color="danger">
+          <small>La fecha/hora de fin debe ser posterior a la de inicio</small>
         </ion-text>
       </ion-item>
       <ion-item lines="full">
@@ -99,33 +140,14 @@
           <small>No hay servicios creados todavía</small>
         </ion-text>
       </ion-item>
+      <ion-item lines="full">
+        <select class="employee-select" aria-label="Empleado" formControlName="employee">
+          <option value="">Sin asignar</option>
+          <option *ngFor="let employee of employees" [value]="employee.id">
+            {{ employee.name }}
+          </option>
+        </select>
+      </ion-item>
     </ion-card>
   </div>
-  <ion-modal [keepContentsMounted]="true">
-    <ng-template>
-      <ion-datetime
-        locale="es-ES"
-        presentation="date-time"
-        showDefaultButtons="true"
-        hourCycle="h23"
-        formControlName="startTime"
-        id="startTime"
-      >
-      </ion-datetime>
-    </ng-template>
-  </ion-modal>
-
-  <ion-modal [keepContentsMounted]="true">
-    <ng-template>
-      <ion-datetime
-        locale="es-ES"
-        presentation="date-time"
-        showDefaultButtons="true"
-        hourCycle="h23"
-        formControlName="endTime"
-        id="endTime"
-      >
-      </ion-datetime>
-    </ng-template>
-  </ion-modal>
 </form>

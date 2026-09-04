@@ -27,6 +27,11 @@ export const routes: Routes = [
           import("../chat/chat.page").then((m) => m.ChatPage),
       },
       {
+        path: "employees",
+        loadComponent: () =>
+          import("../employees/employees.page").then((m) => m.EmployeesPage),
+      },
+      {
         path: "",
         redirectTo: "/tabs/calendar",
         pathMatch: "full",

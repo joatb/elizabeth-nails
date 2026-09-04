@@ -20,6 +20,8 @@ export type DayEventItem = {
   service_name?: string | null;
   service_price?: number | null;
   service_color?: string | null;
+  employee_name?: string | null;
+  employee_color?: string | null;
 };
 
 @Component({
@@ -33,9 +35,20 @@ export class MolDayEventItemComponent {
   @Input({ required: true }) event!: DayEventItem;
   @Input() showDelete: boolean = true;
   @Input() showEdit: boolean = true;
+  @Input() draggable: boolean = false;
+  // En vistas sin un hilo de línea de tiempo (p.ej. columnas por empleado), el dot
+  // flotante no tiene sentido; en su lugar se pinta una franja de color a la izquierda.
+  @Input() showTimelineDot: boolean = true;
 
   @Output() delete = new EventEmitter<DayEventItem>();
   @Output() edit = new EventEmitter<DayEventItem>();
+  @Output() dragStart = new EventEmitter<DayEventItem>();
+
+  handleDragStart(nativeEvent: DragEvent): void {
+    nativeEvent.dataTransfer?.setData("text/plain", this.event?.id ?? "");
+    nativeEvent.dataTransfer!.effectAllowed = "move";
+    this.dragStart.emit(this.event);
+  }
 
   readonly Trash = Trash;
   readonly Pencil = Pencil;

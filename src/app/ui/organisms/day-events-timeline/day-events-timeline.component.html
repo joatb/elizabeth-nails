@@ -13,8 +13,10 @@
       [event]="event"
       [showEdit]="showEdit"
       [showDelete]="showDelete"
+      [draggable]="draggable"
       (edit)="handleEditEvent($event)"
       (delete)="handleDeleteEvent($event)"
+      (dragStart)="handleDragStart($event)"
     ></mol-day-event-item>
   </div>
 

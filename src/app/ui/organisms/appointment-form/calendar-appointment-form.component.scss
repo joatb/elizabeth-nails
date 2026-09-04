@@ -13,6 +13,43 @@
   }
 }
 
+.date-time-item {
+  --padding-top: 8px;
+  --padding-bottom: 10px;
+
+  ion-label {
+    margin-bottom: 6px;
+    font-size: 16px;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Estilo común para todos los inputs/selects nativos del formulario, para que
+// se vean igual que ion-textarea/ionic-selectable (sin caja propia, integrados
+// en la línea del ion-item).
+.date-time-input,
+.employee-select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ion-color-dark);
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: var(--ion-color-medium);
+  }
+
+  &:invalid,
+  option[value=""]:checked {
+    color: var(--ion-color-medium);
+  }
+}
+
 .service-option-color {
   display: inline-block;
   width: 10px;

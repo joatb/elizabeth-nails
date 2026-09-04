@@ -15,3 +15,5 @@ export * from "./calendar-schedule-modal/calendar-schedule-modal.component";
 export * from "./schedule-form/calendar-schedule-form.component";
 export * from "./chat-window/chat.component";
 export * from "./client-form/client-form-page";
+export * from "./employee-form/employee-form.page";
+export * from "./employees-columns-view/employees-columns-view.component";

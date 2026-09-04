@@ -3,9 +3,9 @@
         <ion-buttons slot="start">
             <ion-button (click)="cancel()">Cancelar</ion-button>
         </ion-buttons>
-        <ion-title>Nueva cita</ion-title>
+        <ion-title>{{ isEditMode ? 'Editar cita' : 'Nueva cita' }}</ion-title>
         <ion-buttons (click)="submit()" slot="end">
-            <ion-button [strong]="true">Crear</ion-button>
+            <ion-button [strong]="true">{{ isEditMode ? 'Guardar' : 'Crear' }}</ion-button>
         </ion-buttons>
     </ion-toolbar>
 </ion-header>
@@ -13,6 +13,8 @@
     <app-calendar-appointment-form
     [startTime]="startTime"
     [endTime]="endTime"
+    [employeeId]="employeeId"
+    [appointment]="appointment"
     (submitEvent)="dismiss($event)"
     ></app-calendar-appointment-form>
 </ion-content>

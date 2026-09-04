@@ -1,0 +1,81 @@
+<div class="columns-date-nav">
+  <button type="button" class="nav-arrow" (click)="goToPreviousDay()">‹</button>
+  <span class="nav-date-label">{{ dateLabel }}</span>
+  <button type="button" class="nav-arrow" (click)="goToNextDay()">›</button>
+  <button type="button" class="nav-today" (click)="goToToday()">Hoy</button>
+</div>
+
+<div
+  class="schedule-grid"
+  [style.grid-template-columns]="'64px repeat(' + columns.length + ', minmax(220px, 1fr))'"
+>
+  <div
+    *ngFor="let slot of timeSlots; let rowIndex = index"
+    class="hour-gutter-cell"
+    [style.grid-column]="1"
+    [style.grid-row]="rowIndex + 3"
+  >
+    {{ slot }}
+  </div>
+
+  <ng-container *ngFor="let column of columns; let colIndex = index">
+    <div
+      class="employee-column-header"
+      [class.drag-over]="dragOverColumnKey === column.key"
+      [style.grid-column]="colIndex + 2"
+      [style.grid-row]="1"
+      (dragover)="handleDragOver($event, column.key)"
+      (dragleave)="handleDragLeave(column.key)"
+      (drop)="handleDrop($event, column.employeeId)"
+    >
+      <span class="employee-color-dot" *ngIf="column.color" [style.background]="column.color"></span>
+      <span class="employee-column-title">{{ column.name }}</span>
+    </div>
+
+    <div
+      class="add-cita-cell"
+      [class.drag-over]="dragOverColumnKey === column.key"
+      [style.grid-column]="colIndex + 2"
+      [style.grid-row]="2"
+      (dragover)="handleDragOver($event, column.key)"
+      (dragleave)="handleDragLeave(column.key)"
+      (drop)="handleDrop($event, column.employeeId)"
+    >
+      <mol-add-event-button (action)="handleAdd(column.employeeId)"></mol-add-event-button>
+    </div>
+
+    <div
+      *ngIf="!column.hasEvents"
+      class="empty-column-cell"
+      [class.drag-over]="dragOverColumnKey === column.key"
+      [style.grid-column]="colIndex + 2"
+      [style.grid-row]="'3 / span ' + timeSlots.length"
+      (dragover)="handleDragOver($event, column.key)"
+      (dragleave)="handleDragLeave(column.key)"
+      (drop)="handleDrop($event, column.employeeId)"
+    >
+      No hay citas para este día.
+    </div>
+
+    <div
+      *ngFor="let row of column.rows; let rowIndex = index"
+      class="schedule-cell"
+      [class.drag-over]="dragOverColumnKey === column.key"
+      [style.grid-column]="colIndex + 2"
+      [style.grid-row]="rowIndex + 3"
+      (dragover)="handleDragOver($event, column.key)"
+      (dragleave)="handleDragLeave(column.key)"
+      (drop)="handleDrop($event, column.employeeId)"
+    >
+      <mol-day-event-item
+        *ngFor="let event of row"
+        [event]="event"
+        [draggable]="true"
+        [showTimelineDot]="false"
+        (edit)="handleEdit($event)"
+        (delete)="handleDelete($event)"
+        (dragStart)="handleDragStart($event)"
+      ></mol-day-event-item>
+    </div>
+  </ng-container>
+</div>
