@@ -34,6 +34,7 @@ interface ClientsRowData extends Record<string, unknown> {
   phone: string;
   phone_country: string;
   next_appointment: string;
+  last_appointment: string;
   appointments: number;
   tsinsert: string;
 }
@@ -196,6 +197,15 @@ export class ClientsPage {
     {
       field: "next_appointment",
       headerName: "Próxima Cita",
+      flex: 1,
+      minWidth: 150,
+      autoHeight: true,
+      valueFormatter: dateFormatter,
+      cellStyle: { display: "flex", alignItems: "center" },
+    },
+    {
+      field: "last_appointment",
+      headerName: "Última Cita Realizada",
       flex: 1,
       minWidth: 150,
       autoHeight: true,
@@ -371,20 +381,34 @@ export class ClientsPage {
   }
 
   private mapClientToRowData(client: Client): ClientsRowData {
+    const appointments = client.appointments ?? [];
+    const now = DateTime.now();
+    const pastAppointments = appointments.filter(
+      (a: Appointment) => DateTime.fromISO(a.start_time) < now,
+    );
+
     return {
       id: client.id,
       name: client.name,
       phone: client.phone,
       phone_country: client.phone_country,
       next_appointment:
-        (client.appointments ?? []).length > 0
-          ? (client.appointments ?? []).sort(
+        appointments.length > 0
+          ? appointments.sort(
               (a: Appointment, b: Appointment) =>
                 DateTime.fromISO(b.start_time).toMillis() -
                 DateTime.fromISO(a.start_time).toMillis(),
             )[0].start_time
           : "No hay citas",
-      appointments: (client.appointments ?? []).length,
+      last_appointment:
+        pastAppointments.length > 0
+          ? pastAppointments.sort(
+              (a: Appointment, b: Appointment) =>
+                DateTime.fromISO(b.start_time).toMillis() -
+                DateTime.fromISO(a.start_time).toMillis(),
+            )[0].start_time
+          : "Sin citas realizadas",
+      appointments: appointments.length,
       tsinsert: client["created_at"],
     };
   }

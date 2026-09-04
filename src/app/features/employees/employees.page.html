@@ -13,14 +13,16 @@
     <ion-card-content>
       <ion-list lines="full" class="employees-list" *ngIf="employees.length > 0; else emptyEmployees">
         <ion-item *ngFor="let employee of employees; trackBy: trackByEmployeeId">
-          <div class="employee-color" [style.background]="employee.color"></div>
           <ion-label>
-            <h2>{{ employee.name }}</h2>
             <p>
               <ion-badge [color]="employee.active ? 'success' : 'medium'">
                 {{ employee.active ? 'Activo' : 'Inactivo' }}
               </ion-badge>
             </p>
+            <h2>
+              <span class="employee-color" [style.background]="employee.color || '#5e81ac'"></span>
+              {{ employee.name }}
+            </h2>
           </ion-label>
           <ion-button fill="clear" color="primary" (click)="editEmployee(employee)">
             <ion-icon name="create-outline"></ion-icon>
