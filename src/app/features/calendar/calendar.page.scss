@@ -11,6 +11,16 @@
   transform: none !important;
 }
 
+::ng-deep .fc-employee-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .alert-message {
   .alert-message {
     white-space: pre-line;

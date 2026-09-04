@@ -2,7 +2,6 @@ import { CommonModule } from "@angular/common";
 import { Component, Input } from "@angular/core";
 import {
   AlertController,
-  ActionSheetController,
   ModalController,
   IonHeader,
   IonToolbar,
@@ -20,6 +19,7 @@ import { DayEventItem } from "../../molecules/mol-day-event-item/mol-day-event-i
 import { ServicesProvider } from "../../../providers/services/services.provider";
 import { Service } from "../../../providers/services/models/service";
 import { EventService } from "../../../services/event.service";
+import { AppointmentProximityService } from "../../../services/appointment-proximity.service";
 
 type AppointmentWithServiceMeta = Appointment & {
   service_name?: string | null;
@@ -78,6 +78,8 @@ export class CalendarDayEventsModalComponent {
           service_name: serviceName,
           service_price: servicePrice,
           service_color: serviceColor,
+          employee_name: event.employee?.name ?? null,
+          employee_color: event.employee?.color ?? null,
         };
       });
   }
@@ -89,7 +91,7 @@ export class CalendarDayEventsModalComponent {
     private eventService: EventService,
     private alertService: AlertService,
     private alertCtrl: AlertController,
-    private actionSheetCtrl: ActionSheetController,
+    private proximityService: AppointmentProximityService,
   ) {}
 
   ionViewWillLeave(): void {
@@ -138,9 +140,14 @@ export class CalendarDayEventsModalComponent {
       return;
     }
     const appointmentId = event.id;
+    const original = this._events.find((e) => e.id === appointmentId);
+    const baseMessage = "¿Estás seguro de que deseas eliminar esta cita?";
+    const message = original
+      ? this.proximityService.buildDeleteWarningMessage(baseMessage, original.start_time)
+      : baseMessage;
     const confirmAlert = await this.alertCtrl.create({
       header: "Confirmar eliminación",
-      message: "¿Estás seguro de que deseas eliminar esta cita?",
+      message,
       buttons: [
         {
           text: "Cancelar",
@@ -173,57 +180,43 @@ export class CalendarDayEventsModalComponent {
   async editEvent(event: DayEventItem) {
     if (!event.id) return;
 
-    const services = [...this.servicesById.values()];
-    if (services.length === 0) {
-      await this.alertService.presentToast("No hay servicios para asignar", 2500);
+    const original = this._events.find((e) => e.id === event.id);
+    if (!original) {
+      await this.alertService.presentErrorToast("No se pudo cargar la cita", 2500);
       return;
     }
 
-    const actionSheet = await this.actionSheetCtrl.create({
-      header: "Editar servicio de la cita",
-      buttons: [
-        {
-          text: "Sin servicio",
-          role: "destructive",
-          handler: async () => {
-            try {
-              await this.appointmentsPvd.updateAppointment(event.id!, {
-                service_id: null,
-              });
-              this.changed = true;
-              await this.alertService.presentToast("Servicio eliminado de la cita", 2500);
-              await this.loadEvents();
-            } catch (error) {
-              await this.alertService.presentErrorToast(
-                "No se pudo quitar el servicio de la cita",
-                2500,
-              );
-            }
-          },
-        },
-        ...services.map((service) => ({
-          text: `${service.name} - ${Number(service.price || 0).toFixed(2)}€`,
-          handler: async () => {
-            try {
-              await this.appointmentsPvd.updateAppointment(event.id!, {
-                service_id: service.id,
-              });
-              this.changed = true;
-              await this.alertService.presentToast("Servicio de cita actualizado", 2500);
-              await this.loadEvents();
-            } catch (error) {
-              await this.alertService.presentErrorToast(
-                "No se pudo actualizar el servicio de la cita",
-                2500,
-              );
-            }
-          },
-        })),
-        { text: "Cancelar", role: "cancel" },
-      ],
+    const modal = await this.modalCtrl.create({
+      component: CalendarAppointmentModalComponent,
+      componentProps: {
+        day: this.date,
+        startTime: original.start_time,
+        endTime: original.end_time,
+        appointment: original,
+      },
     });
+    await modal.present();
 
-    await actionSheet.present();
+    const { data } = await modal.onDidDismiss();
+    if (!data) return;
+
+    const { id: _ignoredId, ...changes } = data;
+
+    const proceed = await this.proximityService.confirmIfNeeded(
+      this.alertCtrl,
+      original,
+      changes,
+    );
+    if (!proceed) return;
+
+    try {
+      await this.appointmentsPvd.updateAppointment(original.id, changes);
+      this.changed = true;
+      await this.alertService.presentToast("Cita actualizada", 2500);
+      await this.loadEvents();
+    } catch (error) {
+      await this.alertService.presentErrorToast("No se pudo actualizar la cita", 2500);
+    }
   }
 
   async addEvent() {

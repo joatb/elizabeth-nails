@@ -10,6 +10,10 @@
                 <i-lucide [img]="UsersRound"></i-lucide>
                 <ion-label>Clientes</ion-label>
             </div>
+            <div class="item" [class.active]="selectedSegment === 'employees'" (click)="onChangeSegment('employees')">
+                <i-lucide [img]="UserRound"></i-lucide>
+                <ion-label>Empleados</ion-label>
+            </div>
         </div>
         <div class="center">
             <ion-fab-button [disabled]="selectedSegment === 'chat'" (click)="add()">

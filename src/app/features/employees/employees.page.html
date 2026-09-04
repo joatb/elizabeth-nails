@@ -1,0 +1,45 @@
+<org-clients-toolbar
+  title="Empleados"
+  [logoutIcon]="LogOut"
+  (logout)="authService.logout()"
+></org-clients-toolbar>
+
+<ion-content [fullscreen]="true" class="ion-padding employees-content">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Empleados - {{employees.length}}</ion-card-title>
+      <ion-card-subtitle>Listado y gestión</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-list lines="full" class="employees-list" *ngIf="employees.length > 0; else emptyEmployees">
+        <ion-item *ngFor="let employee of employees; trackBy: trackByEmployeeId">
+          <div class="employee-color" [style.background]="employee.color"></div>
+          <ion-label>
+            <h2>{{ employee.name }}</h2>
+            <p>
+              <ion-badge [color]="employee.active ? 'success' : 'medium'">
+                {{ employee.active ? 'Activo' : 'Inactivo' }}
+              </ion-badge>
+            </p>
+          </ion-label>
+          <ion-button fill="clear" color="primary" (click)="editEmployee(employee)">
+            <ion-icon name="create-outline"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" color="danger" (click)="deleteEmployee(employee)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-list>
+      <ng-template #emptyEmployees>
+        <div *ngIf="!isLoading" class="empty-state">No hay empleados creados todavía.</div>
+        <div *ngIf="isLoading" class="loading-state"><atom-spinner name="circles" size="default"></atom-spinner></div>
+      </ng-template>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button color="primary" (click)="addEmployee()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

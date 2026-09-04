@@ -11,6 +11,14 @@
         <i-lucide [img]="logoutIcon"></i-lucide>
       </ion-button>
       <ion-button
+        *ngIf="showViewModeButton"
+        (click)="handleToggleViewMode()"
+        color="primary-contrast"
+        fill="clear"
+      >
+        <i-lucide [img]="viewModeIcon"></i-lucide>
+      </ion-button>
+      <ion-button
         *ngIf="showScheduleButton"
         [id]="scheduleButtonId"
         color="primary-contrast"

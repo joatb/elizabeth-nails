@@ -3,6 +3,10 @@
   [logoutIcon]="LogOut"
   [scheduleIcon]="Clock"
   [configIcon]="EllipsisVertical"
+  [showViewModeButton]="true"
+  [viewModeIcon]="viewMode === 'day' ? Columns3 : CalendarClock"
+  [viewMode]="viewMode"
+  (viewModeChange)="setViewMode($event)"
   (logout)="authService.logout()"
 ></org-calendar-toolbar>
 
@@ -15,8 +19,21 @@
   <full-calendar
     #calendar
     [options]="calendarOptions"
-    [ngClass]="{'calendar-hidden': isLoadingEvents}"
+    [ngClass]="{'calendar-hidden': isLoadingEvents || viewMode === 'employees'}"
   ></full-calendar>
+
+  <org-employees-columns-view
+    *ngIf="viewMode === 'employees' && !isLoadingEvents"
+    [date]="selectedDate"
+    [employees]="employees"
+    [appointments]="selectedDayAppointments"
+    [businessHourRange]="employeesViewHourRange"
+    (addEvent)="onEmployeesColumnAdd($event)"
+    (editEvent)="onEmployeesColumnEdit($event)"
+    (deleteEvent)="onEmployeesColumnDelete($event)"
+    (dateChange)="onEmployeesDateChange($event)"
+    (reassignEmployee)="onEmployeesColumnReassign($event)"
+  ></org-employees-columns-view>
 
   <org-month-picker-modal
     [isOpen]="isMonthPickerOpen"

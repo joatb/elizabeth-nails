@@ -24,9 +24,13 @@ export class Day {
     getAvailableHourGapsByHoursAndSchedules(hours: number): Array<{ start: Date; end: Date }> {
         
         const availableGaps = [];
-        
+
         if(this.isPast()) {
             return []; // No available slots in the past
+        }
+
+        if (hours <= 0) {
+            return []; // Evita un bucle infinito: sin duración no hay forma de avanzar el tiempo
         }
 
         const requiredMilliseconds = hours * 60 * 60 * 1000;

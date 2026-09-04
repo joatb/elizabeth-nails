@@ -5,9 +5,32 @@
 .timeline-event {
   display: flex;
   align-items: flex-start;
+  flex-wrap: wrap;
   margin-bottom: 28px;
   position: relative;
   gap: 8px;
+}
+
+.timeline-actions {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.employee-inline-dot {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@media (max-width: 600px) {
+  .timeline-content {
+    flex-basis: 100%;
+  }
+
+  .timeline-actions {
+    flex-basis: 100%;
+    justify-content: flex-end;
+    margin-left: 10px;
+  }
 }
 
 .timeline-dot {
@@ -26,6 +49,25 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+// Sin el dot de línea de tiempo (p.ej. columnas por empleado): no hace falta el
+// hueco a la izquierda, se marca el servicio con una franja lateral, y al no haber
+// hilo de línea de tiempo tampoco hace falta tanta separación entre citas.
+.timeline-event.no-dot {
+  margin-bottom: 8px;
+
+  .timeline-content {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.timeline-content.with-accent-bar {
+  border-left: 4px solid var(--ion-color-primary);
 }
 
 .timeline-time {

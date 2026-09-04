@@ -1,0 +1,31 @@
+.employees-content ion-card {
+  margin: 0 0 12px;
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.employees-content ion-card-title {
+  color: var(--ion-color-dark);
+}
+
+.employees-content ion-card-subtitle {
+  color: var(--ion-color-medium);
+}
+
+.employees-list {
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.employee-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 12px;
+  border: 1px solid rgba(var(--ion-color-medium-rgb), 0.35);
+}
+
+.empty-state {
+  color: var(--ion-color-medium);
+  padding: 12px 0;
+}

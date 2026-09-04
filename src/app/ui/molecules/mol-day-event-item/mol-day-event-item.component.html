@@ -1,11 +1,31 @@
-<div class="timeline-event">
+<div
+  class="timeline-event"
+  [class.no-dot]="!showTimelineDot"
+  [attr.draggable]="draggable ? 'true' : null"
+  (dragstart)="draggable && handleDragStart($event)"
+>
   <atom-timeline-dot
+    *ngIf="showTimelineDot"
     class="timeline-dot"
     [color]="event.service_color || 'var(--ion-color-primary)'"
   ></atom-timeline-dot>
-  <div class="timeline-content">
+  <div
+    class="timeline-content"
+    [class.with-accent-bar]="!showTimelineDot"
+    [style.border-left-color]="!showTimelineDot ? (event.service_color || 'var(--ion-color-primary)') : null"
+  >
     <div class="timeline-time">{{ startTimeLabel }} - {{ endTimeLabel }}</div>
-    <div class="timeline-title">{{ event.client.name || 'Cliente eliminado' }}</div>
+    <div class="timeline-title">
+      <atom-timeline-dot
+        class="employee-inline-dot"
+        [size]="10"
+        [color]="event.employee_color || 'transparent'"
+        [borderColor]="event.employee_color ? '#fff' : 'rgba(var(--ion-color-medium-rgb), 0.6)'"
+        [shadowColor]="'rgba(0, 0, 0, 0.15)'"
+      ></atom-timeline-dot>
+      {{ event.client.name || 'Cliente eliminado' }}
+    </div>
+    <div class="timeline-note">Empleado: {{ event.employee_name || 'Sin asignar' }}</div>
     <div class="timeline-note" *ngIf="event.service_name">
       Servicio: {{ event.service_name }}
       <span *ngIf="event.service_price !== null && event.service_price !== undefined">
@@ -13,18 +33,20 @@
       </span>
     </div>
     <div class="timeline-note" *ngIf="hasPhone">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
-    <div class="timeline-note" *ngIf="event.note">{{ event.note }}</div>
+    <div class="timeline-note">Nota: {{ event.note || '-' }}</div>
   </div>
-  <ion-button
-    *ngIf="showEdit"
-    fill="clear"
-    size="small"
-    color="primary"
-    (click)="handleEdit()"
-  >
-    <i-lucide [img]="Pencil"></i-lucide>
-  </ion-button>
-  <ion-button *ngIf="showDelete" fill="clear" size="small" color="danger" (click)="handleDelete()">
-    <i-lucide [img]="Trash"></i-lucide>
-  </ion-button>
+  <div class="timeline-actions">
+    <ion-button
+      *ngIf="showEdit"
+      fill="clear"
+      size="small"
+      color="primary"
+      (click)="handleEdit()"
+    >
+      <i-lucide [img]="Pencil"></i-lucide>
+    </ion-button>
+    <ion-button *ngIf="showDelete" fill="clear" size="small" color="danger" (click)="handleDelete()">
+      <i-lucide [img]="Trash"></i-lucide>
+    </ion-button>
+  </div>
 </div>

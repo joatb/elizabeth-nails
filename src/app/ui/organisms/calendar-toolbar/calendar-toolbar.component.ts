@@ -30,6 +30,7 @@ export class CalendarToolbarComponent {
   @Input() showLogoutButton: boolean = true;
   @Input() showScheduleButton: boolean = true;
   @Input() showConfigButton: boolean = true;
+  @Input() showViewModeButton: boolean = false;
 
   @Input() scheduleButtonId: string = "openModal";
   @Input() configButtonId: string = "openConfigModal";
@@ -37,10 +38,17 @@ export class CalendarToolbarComponent {
   @Input() logoutIcon?: any;
   @Input() scheduleIcon?: any;
   @Input() configIcon?: any;
+  @Input() viewModeIcon?: any;
+  @Input() viewMode: "day" | "employees" = "day";
 
   @Output() logout = new EventEmitter<void>();
+  @Output() viewModeChange = new EventEmitter<"day" | "employees">();
 
   handleLogout(): void {
     this.logout.emit();
+  }
+
+  handleToggleViewMode(): void {
+    this.viewModeChange.emit(this.viewMode === "day" ? "employees" : "day");
   }
 }

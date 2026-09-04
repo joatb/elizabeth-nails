@@ -5,6 +5,7 @@ import { Day } from "../../../models/day";
 import { SharedModule } from "../../../modules/shared.module";
 import { EventService } from "../../../services/event.service";
 import { CalendarAppointmentFormComponent } from "../appointment-form/calendar-appointment-form.component";
+import { Appointment } from "../../../providers/appointments/models/appointment";
 
 @Component({
   standalone: true,
@@ -16,6 +17,12 @@ export class CalendarAppointmentModalComponent {
   @Input() day!: Day;
   @Input() startTime!: string;
   @Input() endTime!: string;
+  @Input() employeeId: string | null = null;
+  @Input() appointment: Appointment | null = null;
+
+  get isEditMode(): boolean {
+    return !!this.appointment?.id;
+  }
 
   constructor(
     private modalCtrl: ModalController,

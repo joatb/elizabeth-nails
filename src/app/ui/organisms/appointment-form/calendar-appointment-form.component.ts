@@ -6,6 +6,7 @@ import {
   Validators,
 } from "@angular/forms";
 import { ModalController } from "@ionic/angular/standalone";
+import { DateTime } from "luxon";
 import { SharedModule } from "../../../modules/shared.module";
 import { IonicSelectableComponent } from "ionic-selectable";
 import { ClientsProvider } from "../../../providers/clients/clients.provider";
@@ -14,15 +15,20 @@ import { Subscription } from "rxjs";
 import { EventService } from "../../../services/event.service";
 import { ServicesProvider } from "../../../providers/services/services.provider";
 import { Service } from "../../../providers/services/models/service";
+import { EmployeesProvider } from "../../../providers/employees/employees.provider";
+import { Employee } from "../../../providers/employees/models/employee";
+import { Appointment } from "../../../providers/appointments/models/appointment";
 
 type ClientOption = { id: string; name: string };
 type ServiceOption = { id: string; name: string; color: string; price: number };
 type AppointmentSubmit = {
+  id?: string;
   start_time: string;
   end_time: string;
   note: string;
   client_id: string;
   service_id?: string;
+  employee_id?: string | null;
 };
 type ClientSearchEvent = { text: string };
 type ClientInfiniteScrollEvent = {
@@ -35,6 +41,17 @@ type ClientInfiniteScrollEvent = {
 };
 type CalendarEventPayload = { name: string };
 
+// Zona horaria fija del negocio: evita que la hora mostrada/guardada dependa
+// de la zona horaria del dispositivo/navegador donde corre la app.
+const BUSINESS_TIMEZONE = "Europe/Madrid";
+
+// El input de fecha es un <input type="date"> nativo (formato interno siempre
+// yyyy-MM-dd, independiente de cómo lo muestre el navegador). El de hora es un
+// campo de texto en formato 24h HH:mm, para que no dependa del locale del SO.
+const DATE_INPUT_FORMAT = "yyyy-LL-dd";
+const TIME_INPUT_FORMAT = "HH:mm";
+const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 @Component({
   selector: "app-calendar-appointment-form",
   templateUrl: "./calendar-appointment-form.component.html",
@@ -45,12 +62,15 @@ export class CalendarAppointmentFormComponent {
   form!: FormGroup;
   @Input() startTime: string = "";
   @Input() endTime: string = "";
+  @Input() employeeId: string | null = null;
+  @Input() appointment: Appointment | null = null;
   @Output() submitEvent = new EventEmitter<AppointmentSubmit>();
 
   protected clients: { total: number; documents: Client[] } | null = null;
   protected selectableClientsOptions: ClientOption[] = [];
   protected services: { total: number; documents: Service[] } | null = null;
   protected selectableServicesOptions: ServiceOption[] = [];
+  protected employees: Employee[] = [];
   private eventsSubscription: Subscription | null = null;
   formSubmitted = false;
 
@@ -66,6 +86,7 @@ export class CalendarAppointmentFormComponent {
     private modalCtrl: ModalController,
     private clientsPvd: ClientsProvider,
     private servicesPvd: ServicesProvider,
+    private employeesPvd: EmployeesProvider,
     private events: EventService,
   ) {}
 
@@ -79,15 +100,72 @@ export class CalendarAppointmentFormComponent {
 
   async ngOnInit(): Promise<void> {
     this.subscribeToEvents();
+
+    const referenceStart = this.appointment?.start_time || this.startTime;
+    const referenceEnd = this.appointment?.end_time || this.endTime;
+    const startDt = referenceStart
+      ? DateTime.fromISO(referenceStart, { zone: BUSINESS_TIMEZONE })
+      : DateTime.now().setZone(BUSINESS_TIMEZONE);
+    const endDt = referenceEnd
+      ? DateTime.fromISO(referenceEnd, { zone: BUSINESS_TIMEZONE })
+      : DateTime.now().setZone(BUSINESS_TIMEZONE);
+
     this.form = this.fb.group({
-      note: [""],
+      note: [this.appointment?.note ?? ""],
       client: ["", [Validators.required]],
       services: [""],
-      startTime: [this.startTime, [Validators.required]],
-      endTime: [this.endTime, [Validators.required]],
+      employee: [this.appointment?.employee_id ?? this.employeeId ?? ""],
+      startDate: [
+        startDt.isValid ? startDt.toFormat(DATE_INPUT_FORMAT) : "",
+        [Validators.required],
+      ],
+      startTimeOfDay: [
+        startDt.isValid ? startDt.toFormat("HH:mm") : "",
+        [Validators.required, Validators.pattern(TIME_PATTERN)],
+      ],
+      endDate: [
+        endDt.isValid ? endDt.toFormat(DATE_INPUT_FORMAT) : "",
+        [Validators.required],
+      ],
+      endTimeOfDay: [
+        endDt.isValid ? endDt.toFormat("HH:mm") : "",
+        [Validators.required, Validators.pattern(TIME_PATTERN)],
+      ],
     });
 
-    await Promise.all([this.loadInitialClients(), this.loadServices()]);
+    await Promise.all([this.loadInitialClients(), this.loadServices(), this.loadEmployees()]);
+
+    if (this.appointment) {
+      this.patchAppointment(this.appointment);
+    }
+  }
+
+  private patchAppointment(appointment: Appointment): void {
+    if (appointment.client && typeof appointment.client !== "string") {
+      const clientOption: ClientOption = {
+        id: appointment.client.id,
+        name: appointment.client.name,
+      };
+      this.form.controls["client"].setValue(clientOption);
+      if (!this.selectableClientsOptions.some((c) => c.id === clientOption.id)) {
+        this.selectableClientsOptions = [clientOption, ...this.selectableClientsOptions];
+      }
+    }
+
+    const service = appointment.services;
+    if (service && typeof service !== "string") {
+      const serviceOption: ServiceOption = {
+        id: service.id,
+        name: service.name,
+        color: service.color,
+        price: Number(service.price) || 0,
+      };
+      this.form.controls["services"].setValue(serviceOption);
+    }
+
+    if (appointment.employee_id) {
+      this.form.controls["employee"].setValue(appointment.employee_id);
+    }
   }
 
   ngOnDestroy() {
@@ -99,20 +177,54 @@ export class CalendarAppointmentFormComponent {
     this.formSubmitted = true;
     if (this.form.valid) {
       const formValue = this.form.value;
-      const utcStartTime = this.convertToUTC(formValue.startTime);
-      const utcEndTime = this.convertToUTC(formValue.endTime);
+      const selectedClient = formValue.client as ClientOption;
+      const selectedService = formValue.services as ServiceOption | "";
+      const startTime = this.combineDateTime(formValue.startDate, formValue.startTimeOfDay);
+      const endTime = this.combineDateTime(formValue.endDate, formValue.endTimeOfDay);
 
-      this.modalCtrl.dismiss({
-        ...formValue,
-        startTime: utcStartTime,
-        endTime: utcEndTime,
-      });
+      if (new Date(endTime).getTime() <= new Date(startTime).getTime()) {
+        this.form.setErrors({ ...(this.form.errors ?? {}), dateRangeInvalid: true });
+        return;
+      }
+
+      const payload: AppointmentSubmit = {
+        ...(this.appointment?.id ? { id: this.appointment.id } : {}),
+        start_time: startTime,
+        end_time: endTime,
+        note: formValue.note,
+        client_id: selectedClient?.id,
+        service_id:
+          selectedService && typeof selectedService !== "string"
+            ? selectedService.id
+            : undefined,
+        employee_id: formValue.employee || null,
+      };
+
+      this.modalCtrl.dismiss(payload);
     }
   }
 
-  private convertToUTC(dateTime: string): string {
-    const date = new Date(dateTime);
-    return date.toISOString();
+  /**
+   * Autoformatea mientras se escribe: inserta los dos puntos de HH:mm.
+   */
+  onTimeInput(controlName: string, event: Event): void {
+    const digits = (event.target as HTMLInputElement).value.replace(/\D/g, "").slice(0, 4);
+    let formatted = digits.slice(0, 2);
+    if (digits.length > 2) formatted += ":" + digits.slice(2, 4);
+    this.form.controls[controlName].setValue(formatted);
+  }
+
+  /**
+   * Combina una fecha (yyyy-LL-dd) y una hora (HH:mm) en un ISO string en UTC.
+   */
+  combineDateTime(dateStr: string, timeStr: string): string {
+    return (
+      DateTime.fromFormat(`${dateStr} ${timeStr}`, `${DATE_INPUT_FORMAT} ${TIME_INPUT_FORMAT}`, {
+        zone: BUSINESS_TIMEZONE,
+      })
+        .toUTC()
+        .toISO() ?? ""
+    );
   }
 
   onClientChange(event: { value: ClientOption }): void {
@@ -158,6 +270,15 @@ export class CalendarAppointmentFormComponent {
     } catch (error) {
       console.error("Error loading services:", error);
       this.selectableServicesOptions = [];
+    }
+  }
+
+  private async loadEmployees(): Promise<void> {
+    try {
+      this.employees = await this.employeesPvd.listActiveEmployees();
+    } catch (error) {
+      console.error("Error loading employees:", error);
+      this.employees = [];
     }
   }
 
@@ -262,17 +383,31 @@ export class CalendarAppointmentFormComponent {
               .value as ClientOption;
             const selectedService = this.form.controls["services"]
               .value as ServiceOption | "";
+            const startTime = this.combineDateTime(
+              this.form.controls["startDate"].value,
+              this.form.controls["startTimeOfDay"].value,
+            );
+            const endTime = this.combineDateTime(
+              this.form.controls["endDate"].value,
+              this.form.controls["endTimeOfDay"].value,
+            );
+
+            if (new Date(endTime).getTime() <= new Date(startTime).getTime()) {
+              this.form.setErrors({ ...(this.form.errors ?? {}), dateRangeInvalid: true });
+              return;
+            }
+
             const appointment: AppointmentSubmit = {
-              start_time: this.convertToUTC(
-                this.form.controls["startTime"].value,
-              ),
-              end_time: this.convertToUTC(this.form.controls["endTime"].value),
+              ...(this.appointment?.id ? { id: this.appointment.id } : {}),
+              start_time: startTime,
+              end_time: endTime,
               note: this.form.controls["note"].value,
               client_id: selectedClient.id,
               service_id:
                 selectedService && typeof selectedService !== "string"
                   ? selectedService.id
                   : undefined,
+              employee_id: this.form.controls["employee"].value || null,
             };
             this.submitEvent.emit(appointment);
           }

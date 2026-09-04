@@ -26,10 +26,12 @@ export class DayEventsTimelineComponent {
   @Input() showAddButton: boolean = true;
   @Input() showDelete: boolean = true;
   @Input() showEdit: boolean = true;
+  @Input() draggable: boolean = false;
 
   @Output() addEvent = new EventEmitter<void>();
   @Output() deleteEvent = new EventEmitter<DayEventItem>();
   @Output() editEvent = new EventEmitter<DayEventItem>();
+  @Output() dragStart = new EventEmitter<DayEventItem>();
 
   get hasEvents(): boolean {
     return this.events.length > 0;
@@ -45,5 +47,9 @@ export class DayEventsTimelineComponent {
 
   handleEditEvent(event: DayEventItem): void {
     this.editEvent.emit(event);
+  }
+
+  handleDragStart(event: DayEventItem): void {
+    this.dragStart.emit(event);
   }
 }

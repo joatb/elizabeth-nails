@@ -34,7 +34,7 @@ import {
   ModalController,
 } from "@ionic/angular";
 
-import { LogOut, Clock, EllipsisVertical } from "lucide-angular";
+import { LogOut, Clock, EllipsisVertical, Columns3, CalendarClock } from "lucide-angular";
 import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
 
@@ -46,9 +46,12 @@ import { Schedule } from "../../providers/schedules/models/schedule";
 import { SchedulesProvider } from "../../providers/schedules/schedules.provider";
 import { ServicesProvider } from "../../providers/services/services.provider";
 import { Service } from "../../providers/services/models/service";
+import { EmployeesProvider } from "../../providers/employees/employees.provider";
+import { Employee } from "../../providers/employees/models/employee";
 import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
+import { AppointmentProximityService } from "../../services/appointment-proximity.service";
 
 import {
   CalendarAppointmentModalComponent,
@@ -56,8 +59,10 @@ import {
   CalendarScheduleModalComponent,
   CalendarToolbarComponent,
   MonthPickerModalComponent,
+  EmployeesColumnsViewComponent,
 } from "../../ui";
 import { CalendarDayEventsModalComponent } from "../../ui/organisms/day-events-modal/calendar-day-events-modal";
+import { DayEventItem } from "../../ui/molecules/mol-day-event-item/mol-day-event-item.component";
 
 import { ConfigModalComponent } from "../../components/modals/config-modal/config-modal.component";
 
@@ -73,18 +78,25 @@ import { ConfigModalComponent } from "../../components/modals/config-modal/confi
     MonthPickerModalComponent,
     CalendarScheduleModalComponent,
     ConfigModalComponent,
+    EmployeesColumnsViewComponent,
   ],
 })
 export class CalendarPage implements OnDestroy {
   readonly LogOut = LogOut;
   readonly Clock = Clock;
   readonly EllipsisVertical = EllipsisVertical;
+  readonly Columns3 = Columns3;
+  readonly CalendarClock = CalendarClock;
 
   // Datos para agenda
   schedules: { total: number; documents: Schedule[] } | null = null;
   appointments: { total: number; documents: Appointment[] } | null = null;
   services: { total: number; documents: Service[] } | null = null;
+  employees: Employee[] = [];
   private servicesById = new Map<string, Service>();
+
+  viewMode: "day" | "employees" = "day";
+  selectedDate: Date = new Date();
 
   calendarOptions?: CalendarOptions;
 
@@ -103,12 +115,14 @@ export class CalendarPage implements OnDestroy {
     private schedulesPvd: SchedulesProvider,
     private appointmentsPvd: AppointmentsProvider,
     private servicesPvd: ServicesProvider,
+    private employeesPvd: EmployeesProvider,
     private actionSheetCtrl: ActionSheetController,
     private alertCtrl: AlertController,
     private alertService: AlertService,
     private events: EventService,
     private modalController: ModalController,
     private cdr: ChangeDetectorRef,
+    private proximityService: AppointmentProximityService,
   ) {
     // Configuración base de FullCalendar
     this.calendarOptions = {
@@ -140,6 +154,7 @@ export class CalendarPage implements OnDestroy {
       dateClick: (arg: any) => this.handleDateClick(arg),
       moreLinkClick: (arg: any) => this.handleMoreLinkClick(arg),
       eventClick: (info: any) => this.handleEventClick(info),
+      eventDidMount: (info: any) => this.prependEmployeeDot(info),
       dayMaxEventRows: true,
       eventColor: "var(--ion-color-primary)",
       eventTimeFormat: {
@@ -197,8 +212,39 @@ export class CalendarPage implements OnDestroy {
 
   private async initialize(): Promise<void> {
     await this.fetchServices();
-    await Promise.all([this.fetchAppointments(), this.fetchSchedules()]);
+    await Promise.all([this.fetchAppointments(), this.fetchSchedules(), this.fetchEmployees()]);
     this.updateTodayButtonVisibility();
+  }
+
+  private async fetchEmployees(): Promise<void> {
+    try {
+      this.employees = await this.employeesPvd.listActiveEmployees();
+    } catch (err) {
+      console.error("Error cargando employees:", err);
+      this.employees = [];
+    }
+  }
+
+  setViewMode(mode: "day" | "employees"): void {
+    this.viewMode = mode;
+    if (mode === "day") {
+      // El full-calendar estuvo colapsado (height: 0) mientras se veía la vista de
+      // columnas; sin esto no vuelve a medir su contenedor y el grid sale roto.
+      setTimeout(() => this.calendarApi?.updateSize(), 0);
+    }
+  }
+
+  selectedDayAppointments: Appointment[] = [];
+
+  private recomputeSelectedDayAppointments(): void {
+    if (!Array.isArray(this.appointments?.documents)) {
+      this.selectedDayAppointments = [];
+      return;
+    }
+    const dayStr = DateTime.fromJSDate(this.selectedDate).toFormat("yyyy-LL-dd");
+    this.selectedDayAppointments = this.appointments.documents.filter(
+      (a) => DateTime.fromISO(a.start_time).toFormat("yyyy-LL-dd") === dayStr,
+    );
   }
 
   // Recarga completa del calendario (usado externamente)
@@ -231,6 +277,7 @@ export class CalendarPage implements OnDestroy {
       if (this.calendarOptions) {
         this.calendarOptions.businessHours = businessHours;
       }
+      this.recomputeEmployeesViewHourRange();
     } catch (err) {
       // Log mínimamente y no romper la página
       // eslint-disable-next-line no-console
@@ -239,6 +286,7 @@ export class CalendarPage implements OnDestroy {
       if (this.calendarOptions) {
         this.calendarOptions.businessHours = [];
       }
+      this.recomputeEmployeesViewHourRange();
     }
   }
 
@@ -332,6 +380,8 @@ export class CalendarPage implements OnDestroy {
                 serviceId: service?.id,
                 serviceName: service?.name,
                 serviceColor: service?.color,
+                employeeName: appointment.employee?.name ?? null,
+                employeeColor: appointment.employee?.color ?? null,
               },
             };
           })
@@ -348,6 +398,7 @@ export class CalendarPage implements OnDestroy {
         this.calendarOptions.events = [];
       }
     } finally {
+      this.recomputeSelectedDayAppointments();
       this.isLoadingEvents = false;
       this.cdr.detectChanges();
     }
@@ -425,6 +476,27 @@ export class CalendarPage implements OnDestroy {
     }
   }
 
+  // Añade un pequeño punto con el color del empleado asignado al inicio de cada evento
+  private prependEmployeeDot(info: any): void {
+    const titleEl = info.el.querySelector(".fc-event-title");
+    if (!titleEl || titleEl.querySelector(".fc-employee-dot")) return;
+
+    const color = info.event.extendedProps?.employeeColor;
+    const dot = document.createElement("span");
+    dot.className = "fc-employee-dot";
+    if (color) {
+      dot.style.background = color;
+      dot.style.border = "1.5px solid #fff";
+    } else {
+      dot.style.background = "transparent";
+      dot.style.border = "1.5px dashed rgba(255, 255, 255, 0.7)";
+    }
+    if (info.event.extendedProps?.employeeName) {
+      dot.title = info.event.extendedProps.employeeName;
+    }
+    titleEl.prepend(dot);
+  }
+
   // Manejo de clicks en fechas: abre modal con eventos del día si es día de negocio
   private async handleDateClick(arg: any): Promise<void> {
     // Asegurar existencia de arg y de fecha
@@ -432,6 +504,14 @@ export class CalendarPage implements OnDestroy {
     if (!dateStr) return;
     if (!this.checkIfBusinessDay(new Date(dateStr))) return;
     const dateObj = new Date(dateStr);
+
+    if (this.viewMode === "employees") {
+      this.selectedDate = dateObj;
+      this.recomputeSelectedDayAppointments();
+      this.recomputeEmployeesViewHourRange();
+      return;
+    }
+
     const dayStr = dateObj.toISOString().substring(0, 10);
     const eventsForDay = Array.isArray(this.appointments?.documents)
       ? this.appointments!.documents
@@ -490,6 +570,47 @@ export class CalendarPage implements OnDestroy {
       const currentTime = new Date(`1970-01-01T${time}`);
       return currentTime >= start && currentTime <= end;
     });
+  }
+
+  // Rango de horas configurado (schedules) para el día seleccionado, cacheado para
+  // no recalcularse en cada ciclo de detección de cambios (ver bug de congelación).
+  employeesViewHourRange: { startHour: number; endHour: number } | null = null;
+
+  private recomputeEmployeesViewHourRange(): void {
+    this.employeesViewHourRange = this.getBusinessHourRangeForDate(this.selectedDate);
+  }
+
+  // Rango de horas configurado (schedules) para el día indicado, usado por la vista
+  // de columnas por empleado en vez de una franja fija.
+  private getBusinessHourRangeForDate(date: Date): { startHour: number; endHour: number } | null {
+    if (!this.schedules?.documents || !Array.isArray(this.schedules.documents)) return null;
+
+    const weekday = date.getDay();
+    const applicable = this.schedules.documents.filter((schedule: any) => {
+      const days: number[] = Array.isArray(schedule.days)
+        ? schedule.days
+            .map((d: any) => {
+              const n = Number(d);
+              return Number.isNaN(n) ? null : n === 7 ? 0 : n;
+            })
+            .filter((n: number | null): n is number => n !== null)
+        : [];
+      return days.includes(weekday);
+    });
+
+    if (applicable.length === 0) return null;
+
+    let startHour = Infinity;
+    let endHour = -Infinity;
+    for (const schedule of applicable as any[]) {
+      const start = Number(String(schedule.start_time ?? "").split(":")[0]);
+      const end = Number(String(schedule.end_time ?? "").split(":")[0]);
+      if (!Number.isNaN(start)) startHour = Math.min(startHour, start);
+      if (!Number.isNaN(end)) endHour = Math.max(endHour, end);
+    }
+
+    if (!Number.isFinite(startHour) || !Number.isFinite(endHour)) return null;
+    return { startHour, endHour };
   }
 
   // Comprueba si la fecha es un día de negocio según schedules
@@ -648,8 +769,8 @@ export class CalendarPage implements OnDestroy {
   ): Promise<void> {
     const modal = await this.modalController.create({
       component: CalendarAppointmentModalComponent,
-      initialBreakpoint: 0.5,
-      breakpoints: [0, 0.25, 0.5, 0.75],
+      initialBreakpoint: 1,
+      breakpoints: [0, 0.25, 0.5, 0.75, 1],
       componentProps: {
         day,
         startTime: DateTime.fromJSDate(startTime, { zone: "system" }).toISO(),
@@ -689,16 +810,121 @@ export class CalendarPage implements OnDestroy {
   }
 
   private async saveAppointment(appointment: {
+    id?: string;
     note: string;
     start_time: string;
     end_time: string;
     client_id: string;
     service_id?: string;
+    employee_id?: string | null;
   }): Promise<void> {
-    await this.appointmentsPvd.createAppointment(appointment);
-    this.events.push("appointment.created", appointment);
-    await this.alertService.presentToast("Cita creada", 2500);
+    const { id, ...changes } = appointment;
+    if (id) {
+      const original = this.appointments?.documents.find((a) => a.id === id);
+      if (original) {
+        const proceed = await this.proximityService.confirmIfNeeded(this.alertCtrl, original, changes);
+        if (!proceed) return;
+      }
+      await this.appointmentsPvd.updateAppointment(id, changes);
+      await this.alertService.presentToast("Cita actualizada", 2500);
+    } else {
+      await this.appointmentsPvd.createAppointment(changes);
+      this.events.push("appointment.created", changes);
+      await this.alertService.presentToast("Cita creada", 2500);
+    }
     this.reload();
+  }
+
+  async onEmployeesColumnAdd(payload: { employeeId: string | null }): Promise<void> {
+    const baseDate = DateTime.fromJSDate(this.selectedDate, { zone: "system" });
+    const modal = await this.modalController.create({
+      component: CalendarAppointmentModalComponent,
+      initialBreakpoint: 1,
+      breakpoints: [0, 0.25, 0.5, 0.75, 1],
+      componentProps: {
+        day: this.selectedDate,
+        startTime: baseDate.set({ hour: 9, minute: 0, second: 0, millisecond: 0 }).toISO(),
+        endTime: baseDate.set({ hour: 10, minute: 0, second: 0, millisecond: 0 }).toISO(),
+        employeeId: payload.employeeId,
+      },
+    });
+
+    await modal.present();
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      await this.saveAppointment(data);
+    }
+  }
+
+  async onEmployeesColumnEdit(event: DayEventItem): Promise<void> {
+    if (!event.id) return;
+    const original = this.appointments?.documents.find((a) => a.id === event.id);
+    if (!original) {
+      await this.alertService.presentErrorToast("No se pudo cargar la cita", 2500);
+      return;
+    }
+
+    const modal = await this.modalController.create({
+      component: CalendarAppointmentModalComponent,
+      initialBreakpoint: 0.5,
+      breakpoints: [0, 0.25, 0.5, 0.75],
+      componentProps: {
+        day: this.selectedDate,
+        startTime: original.start_time,
+        endTime: original.end_time,
+        appointment: original,
+      },
+    });
+
+    await modal.present();
+    const { data } = await modal.onDidDismiss();
+    if (data) {
+      await this.saveAppointment(data);
+    }
+  }
+
+  onEmployeesDateChange(newDate: Date): void {
+    this.selectedDate = newDate;
+    this.recomputeSelectedDayAppointments();
+    this.recomputeEmployeesViewHourRange();
+  }
+
+  async onEmployeesColumnReassign(payload: { appointmentId: string; employeeId: string | null }): Promise<void> {
+    try {
+      await this.appointmentsPvd.updateAppointment(payload.appointmentId, {
+        employee_id: payload.employeeId,
+      });
+      this.reload();
+    } catch (error) {
+      await this.alertService.presentErrorToast("No se pudo reasignar la cita", 2500);
+    }
+  }
+
+  async onEmployeesColumnDelete(event: DayEventItem): Promise<void> {
+    if (!event.id) return;
+    const original = this.appointments?.documents.find((a) => a.id === event.id);
+    const baseMessage = "¿Estás seguro de que deseas eliminar esta cita?";
+    const message = original
+      ? this.proximityService.buildDeleteWarningMessage(baseMessage, original.start_time)
+      : baseMessage;
+
+    const alert = await this.alertCtrl.create({
+      header: "Confirmar eliminación",
+      message,
+      buttons: [
+        { text: "Cancelar", role: "cancel" },
+        {
+          text: "Eliminar",
+          role: "destructive",
+          handler: async () => {
+            await this.appointmentsPvd.deleteAppointment(event.id!);
+            await this.alertService.presentToast("Cita eliminada correctamente", 2500);
+            this.reload();
+          },
+        },
+      ],
+    });
+    await alert.present();
   }
 
   private resolveService(appointment: Appointment): Service | null {
