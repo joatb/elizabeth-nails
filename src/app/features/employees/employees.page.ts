@@ -70,6 +70,7 @@ export class EmployeesPage implements OnDestroy {
       color: data.color ?? "#5e81ac",
       active: data.active ?? true,
     });
+    this.events.push("employees.changed", true);
     await this.alertService.presentToast("Empleado creado", 2500);
     await this.loadData();
   }
@@ -97,6 +98,7 @@ export class EmployeesPage implements OnDestroy {
         color: data.color ?? "#5e81ac",
         active: data.active ?? true,
       });
+      this.events.push("employees.changed", true);
       await this.alertService.presentToast("Empleado actualizado", 2500);
       await this.loadData();
     } catch (error) {
@@ -115,6 +117,7 @@ export class EmployeesPage implements OnDestroy {
           role: "destructive",
           handler: async () => {
             await this.employeesProvider.deleteEmployee(employee.id);
+            this.events.push("employees.changed", true);
             await this.alertService.presentToast("Empleado eliminado", 2500);
             await this.loadData();
           },

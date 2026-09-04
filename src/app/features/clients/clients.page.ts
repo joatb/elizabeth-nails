@@ -26,6 +26,7 @@ import {
   ClientFormPage,
   MolLoadingBannerComponent,
   MolPaginationInfoComponent,
+  ClientAppointmentsHistoryModalComponent,
 } from "../../ui";
 
 interface ClientsRowData extends Record<string, unknown> {
@@ -57,6 +58,7 @@ class CustomButtonComponent implements ICellRendererAngularComp {
       action: string;
     }>;
     reload: () => void;
+    viewHistory: (id: string) => void;
   };
   public buttons: Array<{
     label?: string;
@@ -80,6 +82,7 @@ class CustomButtonComponent implements ICellRendererAngularComp {
         action: string;
       }>;
       reload: () => void;
+      viewHistory: (id: string) => void;
     },
   ): void {
     this.params = params;
@@ -91,6 +94,8 @@ class CustomButtonComponent implements ICellRendererAngularComp {
   buttonClicked(action: string) {
     if (action === "delete") {
       this.delete();
+    } else if (action === "history") {
+      this.params.viewHistory(this.params.data.id);
     } else {
       alert(`Clicked: ${this.params.data.name}`);
     }
@@ -234,8 +239,12 @@ export class ClientsPage {
       headerName: "",
       cellRenderer: CustomButtonComponent,
       cellRendererParams: {
-        buttons: [{ icon: "trash-outline", color: "danger", action: "delete" }],
+        buttons: [
+          { icon: "time-outline", color: "medium", action: "history" },
+          { icon: "trash-outline", color: "danger", action: "delete" },
+        ],
         reload: () => this.reload(),
+        viewHistory: (id: string) => this.viewHistory(id),
       },
       flex: 1,
       minWidth: 100,
@@ -527,6 +536,18 @@ export class ClientsPage {
   async reload() {
     this.initializeClients();
     await this.alertService.presentToast("Se ha actualizado la tabla", 2500);
+  }
+
+  async viewHistory(clientId: string): Promise<void> {
+    const row = this.rowData.find((r) => r.id === clientId);
+    const modal = await this.modalCtrl.create({
+      component: ClientAppointmentsHistoryModalComponent,
+      componentProps: {
+        clientName: row?.name ?? "",
+        clientId,
+      },
+    });
+    await modal.present();
   }
 
   async subscribeToEvents() {

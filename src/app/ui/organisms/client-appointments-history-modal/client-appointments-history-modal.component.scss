@@ -1,0 +1,22 @@
+.empty-state {
+  color: var(--ion-color-medium);
+  text-align: center;
+  padding: 24px 0;
+}
+
+.history-list {
+  padding-left: 12px;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+
+  .page-label {
+    font-size: 0.9em;
+    color: var(--ion-color-medium);
+  }
+}

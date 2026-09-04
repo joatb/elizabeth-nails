@@ -17,3 +17,4 @@ export * from "./chat-window/chat.component";
 export * from "./client-form/client-form-page";
 export * from "./employee-form/employee-form.page";
 export * from "./employees-columns-view/employees-columns-view.component";
+export * from "./client-appointments-history-modal/client-appointments-history-modal.component";

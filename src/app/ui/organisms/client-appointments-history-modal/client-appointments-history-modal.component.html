@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Historial de {{ clientName }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="!hasAppointments && !isLoading" class="empty-state">Este cliente no tiene citas.</div>
+
+  <div class="history-list">
+    <mol-day-event-item
+      *ngFor="let item of items"
+      [event]="item"
+      [showEdit]="false"
+      [showDelete]="false"
+      [showTimelineDot]="false"
+      [showClientName]="false"
+      [showDate]="true"
+    ></mol-day-event-item>
+  </div>
+
+  <ion-infinite-scroll [disabled]="!hasMore" (ionInfinite)="loadNextPage($event)">
+    <ion-infinite-scroll-content loadingSpinner="crescent"></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+</ion-content>

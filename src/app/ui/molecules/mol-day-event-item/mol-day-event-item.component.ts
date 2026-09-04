@@ -39,6 +39,12 @@ export class MolDayEventItemComponent {
   // En vistas sin un hilo de línea de tiempo (p.ej. columnas por empleado), el dot
   // flotante no tiene sentido; en su lugar se pinta una franja de color a la izquierda.
   @Input() showTimelineDot: boolean = true;
+  // En vistas donde el cliente ya es fijo (p.ej. historial de un cliente concreto),
+  // no hace falta repetir su nombre en cada tarjeta.
+  @Input() showClientName: boolean = true;
+  // En vistas que abarcan varios días (p.ej. historial de citas), hace falta mostrar
+  // la fecha de cada cita, no solo la hora.
+  @Input() showDate: boolean = false;
 
   @Output() delete = new EventEmitter<DayEventItem>();
   @Output() edit = new EventEmitter<DayEventItem>();
@@ -59,6 +65,18 @@ export class MolDayEventItemComponent {
 
   get endTimeLabel(): string {
     return this.toTimeLabel(this.event?.end_time);
+  }
+
+  get dateLabel(): string {
+    const value = this.event?.start_time;
+    if (!value) return "";
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
   }
 
   get hasPhone(): boolean {

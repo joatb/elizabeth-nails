@@ -196,6 +196,9 @@ export class CalendarPage implements OnDestroy {
 
   ionViewDidEnter(): void {
     this.subscribeToEvents();
+    // Refrescar empleados por si se crearon/editaron/eliminaron mientras esta
+    // pestaña estaba desuscrita de eventos (p.ej. estando en la pestaña Empleados).
+    void this.fetchEmployees();
     // Forzar un resize para que FullCalendar calcule correctamente su tamaño
     setTimeout(() => window.dispatchEvent(new Event("resize")), 1);
   }
@@ -957,6 +960,9 @@ export class CalendarPage implements OnDestroy {
       }
       if (event?.name === "appointments.changed") {
         this.reload();
+      }
+      if (event?.name === "employees.changed") {
+        void this.fetchEmployees();
       }
     });
   }
