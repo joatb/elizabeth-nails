@@ -16,6 +16,7 @@ export class AppointmentsProvider {
         const { data, error, count } = await supabase
             .from('appointments')
             .select('*, client:clients(*), services(*), employee:employees(*)', { count: 'exact' })
+            .is('deleted_at', null)
             .gte('start_time', startDate)
             .lte('start_time', endDate)
             .order('start_time');
@@ -30,6 +31,7 @@ export class AppointmentsProvider {
         const { data, error, count } = await supabase
             .from('appointments')
             .select('*, client:clients(*), services(*), employee:employees(*)', { count: 'exact' })
+            .is('deleted_at', null)
             .gte('start_time', startIso)
             .lte('start_time', endIso)
             .order('start_time');
@@ -45,6 +47,7 @@ export class AppointmentsProvider {
         const { data, error, count } = await supabase
             .from('appointments')
             .select('*, client:clients(*), services(*), employee:employees(*)', { count: 'exact' })
+            .is('deleted_at', null)
             .eq('client_id', clientId)
             .order('start_time', { ascending: false })
             .range(offset, offset + limit - 1);
@@ -57,7 +60,18 @@ export class AppointmentsProvider {
         const { data, error, count } = await supabase
             .from('appointments')
             .select('*, client:clients(*), services(*), employee:employees(*)', { count: 'exact' })
+            .is('deleted_at', null)
             .order('start_time', { ascending: false });
+        if (error) throw error;
+        return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
+    }
+
+    async listDeletedAppointments(): Promise<{ total: number; documents: Appointment[] }> {
+        const { data, error, count } = await supabase
+            .from('appointments')
+            .select('*, client:clients(*), services(*), employee:employees(*)', { count: 'exact' })
+            .not('deleted_at', 'is', null)
+            .order('deleted_at', { ascending: false });
         if (error) throw error;
         return { total: count ?? 0, documents: (data ?? []) as Appointment[] };
     }
@@ -86,7 +100,15 @@ export class AppointmentsProvider {
     async deleteAppointment(appointmentId: string): Promise<void> {
         const { error } = await supabase
             .from('appointments')
-            .delete()
+            .update({ deleted_at: new Date().toISOString() })
+            .eq('id', appointmentId);
+        if (error) throw error;
+    }
+
+    async restoreAppointment(appointmentId: string): Promise<void> {
+        const { error } = await supabase
+            .from('appointments')
+            .update({ deleted_at: null })
             .eq('id', appointmentId);
         if (error) throw error;
     }
