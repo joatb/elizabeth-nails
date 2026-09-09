@@ -53,6 +53,78 @@
   }
 }
 
+// Estilo para los botones "Mes"/"Día" (sustituyen al grupo nativo de vistas)
+::ng-deep .fc-monthButton-button,
+::ng-deep .fc-dayButton-button {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  // La diferencia entre --fc-button-bg-color y --fc-button-active-bg-color
+  // (dos tonos de gris muy próximos) apenas se aprecia en botones pequeños,
+  // así que aquí se refuerza con opacidad además del cambio de color.
+  &.fc-button-active {
+    opacity: 1;
+    font-weight: 700;
+  }
+}
+
+// Los botones prev/next son solo icono: no necesitan tanto padding horizontal
+// como los botones de texto.
+::ng-deep .fc-prevButton-button,
+::ng-deep .fc-nextButton-button {
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// El font-size/padding de arriba llevan !important, así que sin esto ignoran
+// por completo el encogido responsive que sí aplica a los demás botones
+// (.fc-button-primary) en full-calendar.scss, dejando "Mes actual"/"Día
+// actual" y 📅 desproporcionadamente grandes en móvil.
+@media screen and (max-width: 768px) {
+  ::ng-deep .fc-monthPicker-button {
+    font-size: 1.05em !important;
+    padding: 0.35em 0.55em !important;
+  }
+
+  ::ng-deep .fc-todayButton-button {
+    font-size: 0.95em !important;
+    padding: 0.4em 0.8em !important;
+  }
+
+  ::ng-deep .fc-prevButton-button,
+  ::ng-deep .fc-nextButton-button {
+    padding: 0.4em 0.6em;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  ::ng-deep .fc-monthPicker-button {
+    font-size: 0.9em !important;
+    padding: 0.3em 0.5em !important;
+  }
+
+  ::ng-deep .fc-todayButton-button {
+    font-size: 0.8em !important;
+    padding: 0.35em 0.6em !important;
+  }
+
+  ::ng-deep .fc-prevButton-button,
+  ::ng-deep .fc-nextButton-button {
+    padding: 0.35em 0.5em;
+  }
+}
+
 .calendar-hidden {
   opacity: 0;
   pointer-events: none;
@@ -60,4 +132,19 @@
   width: 100%;
   height: 0;
   z-index: 0;
+}
+
+// En la vista de columnas por empleado se reutiliza la misma cabecera de
+// FullCalendar (título, prev/next, mes actual, selector de mes, Mes/Día);
+// solo se oculta el grid mensual, no la toolbar.
+// Nota: @fullcalendar/angular monta la instancia de FullCalendar sobre el propio
+// elemento <full-calendar>, así que la clase ".fc" cae en el mismo host que
+// ".fc-body-hidden" (no es un descendiente) — de ahí el selector compuesto.
+::ng-deep full-calendar.fc.fc-body-hidden {
+  height: auto;
+  overflow: visible;
+}
+
+::ng-deep .fc-body-hidden .fc-view-harness {
+  display: none;
 }

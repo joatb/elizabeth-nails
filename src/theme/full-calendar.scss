@@ -55,6 +55,16 @@
     background: rgba(var(--ion-color-light-rgb), 0.5);
     border-radius: 12px;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+}
+
+.fc .fc-toolbar-chunk {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    row-gap: 0.4rem;
 }
 
 .fc .fc-toolbar-title {
@@ -94,17 +104,17 @@
     .fc {
         font-size: 0.9em;
     }
-    
+
     .fc .fc-button-primary {
         padding: 0.4em 0.8em;
         font-size: 0.95em;
         min-width: 70px;
     }
-    
+
     .fc .fc-toolbar-title {
         font-size: 1.2em;
     }
-    
+
     .fc .fc-toolbar {
         padding: 0.8rem;
     }
@@ -112,36 +122,53 @@
     .fc .fc-daygrid-day {
         min-height: 80px;
     }
+
+    .fc .fc-event-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 @media screen and (max-width: 480px) {
     .fc {
         font-size: 0.9em;
     }
-    
+
     .fc .fc-button-primary {
-        padding: 0.5em 1em;
-        font-size: 1em;
-        min-width: 75px;
+        padding: 0.35em 0.6em;
+        font-size: 0.8em;
+        min-width: 0;
     }
-    
+
     .fc .fc-toolbar-title {
         font-size: 1.1em;
     }
-    
+
     .fc .fc-toolbar {
         flex-direction: column;
         gap: 0.5em;
         padding: 0.6rem;
     }
-    
+
     .fc .fc-toolbar-chunk {
-        display: flex;
         justify-content: center;
         width: 100%;
+        gap: 0.3rem;
     }
 
     .fc .fc-daygrid-day {
         min-height: 60px;
+    }
+
+    .fc .fc-event {
+        padding: 0.1em 0.3em;
+        font-size: 0.85em;
+    }
+
+    .fc .fc-event-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 }

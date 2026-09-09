@@ -3,10 +3,6 @@
   [logoutIcon]="LogOut"
   [scheduleIcon]="Clock"
   [configIcon]="EllipsisVertical"
-  [showViewModeButton]="true"
-  [viewModeIcon]="viewMode === 'day' ? Columns3 : CalendarClock"
-  [viewMode]="viewMode"
-  (viewModeChange)="setViewMode($event)"
   (logout)="authService.logout()"
 ></org-calendar-toolbar>
 
@@ -19,7 +15,7 @@
   <full-calendar
     #calendar
     [options]="calendarOptions"
-    [ngClass]="{'calendar-hidden': isLoadingEvents || viewMode === 'employees'}"
+    [ngClass]="{'calendar-hidden': isLoadingEvents, 'fc-body-hidden': viewMode === 'employees'}"
   ></full-calendar>
 
   <org-employees-columns-view
@@ -31,7 +27,6 @@
     (addEvent)="onEmployeesColumnAdd($event)"
     (editEvent)="onEmployeesColumnEdit($event)"
     (deleteEvent)="onEmployeesColumnDelete($event)"
-    (dateChange)="onEmployeesDateChange($event)"
     (reassignEmployee)="onEmployeesColumnReassign($event)"
   ></org-employees-columns-view>
 
