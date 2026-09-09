@@ -1,6 +1,5 @@
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { DateTime } from "luxon";
 import { MolDayEventItemComponent, DayEventItem } from "../../molecules/mol-day-event-item/mol-day-event-item.component";
 import { MolAddEventButtonComponent } from "../../molecules/mol-add-event-button/mol-add-event-button.component";
 import { Appointment } from "../../../providers/appointments/models/appointment";
@@ -55,7 +54,6 @@ export class EmployeesColumnsViewComponent {
   @Output() addEvent = new EventEmitter<{ employeeId: string | null }>();
   @Output() editEvent = new EventEmitter<DayEventItem>();
   @Output() deleteEvent = new EventEmitter<DayEventItem>();
-  @Output() dateChange = new EventEmitter<Date>();
   @Output() reassignEmployee = new EventEmitter<{ appointmentId: string; employeeId: string | null }>();
 
   columns: EmployeeColumn[] = [];
@@ -65,24 +63,6 @@ export class EmployeesColumnsViewComponent {
   private _employees: Employee[] = [];
   private draggedAppointmentId: string | null = null;
   private _businessHourRange: { startHour: number; endHour: number } | null = null;
-
-  get dateLabel(): string {
-    if (!this.date) return "";
-    const label = DateTime.fromJSDate(this.date).setLocale("es").toFormat("cccc, d 'de' LLLL");
-    return label.charAt(0).toUpperCase() + label.slice(1);
-  }
-
-  goToPreviousDay(): void {
-    this.dateChange.emit(DateTime.fromJSDate(this.date).minus({ days: 1 }).toJSDate());
-  }
-
-  goToNextDay(): void {
-    this.dateChange.emit(DateTime.fromJSDate(this.date).plus({ days: 1 }).toJSDate());
-  }
-
-  goToToday(): void {
-    this.dateChange.emit(DateTime.now().startOf("day").toJSDate());
-  }
 
   handleDragStart(event: DayEventItem): void {
     this.draggedAppointmentId = event.id ?? null;

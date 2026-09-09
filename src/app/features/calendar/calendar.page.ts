@@ -26,7 +26,6 @@ import esLocale from "@fullcalendar/core/locales/es";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import timeGridPlugin from "@fullcalendar/timegrid";
 
 import {
   ActionSheetController,
@@ -34,7 +33,7 @@ import {
   ModalController,
 } from "@ionic/angular";
 
-import { LogOut, Clock, EllipsisVertical, Columns3, CalendarClock } from "lucide-angular";
+import { LogOut, Clock, EllipsisVertical } from "lucide-angular";
 import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
 
@@ -85,8 +84,6 @@ export class CalendarPage implements OnDestroy {
   readonly LogOut = LogOut;
   readonly Clock = Clock;
   readonly EllipsisVertical = EllipsisVertical;
-  readonly Columns3 = Columns3;
-  readonly CalendarClock = CalendarClock;
 
   // Datos para agenda
   schedules: { total: number; documents: Schedule[] } | null = null;
@@ -110,6 +107,18 @@ export class CalendarPage implements OnDestroy {
   monthPickerValue: string =
     DateTime.local().startOf("month").toISODate() ?? "";
 
+  private readonly monthTitleFormat = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  } as const;
+  private readonly dayTitleFormat = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  } as const;
+
   constructor(
     protected authService: AuthService,
     private schedulesPvd: SchedulesProvider,
@@ -130,27 +139,16 @@ export class CalendarPage implements OnDestroy {
       initialView: "dayGridMonth",
       locale: esLocale,
       navLinks: true,
-      titleFormat: { year: "numeric", month: "long", day: "numeric" },
+      titleFormat: this.monthTitleFormat,
       headerToolbar: {
         start: "title",
         center: "",
-        end: "prev todayButton next monthPicker dayGridMonth,timeGridDay",
+        end: "prevButton todayButton nextButton monthPicker monthButton,dayButton",
       },
-      customButtons: {
-        todayButton: {
-          text: "Mes actual",
-          hint: "Volver al mes actual",
-          click: () => this.goToToday(),
-        },
-        monthPicker: {
-          text: "📅",
-          hint: "Seleccionar mes",
-          click: () => this.openMonthPicker(),
-        },
-      },
+      customButtons: this.buildCustomButtons(),
       displayEventEnd: true,
       nowIndicator: true,
-      plugins: [timeGridPlugin, dayGridPlugin, listPlugin, interactionPlugin],
+      plugins: [dayGridPlugin, listPlugin, interactionPlugin],
       dateClick: (arg: any) => this.handleDateClick(arg),
       moreLinkClick: (arg: any) => this.handleMoreLinkClick(arg),
       eventClick: (info: any) => this.handleEventClick(info),
@@ -188,10 +186,12 @@ export class CalendarPage implements OnDestroy {
       this.calendarOptions.datesSet = () => {
         this.fetchAppointments().catch(() => {});
         this.updateTodayButtonVisibility();
+        this.updateViewButtonsActiveState();
       };
     }
 
     void this.initialize();
+    this.updateViewButtonsActiveState();
   }
 
   ionViewDidEnter(): void {
@@ -235,6 +235,98 @@ export class CalendarPage implements OnDestroy {
       // columnas; sin esto no vuelve a medir su contenedor y el grid sale roto.
       setTimeout(() => this.calendarApi?.updateSize(), 0);
     }
+    // El título y el botón "Mes actual"/"Día actual" dependen del modo activo;
+    // se actualizan vía la API oficial de FullCalendar (evita tocar a mano el DOM
+    // que gestiona internamente, que descoloca el texto en el siguiente render).
+    this.calendarApi?.setOption(
+      "titleFormat",
+      mode === "employees" ? this.dayTitleFormat : this.monthTitleFormat,
+    );
+    this.calendarApi?.setOption("customButtons", this.buildCustomButtons());
+    // setOption("customButtons", ...) reconstruye la toolbar de forma asíncrona
+    // (igual que el título, ver comentario arriba); si marcamos el botón activo
+    // en el mismo ciclo, la reconstrucción llega después y se pierde la clase.
+    setTimeout(() => this.updateViewButtonsActiveState(), 0);
+  }
+
+  // Botones personalizados de la toolbar de FullCalendar. El texto de "Mes
+  // actual"/"Día actual" depende del viewMode activo (ver setViewMode).
+  private buildCustomButtons(): CalendarOptions["customButtons"] {
+    const isEmployees = this.viewMode === "employees";
+    return {
+      prevButton: {
+        icon: "chevron-left",
+        hint: "Anterior",
+        click: () => this.goToPrev(),
+      },
+      todayButton: {
+        text: isEmployees ? "Día actual" : "Mes actual",
+        hint: isEmployees ? "Volver al día actual" : "Volver al mes actual",
+        click: () => this.goToToday(),
+      },
+      nextButton: {
+        icon: "chevron-right",
+        hint: "Siguiente",
+        click: () => this.goToNext(),
+      },
+      monthPicker: {
+        text: "📅",
+        hint: "Seleccionar mes",
+        click: () => this.openMonthPicker(),
+      },
+      monthButton: {
+        text: "Mes",
+        hint: "Ver mes",
+        click: () => this.selectDayGridView(),
+      },
+      dayButton: {
+        text: "Día",
+        hint: "Ver por empleados",
+        click: () => this.selectEmployeesView(),
+      },
+    };
+  }
+
+  // "Mes" en la toolbar de FullCalendar: vuelve a la vista de mes nativa.
+  selectDayGridView(): void {
+    this.calendarApi?.changeView("dayGridMonth");
+    this.setViewMode("day");
+  }
+
+  // "Día" en la toolbar de FullCalendar: activa la vista de columnas por empleado,
+  // manteniendo la misma cabecera (título, prev/next, día actual, selector de mes).
+  // Se cambia a la vista nativa "dayGridDay" (oculta vía CSS) para que el título
+  // de FullCalendar muestre el día seleccionado en vez del mes.
+  selectEmployeesView(): void {
+    this.calendarApi?.changeView("dayGridDay", this.selectedDate);
+    this.setViewMode("employees");
+  }
+
+  // Flechas prev/next de la toolbar: al ser nativas de FullCalendar, ya paginan
+  // por mes en la vista "dayGridMonth" y por día en "dayGridDay".
+  goToPrev(): void {
+    if (!this.calendarApi) return;
+    this.calendarApi.prev();
+    if (this.viewMode === "employees") this.syncSelectedDateFromCalendar();
+  }
+
+  goToNext(): void {
+    if (!this.calendarApi) return;
+    this.calendarApi.next();
+    if (this.viewMode === "employees") this.syncSelectedDateFromCalendar();
+  }
+
+  private syncSelectedDateFromCalendar(): void {
+    if (!this.calendarApi) return;
+    this.onEmployeesDateChange(this.calendarApi.getDate());
+  }
+
+  // Refleja en los botones "Mes"/"Día" cuál es el viewMode activo.
+  private updateViewButtonsActiveState(): void {
+    const monthButton = document.querySelector(".fc-monthButton-button");
+    const dayButton = document.querySelector(".fc-dayButton-button");
+    monthButton?.classList.toggle("fc-button-active", this.viewMode === "day");
+    dayButton?.classList.toggle("fc-button-active", this.viewMode === "employees");
   }
 
   selectedDayAppointments: Appointment[] = [];
@@ -443,6 +535,7 @@ export class CalendarPage implements OnDestroy {
       dt.startOf("month").toISODate() ?? this.monthPickerValue;
     this.calendarApi.gotoDate(dt.startOf("month").toJSDate());
     this.calendarApi.changeView("dayGridMonth");
+    this.setViewMode("day");
 
     setTimeout(() => this.updateTodayButtonVisibility(), 100);
     this.isMonthPickerOpen = false;
@@ -450,8 +543,15 @@ export class CalendarPage implements OnDestroy {
 
   goToToday(): void {
     if (!this.calendarApi) return;
+
     this.calendarApi.today();
-    this.calendarApi.changeView("dayGridMonth");
+
+    if (this.viewMode === "employees") {
+      this.syncSelectedDateFromCalendar();
+    } else {
+      this.calendarApi.changeView("dayGridMonth");
+    }
+
     setTimeout(() => this.updateTodayButtonVisibility(), 100);
   }
 
@@ -461,16 +561,18 @@ export class CalendarPage implements OnDestroy {
     if (!currentDate) return;
 
     const today = new Date();
-    const isCurrentMonth =
-      currentDate.getMonth() === today.getMonth() &&
-      currentDate.getFullYear() === today.getFullYear();
+    const isCurrent =
+      this.viewMode === "employees"
+        ? currentDate.toDateString() === today.toDateString()
+        : currentDate.getMonth() === today.getMonth() &&
+          currentDate.getFullYear() === today.getFullYear();
 
     const todayButton = document.querySelector(
       ".fc-todayButton-button",
     ) as HTMLElement | null;
     if (!todayButton) return;
 
-    if (isCurrentMonth) {
+    if (isCurrent) {
       todayButton.setAttribute("disabled", "true");
       todayButton.style.opacity = "0.5";
     } else {
