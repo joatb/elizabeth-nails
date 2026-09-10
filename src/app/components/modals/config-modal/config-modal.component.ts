@@ -1,8 +1,10 @@
 import { CommonModule } from "@angular/common";
-import { Component, ViewChild } from "@angular/core";
+import { Component, OnDestroy, OnInit, ViewChild } from "@angular/core";
+import { Subscription } from "rxjs";
 import { SharedModule } from "../../../modules/shared.module";
 /* IonNav and IonModal provided via SharedModule (IonicModule); evitar import standalone para prevenir selectores duplicados */
 import { ConfigComponent } from "../../../ui/organisms/config-panel/config-panel.component";
+import { EventService } from "../../../services/event.service";
 
 @Component({
   selector: "app-config-modal",
@@ -10,13 +12,32 @@ import { ConfigComponent } from "../../../ui/organisms/config-panel/config-panel
   templateUrl: "./config-modal.component.html",
   imports: [SharedModule, CommonModule],
 })
-export class ConfigModalComponent {
+export class ConfigModalComponent implements OnInit, OnDestroy {
   showModalBackButton: boolean = false;
 
   @ViewChild("nav") private nav: any;
   @ViewChild("configModal") private modal: any;
 
-  constructor() {}
+  private eventsSubscription: Subscription | null = null;
+
+  constructor(private events: EventService) {}
+
+  ngOnInit(): void {
+    // Ver nota equivalente en calendar-schedule-modal.component.ts: el botón
+    // que abre este modal vive dentro de un ion-popover cuyo contenido no
+    // existe en el DOM hasta que se abre, así que el trigger por id de Ionic
+    // no llega a engancharse. Se abre vía EventService en su lugar.
+    this.eventsSubscription = this.events.getObservable().subscribe((event) => {
+      if (event?.name === "open-config-modal") {
+        void this.modal?.present();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.eventsSubscription?.unsubscribe();
+    this.eventsSubscription = null;
+  }
 
   async onWillPresent() {
     // Solo intentar setRoot si `nav` existe y expone la API esperada.

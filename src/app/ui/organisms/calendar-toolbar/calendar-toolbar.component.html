@@ -16,42 +16,6 @@
       >
         <i-lucide [img]="viewModeIcon"></i-lucide>
       </ion-button>
-      <ion-button
-        *ngIf="showScheduleButton && !isMobile"
-        [id]="scheduleButtonId"
-        fill="clear"
-      >
-        <i-lucide [img]="scheduleIcon"></i-lucide>
-      </ion-button>
-      <ion-button
-        *ngIf="showConfigButton && !isMobile"
-        [id]="configButtonId"
-        fill="clear"
-      >
-        <i-lucide [img]="configIcon"></i-lucide>
-      </ion-button>
-      <ion-button
-        *ngIf="(showScheduleButton || showConfigButton) && isMobile"
-        [id]="moreButtonId"
-        fill="clear"
-      >
-        <i-lucide [img]="moreIcon"></i-lucide>
-      </ion-button>
     </ion-buttons>
   </ion-toolbar>
-
-  <ion-popover *ngIf="isMobile" [trigger]="moreButtonId" dismissOnSelect="true">
-    <ng-template>
-      <ion-list>
-        <ion-item *ngIf="showScheduleButton" [id]="scheduleButtonId" button="true">
-          <i-lucide [img]="scheduleIcon" slot="start"></i-lucide>
-          <ion-label>Horarios</ion-label>
-        </ion-item>
-        <ion-item *ngIf="showConfigButton" [id]="configButtonId" button="true">
-          <i-lucide [img]="configIcon" slot="start"></i-lucide>
-          <ion-label>Configuración</ion-label>
-        </ion-item>
-      </ion-list>
-    </ng-template>
-  </ion-popover>
 </ion-header>

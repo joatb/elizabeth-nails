@@ -1,9 +1,6 @@
 <org-calendar-toolbar
   title="Calendario"
   [logoutIcon]="LogOut"
-  [scheduleIcon]="Clock"
-  [configIcon]="EllipsisVertical"
-  [moreIcon]="MoreVertical"
   (logout)="authService.logout()"
 ></org-calendar-toolbar>
 
@@ -76,11 +73,4 @@
     (confirm)="confirmMonthPicker($event)"
     (dismiss)="onMonthPickerDismiss()"
   ></org-month-picker-modal>
-
-  <org-calendar-schedule-modal
-    title="Horarios"
-    triggerId="openModal"
-  ></org-calendar-schedule-modal>
-
-  <app-config-modal></app-config-modal>
 </ion-content>

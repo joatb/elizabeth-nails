@@ -63,6 +63,15 @@ ion-header {
     }
 }
 
+// Ionic deja los modales a 0 por defecto en móvil (border-radius solo se activa
+// automáticamente a partir del breakpoint de tablet). Se fija aquí un radio
+// consistente con el resto del rediseño (header/footer). Ionic ya recorta el
+// contenido a esta forma internamente, y en los modales tipo "sheet" (con
+// breakpoints) solo redondea las esquinas superiores automáticamente.
+ion-modal {
+    --border-radius: 20px;
+}
+
 .full-screen-modal {
     --width: 100%;
     --height: 100%;
