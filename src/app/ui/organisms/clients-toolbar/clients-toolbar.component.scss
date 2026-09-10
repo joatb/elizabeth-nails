@@ -2,4 +2,37 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  // Ver nota equivalente en calendar-toolbar.component.scss: color="primary-contrast"
+  // no es un color registrado en Ionic y caía en el blanco global de ion-button.
+  ion-button {
+    --color: var(--ion-color-secondary-contrast);
+    --background: transparent;
+  }
+}
+
+// Ver nota equivalente en calendar-toolbar.component.scss: se normaliza el
+// tamaño/alineación de ion-toolbar/ion-title entre plataformas (ios vs md).
+ion-toolbar {
+  --min-height: 44px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  padding-top: 0 !important;
+}
+
+ion-title {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding-inline-start: 8px !important;
+  padding-inline-end: 8px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  text-align: start !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.0125em !important;
+  color: var(--ion-color-secondary-contrast) !important;
 }

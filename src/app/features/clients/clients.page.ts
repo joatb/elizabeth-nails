@@ -20,6 +20,7 @@ import { Client } from "../../providers/clients/models/client";
 import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
+import { TabBarVisibilityService } from "../../services/tab-bar-visibility.service";
 import {
   ClientsToolbarComponent,
   ClientsGridPanelComponent,
@@ -270,7 +271,12 @@ export class ClientsPage {
     private alertService: AlertService,
     private events: EventService,
     private cdr: ChangeDetectorRef,
+    private tabBarVisibility: TabBarVisibilityService,
   ) {}
+
+  onIonScroll(ev: CustomEvent): void {
+    this.tabBarVisibility.onScroll(ev.detail.scrollTop);
+  }
 
   async ionViewDidEnter() {
     this.subscribeToEvents();

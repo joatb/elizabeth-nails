@@ -2,4 +2,45 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+
+  // El componente usaba color="primary-contrast" en los ion-button, que no es
+  // un color registrado en la paleta de Ionic (solo existen primary/secondary/
+  // tertiary/success/warning/danger/light/medium/dark). Sin esto, el botón
+  // caía en la regla global `ion-button { --color: var(--ion-color-primary-contrast) }`,
+  // que es blanco en todos los temas — de ahí los iconos invisibles.
+  ion-button {
+    --color: var(--ion-color-secondary-contrast);
+    --background: transparent;
+  }
+}
+
+// Ionic da a ion-toolbar/ion-title un tamaño y una alineación distintos según
+// la plataforma detectada (mode="ios" vs "md": min-height, padding y sobre
+// todo el título absoluto+centrado en iOS frente al título en flujo normal y
+// alineado a la izquierda en md). Se fuerza aquí un único aspecto consistente
+// en cualquier plataforma. Los !important son necesarios porque estas reglas
+// compiten con los estilos por defecto del shadow DOM de ion-toolbar/ion-title,
+// que tienen mayor especificidad que un selector de tipo normal.
+ion-toolbar {
+  --min-height: 44px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  padding-top: 0 !important;
+}
+
+ion-title {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding-inline-start: 8px !important;
+  padding-inline-end: 8px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  text-align: start !important;
+  font-size: 1.1rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.0125em !important;
+  color: var(--ion-color-secondary-contrast) !important;
 }

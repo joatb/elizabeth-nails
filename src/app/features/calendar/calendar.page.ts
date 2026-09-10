@@ -33,7 +33,7 @@ import {
   ModalController,
 } from "@ionic/angular";
 
-import { LogOut, Clock, EllipsisVertical } from "lucide-angular";
+import { LogOut, Clock, EllipsisVertical, MoreVertical } from "lucide-angular";
 import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
 
@@ -51,6 +51,7 @@ import { AlertService } from "../../services/alert.service";
 import { AuthService } from "../../services/auth.service";
 import { EventService } from "../../services/event.service";
 import { AppointmentProximityService } from "../../services/appointment-proximity.service";
+import { TabBarVisibilityService } from "../../services/tab-bar-visibility.service";
 
 import {
   CalendarAppointmentModalComponent,
@@ -84,6 +85,17 @@ export class CalendarPage implements OnDestroy {
   readonly LogOut = LogOut;
   readonly Clock = Clock;
   readonly EllipsisVertical = EllipsisVertical;
+  readonly MoreVertical = MoreVertical;
+
+  // Placeholders del skeleton de carga: imitan la rejilla de 5 semanas x 7 días
+  // del mes con anchos variados (deterministas, no random) para que las "citas"
+  // no salgan todas del mismo tamaño.
+  readonly skeletonWeekdays = Array.from({ length: 7 });
+  readonly skeletonCells = Array.from({ length: 35 }, (_, i) => ({
+    hasSecond: i % 3 !== 0,
+    width: 55 + ((i * 13) % 35),
+    width2: 40 + ((i * 7) % 30),
+  }));
 
   // Datos para agenda
   schedules: { total: number; documents: Schedule[] } | null = null;
@@ -132,6 +144,7 @@ export class CalendarPage implements OnDestroy {
     private modalController: ModalController,
     private cdr: ChangeDetectorRef,
     private proximityService: AppointmentProximityService,
+    private tabBarVisibility: TabBarVisibilityService,
   ) {
     // Configuración base de FullCalendar
     this.calendarOptions = {
@@ -211,6 +224,10 @@ export class CalendarPage implements OnDestroy {
   ngOnDestroy(): void {
     this.eventsSubscription?.unsubscribe();
     this.eventsSubscription = null;
+  }
+
+  onIonScroll(ev: CustomEvent): void {
+    this.tabBarVisibility.onScroll(ev.detail.scrollTop);
   }
 
   private async initialize(): Promise<void> {

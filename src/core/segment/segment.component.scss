@@ -5,6 +5,16 @@
     bottom: 0;
     left: 0;
     height: 69px;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+
+    &.hidden {
+        // El FAB central sobresale por encima del footer (margin-top negativo),
+        // así que solo con translateY no basta para ocultarlo del todo — hace
+        // falta opacity + pointer-events para que desaparezca por completo.
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
+    }
 
     .img {
         position: absolute;

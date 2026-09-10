@@ -3,15 +3,53 @@
   [logoutIcon]="LogOut"
   [scheduleIcon]="Clock"
   [configIcon]="EllipsisVertical"
+  [moreIcon]="MoreVertical"
   (logout)="authService.logout()"
 ></org-calendar-toolbar>
 
-<ion-content class="ion-padding" [fullscreen]="true" style="max-height: 100vh">
-  <ion-skeleton-text
-    *ngIf="isLoadingEvents"
-    animated
-    style="width: 100%; height: 100vh; border-radius: 12px"
-  ></ion-skeleton-text>
+<ion-content
+  class="ion-padding"
+  [fullscreen]="true"
+  style="max-height: 100vh"
+  [scrollEvents]="true"
+  (ionScroll)="onIonScroll($event)"
+>
+  <div class="calendar-skeleton" *ngIf="isLoadingEvents">
+    <div class="calendar-skeleton__toolbar">
+      <ion-skeleton-text animated class="pill pill--title"></ion-skeleton-text>
+      <div class="calendar-skeleton__toolbar-actions">
+        <ion-skeleton-text animated class="pill pill--icon"></ion-skeleton-text>
+        <ion-skeleton-text animated class="pill pill--icon"></ion-skeleton-text>
+        <ion-skeleton-text animated class="pill pill--icon"></ion-skeleton-text>
+        <ion-skeleton-text animated class="pill pill--icon"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <div class="calendar-skeleton__weekdays">
+      <ion-skeleton-text
+        animated
+        class="weekday"
+        *ngFor="let day of skeletonWeekdays"
+      ></ion-skeleton-text>
+    </div>
+
+    <div class="calendar-skeleton__grid">
+      <div class="calendar-skeleton__cell" *ngFor="let cell of skeletonCells">
+        <ion-skeleton-text animated class="day-number"></ion-skeleton-text>
+        <ion-skeleton-text
+          animated
+          class="event-pill"
+          [style.width.%]="cell.width"
+        ></ion-skeleton-text>
+        <ion-skeleton-text
+          *ngIf="cell.hasSecond"
+          animated
+          class="event-pill"
+          [style.width.%]="cell.width2"
+        ></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
   <full-calendar
     #calendar
     [options]="calendarOptions"

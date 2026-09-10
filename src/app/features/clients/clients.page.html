@@ -4,7 +4,7 @@
   (logout)="authService.logout()"
 ></org-clients-toolbar>
 
-<ion-content [fullscreen]="true">
+<ion-content [fullscreen]="true" [scrollEvents]="true" (ionScroll)="onIonScroll($event)">
   <org-clients-grid-panel
     [rowData]="rowData"
     [colDefs]="colDefs"

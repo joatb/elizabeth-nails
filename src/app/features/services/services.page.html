@@ -4,7 +4,7 @@
   (logout)="authService.logout()"
 ></org-clients-toolbar>
 
-<ion-content [fullscreen]="true" class="ion-padding services-content">
+<ion-content [fullscreen]="true" class="ion-padding services-content" [scrollEvents]="true" (ionScroll)="onIonScroll($event)">
   <ion-card>
     <ion-card-header>
       <ion-card-title>Servicios - {{totalServices}}</ion-card-title>
