@@ -14,6 +14,9 @@
 .timeline-actions {
   display: flex;
   flex-shrink: 0;
+  // Siempre al final (borde derecho) de la fila, aunque .timeline-content no
+  // llegue a ocupar todo el ancho disponible.
+  margin-left: auto;
 }
 
 .employee-inline-dot {
@@ -74,6 +77,40 @@
   font-weight: bold;
   color: var(--ion-color-primary);
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.collapse-chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  // Empuja el chevron al final de la línea de hora, en vez de quedar pegado
+  // justo detrás del texto.
+  margin-left: auto;
+  transition: transform 0.15s ease;
+
+  &.expanded {
+    transform: rotate(180deg);
+  }
+}
+
+// Modo compacto (collapsible sin expandir): solo hora + nombre, pensado para
+// tarjetas muy bajas (p.ej. columnas por empleado) donde no cabe el detalle.
+.timeline-event.collapsed {
+  .timeline-content {
+    padding: 8px 12px;
+    gap: 3px;
+  }
+
+  .timeline-time {
+    font-size: 0.95em;
+  }
+
+  .timeline-title {
+    font-size: 1em;
+  }
 }
 
 .timeline-title {

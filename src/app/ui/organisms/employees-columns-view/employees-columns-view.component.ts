@@ -9,15 +9,37 @@ const UNASSIGNED_KEY = "__unassigned__";
 // Franja horaria por defecto del negocio si no hay citas que la amplíen.
 const DEFAULT_START_HOUR = 9;
 const DEFAULT_END_HOUR = 20;
+// Duración mínima "visual" de una cita muy corta, para que su altura en % no
+// desaparezca del todo (se complementa con un min-height en CSS).
+const MIN_EVENT_MINUTES = 15;
+
+// Cita ya posicionada dentro de la columna de su empleado: top/height en %
+// respecto al rango de horas visible, calculados a partir de start/end_time
+// reales (no solo la hora en punto en la que empieza). left/width reparten el
+// ancho de la columna en sub-columnas cuando varias citas se solapan en el
+// tiempo (p.ej. "Sin asignar", donde no hay un empleado que las separe).
+type PositionedDayEvent = DayEventItem & {
+  topPercent: number;
+  heightPercent: number;
+  leftPercent: number;
+  widthPercent: number;
+};
+
+// Intervalo auxiliar usado solo para calcular el layout de solapamiento.
+type EventInterval = {
+  event: DayEventItem;
+  topPercent: number;
+  heightPercent: number;
+  startMinutes: number;
+  endMinutes: number;
+};
 
 type EmployeeColumn = {
   key: string;
   name: string;
   color: string | null;
   employeeId: string | null;
-  // Una fila por cada franja horaria del día (compartidas entre todas las columnas),
-  // para que las citas de la misma hora se alineen visualmente entre empleados.
-  rows: DayEventItem[][];
+  events: PositionedDayEvent[];
   hasEvents: boolean;
 };
 
@@ -59,10 +81,22 @@ export class EmployeesColumnsViewComponent {
   columns: EmployeeColumn[] = [];
   timeSlots: string[] = [];
   dragOverColumnKey: string | null = null;
+  // Cita actualmente expandida (mol-day-event-item en modo collapsible solo
+  // muestra hora + nombre hasta que se hace click para ver el resto).
+  expandedEventId: string | null = null;
   private _appointments: Appointment[] = [];
   private _employees: Employee[] = [];
   private draggedAppointmentId: string | null = null;
   private _businessHourRange: { startHour: number; endHour: number } | null = null;
+  // Rango de minutos que cubre `timeSlots`, recalculado en buildHourSlots();
+  // toda cita se posiciona en % respecto a este rango.
+  private rangeStartMinutes = DEFAULT_START_HOUR * 60;
+  private rangeTotalMinutes = (DEFAULT_END_HOUR - DEFAULT_START_HOUR + 1) * 60;
+
+  toggleExpanded(eventId: string | undefined): void {
+    if (!eventId) return;
+    this.expandedEventId = this.expandedEventId === eventId ? null : eventId;
+  }
 
   handleDragStart(event: DayEventItem): void {
     this.draggedAppointmentId = event.id ?? null;
@@ -122,7 +156,7 @@ export class EmployeesColumnsViewComponent {
         name: employee.name,
         color: employee.color,
         employeeId: employee.id,
-        rows: this.toRows(employeeAppointments),
+        events: this.layoutEvents(employeeAppointments),
         hasEvents: employeeAppointments.length > 0,
       };
     });
@@ -133,7 +167,7 @@ export class EmployeesColumnsViewComponent {
       name: "Sin asignar",
       color: null,
       employeeId: null,
-      rows: this.toRows(unassignedAppointments),
+      events: this.layoutEvents(unassignedAppointments),
       hasEvents: unassignedAppointments.length > 0,
     });
 
@@ -156,6 +190,9 @@ export class EmployeesColumnsViewComponent {
       }
     }
 
+    this.rangeStartMinutes = startHour * 60;
+    this.rangeTotalMinutes = (endHour - startHour + 1) * 60;
+
     const slots: string[] = [];
     for (let hour = startHour; hour <= endHour; hour++) {
       slots.push(`${hour.toString().padStart(2, "0")}:00`);
@@ -163,20 +200,110 @@ export class EmployeesColumnsViewComponent {
     return slots;
   }
 
-  private toRows(appointments: Appointment[]): DayEventItem[][] {
-    const rows: DayEventItem[][] = this.timeSlots.map(() => []);
+  // Posiciona cada cita en % respecto al rango de horas visible, en vez de
+  // repartirla en un cubo fijo por hora en punto (lo que hacía que una cita
+  // de 9:30 a 11:00 pareciera ocupar solo la franja de las 9:00). Las citas
+  // que se solapan en el tiempo dentro de la misma columna (p.ej. "Sin
+  // asignar") se reparten en sub-columnas en vez de dibujarse unas encima de
+  // otras.
+  private layoutEvents(appointments: Appointment[]): PositionedDayEvent[] {
+    const rangeEndMinutes = this.rangeStartMinutes + this.rangeTotalMinutes;
+    const intervals: EventInterval[] = [];
+
     for (const appointment of appointments) {
       const start = new Date(appointment.start_time);
-      if (Number.isNaN(start.getTime())) continue;
-      const rowIndex = start.getHours() - this.startHourOfFirstSlot();
-      if (rowIndex < 0 || rowIndex >= rows.length) continue;
-      rows[rowIndex].push(this.toTimelineEvent(appointment));
+      const end = new Date(appointment.end_time);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) continue;
+
+      const startMinutes = start.getHours() * 60 + start.getMinutes();
+      const endMinutes = Math.max(
+        end.getHours() * 60 + end.getMinutes(),
+        startMinutes + MIN_EVENT_MINUTES,
+      );
+
+      // Fuera del rango de horas visible: no se dibuja.
+      if (endMinutes <= this.rangeStartMinutes || startMinutes >= rangeEndMinutes) continue;
+
+      const clampedStart = Math.max(startMinutes, this.rangeStartMinutes);
+      const clampedEnd = Math.min(endMinutes, rangeEndMinutes);
+
+      intervals.push({
+        event: this.toTimelineEvent(appointment),
+        topPercent: ((clampedStart - this.rangeStartMinutes) / this.rangeTotalMinutes) * 100,
+        heightPercent: ((clampedEnd - clampedStart) / this.rangeTotalMinutes) * 100,
+        startMinutes: clampedStart,
+        endMinutes: clampedEnd,
+      });
     }
-    return rows;
+
+    return this.assignOverlapColumns(intervals);
   }
 
-  private startHourOfFirstSlot(): number {
-    return this.timeSlots.length ? Number(this.timeSlots[0].slice(0, 2)) : DEFAULT_START_HOUR;
+  // Reparte los intervalos solapados en sub-columnas dentro de la misma
+  // columna de empleado (algoritmo clásico "clusters + greedy columns", el
+  // mismo tipo de layout que usa Google Calendar en su vista de día):
+  // 1) agrupa en "clusters" los eventos conectados por solapamiento (en
+  //    cuanto hay un hueco real entre citas, empieza un cluster nuevo, así
+  //    dos citas del mediodía no comparten ancho con dos de la tarde aunque
+  //    ambas parejas se solapen entre sí);
+  // 2) dentro de cada cluster, asigna cada evento a la primera sub-columna
+  //    cuyo último evento ya haya terminado; si ninguna sirve, abre una
+  //    sub-columna nueva. El ancho final de cada evento es 100 / nº de
+  //    sub-columnas del cluster al que pertenece.
+  private assignOverlapColumns(intervals: EventInterval[]): PositionedDayEvent[] {
+    const sorted = [...intervals].sort(
+      (a, b) => a.startMinutes - b.startMinutes || a.endMinutes - b.endMinutes,
+    );
+
+    const result: PositionedDayEvent[] = [];
+    let cluster: EventInterval[] = [];
+    let clusterEndMinutes = -Infinity;
+
+    const flushCluster = () => {
+      if (cluster.length === 0) return;
+
+      // Fin del último evento colocado en cada sub-columna, para decidir en
+      // cuál encaja el siguiente evento sin solaparse.
+      const columnEndMinutes: number[] = [];
+      const columnByEvent = new Map<EventInterval, number>();
+
+      for (const interval of cluster) {
+        let column = columnEndMinutes.findIndex((end) => end <= interval.startMinutes);
+        if (column === -1) {
+          column = columnEndMinutes.length;
+          columnEndMinutes.push(interval.endMinutes);
+        } else {
+          columnEndMinutes[column] = interval.endMinutes;
+        }
+        columnByEvent.set(interval, column);
+      }
+
+      const columnCount = columnEndMinutes.length;
+      for (const interval of cluster) {
+        const column = columnByEvent.get(interval) ?? 0;
+        result.push({
+          ...interval.event,
+          topPercent: interval.topPercent,
+          heightPercent: interval.heightPercent,
+          leftPercent: (column / columnCount) * 100,
+          widthPercent: 100 / columnCount,
+        });
+      }
+
+      cluster = [];
+      clusterEndMinutes = -Infinity;
+    };
+
+    for (const interval of sorted) {
+      if (cluster.length > 0 && interval.startMinutes >= clusterEndMinutes) {
+        flushCluster();
+      }
+      cluster.push(interval);
+      clusterEndMinutes = Math.max(clusterEndMinutes, interval.endMinutes);
+    }
+    flushCluster();
+
+    return result;
   }
 
   private toTimelineEvent(appointment: Appointment): DayEventItem {

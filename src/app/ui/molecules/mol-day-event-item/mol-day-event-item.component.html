@@ -1,6 +1,7 @@
 <div
   class="timeline-event"
   [class.no-dot]="!showTimelineDot"
+  [class.collapsed]="collapsible && !expanded"
   [attr.draggable]="draggable ? 'true' : null"
   (dragstart)="draggable && handleDragStart($event)"
 >
@@ -16,6 +17,7 @@
   >
     <div class="timeline-time">
       <span *ngIf="showDate">{{ dateLabel }} · </span>{{ startTimeLabel }} - {{ endTimeLabel }}
+      <i-lucide *ngIf="collapsible" class="collapse-chevron" [class.expanded]="expanded" [img]="ChevronDown"></i-lucide>
     </div>
     <div class="timeline-title" *ngIf="showClientName">
       <atom-timeline-dot
@@ -25,17 +27,19 @@
         [borderColor]="event.employee_color ? '#fff' : 'rgba(var(--ion-color-medium-rgb), 0.6)'"
         [shadowColor]="'rgba(0, 0, 0, 0.15)'"
       ></atom-timeline-dot>
-      {{ event.client.name || 'Cliente eliminado' }}
+      <span class="timeline-title-text">{{ event.client.name || 'Cliente eliminado' }}</span>
     </div>
-    <div class="timeline-note">Empleado: {{ event.employee_name || 'Sin asignar' }}</div>
-    <div class="timeline-note" *ngIf="event.service_name">
-      Servicio: {{ event.service_name }}
-      <span *ngIf="event.service_price !== null && event.service_price !== undefined">
-        - {{ event.service_price | currency: "EUR":"symbol":"1.2-2" }}
-      </span>
-    </div>
-    <div class="timeline-note" *ngIf="hasPhone">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
-    <div class="timeline-note">Nota: {{ event.note || '-' }}</div>
+    <ng-container *ngIf="showDetails">
+      <div class="timeline-note">Empleado: {{ event.employee_name || 'Sin asignar' }}</div>
+      <div class="timeline-note" *ngIf="event.service_name">
+        Servicio: {{ event.service_name }}
+        <span *ngIf="event.service_price !== null && event.service_price !== undefined">
+          - {{ event.service_price | currency: "EUR":"symbol":"1.2-2" }}
+        </span>
+      </div>
+      <div class="timeline-note" *ngIf="hasPhone">+{{ event.client.phone_country }} {{ event.client.phone }}</div>
+      <div class="timeline-note">Nota: {{ event.note || '-' }}</div>
+    </ng-container>
   </div>
   <div class="timeline-actions">
     <ion-button

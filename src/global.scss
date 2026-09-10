@@ -80,6 +80,20 @@ ion-modal {
     --border-radius: 0;
 }
 
+// Formularios de cita / lista de eventos del día en escritorio: en vez del
+// "sheet" inferior arrastrable (pensado para gesto táctil, incómodo con
+// ratón), un diálogo centrado normal. Ver CalendarPage.desktopDialogOrSheetOptions().
+// Ojo: --height NO puede ser "auto" — ion-content posiciona su contenido en
+// absoluto internamente y necesita una altura definida del padre para no
+// colapsar a 0 (por eso antes solo se veía la cabecera del modal). Se usa una
+// altura fija con scroll interno en su lugar.
+.modal-desktop-dialog {
+    --width: 480px;
+    --height: 640px;
+    --max-height: 85vh;
+    align-items: center;
+}
+
 // ion-toast
 ion-toast.custom-toast {
     --background: var(--ion-color-secondary);
