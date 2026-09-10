@@ -11,7 +11,7 @@
   [scrollEvents]="true"
   (ionScroll)="onIonScroll($event)"
 >
-  <div class="calendar-skeleton" *ngIf="isLoadingEvents">
+  <ng-template #calendarSkeletonToolbar>
     <div class="calendar-skeleton__toolbar">
       <ion-skeleton-text animated class="pill pill--title"></ion-skeleton-text>
       <div class="calendar-skeleton__toolbar-actions">
@@ -21,6 +21,10 @@
         <ion-skeleton-text animated class="pill pill--icon"></ion-skeleton-text>
       </div>
     </div>
+  </ng-template>
+
+  <div class="calendar-skeleton" *ngIf="isLoadingEvents && viewMode !== 'employees'">
+    <ng-container [ngTemplateOutlet]="calendarSkeletonToolbar"></ng-container>
 
     <div class="calendar-skeleton__weekdays">
       <ion-skeleton-text
@@ -43,6 +47,23 @@
           animated
           class="event-pill"
           [style.width.%]="cell.width2"
+        ></ion-skeleton-text>
+      </div>
+    </div>
+  </div>
+
+  <div class="calendar-skeleton calendar-skeleton--columns" *ngIf="isLoadingEvents && viewMode === 'employees'">
+    <ng-container [ngTemplateOutlet]="calendarSkeletonToolbar"></ng-container>
+
+    <div class="calendar-skeleton__columns">
+      <div class="employee-col" *ngFor="let col of skeletonEmployeeColumns">
+        <ion-skeleton-text animated class="employee-col__header"></ion-skeleton-text>
+        <ion-skeleton-text
+          *ngFor="let row of col.rows"
+          animated
+          class="employee-col__slot"
+          [class.employee-col__slot--empty]="!row.visible"
+          [style.height.px]="row.height"
         ></ion-skeleton-text>
       </div>
     </div>

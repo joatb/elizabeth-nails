@@ -26,6 +26,7 @@ import esLocale from "@fullcalendar/core/locales/es";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
+import timeGridPlugin from "@fullcalendar/timegrid";
 
 import {
   ActionSheetController,
@@ -89,6 +90,16 @@ export class CalendarPage implements OnDestroy {
     width2: 40 + ((i * 7) % 30),
   }));
 
+  // Placeholder del skeleton de la vista de columnas por empleado: una
+  // cabecera por columna y varias franjas horarias, algunas "vacías" (más
+  // tenues) para imitar el hueco entre citas en vez de un bloque continuo.
+  readonly skeletonEmployeeColumns = Array.from({ length: 4 }, (_, col) => ({
+    rows: Array.from({ length: 6 }, (_, row) => ({
+      visible: (col + row) % 3 !== 0,
+      height: 28 + ((col * 7 + row * 11) % 20),
+    })),
+  }));
+
   // Datos para agenda
   schedules: { total: number; documents: Schedule[] } | null = null;
   appointments: { total: number; documents: Appointment[] } | null = null;
@@ -148,12 +159,12 @@ export class CalendarPage implements OnDestroy {
       headerToolbar: {
         start: "title",
         center: "",
-        end: "prevButton todayButton nextButton monthPicker monthButton,dayButton",
+        end: "prevButton todayButton nextButton monthPicker monthButton,dayButton,employeesButton",
       },
       customButtons: this.buildCustomButtons(),
       displayEventEnd: true,
       nowIndicator: true,
-      plugins: [dayGridPlugin, listPlugin, interactionPlugin],
+      plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin],
       dateClick: (arg: any) => this.handleDateClick(arg),
       moreLinkClick: (arg: any) => this.handleMoreLinkClick(arg),
       eventClick: (info: any) => this.handleEventClick(info),
@@ -290,6 +301,11 @@ export class CalendarPage implements OnDestroy {
       },
       dayButton: {
         text: "Día",
+        hint: "Ver el día",
+        click: () => this.selectDayView(),
+      },
+      employeesButton: {
+        text: "Empleados",
         hint: "Ver por empleados",
         click: () => this.selectEmployeesView(),
       },
@@ -302,10 +318,17 @@ export class CalendarPage implements OnDestroy {
     this.setViewMode("day");
   }
 
-  // "Día" en la toolbar de FullCalendar: activa la vista de columnas por empleado,
-  // manteniendo la misma cabecera (título, prev/next, día actual, selector de mes).
-  // Se cambia a la vista nativa "dayGridDay" (oculta vía CSS) para que el título
-  // de FullCalendar muestre el día seleccionado en vez del mes.
+  // "Día" en la toolbar de FullCalendar: vista nativa de FullCalendar con la
+  // franja horaria del día seleccionado (timeGridDay).
+  selectDayView(): void {
+    this.calendarApi?.changeView("timeGridDay");
+    this.setViewMode("day");
+  }
+
+  // "Empleados" en la toolbar de FullCalendar: activa la vista de columnas por
+  // empleado, manteniendo la misma cabecera (título, prev/next, día actual,
+  // selector de mes). Se cambia a la vista nativa "dayGridDay" (oculta vía CSS)
+  // para que el título de FullCalendar muestre el día seleccionado en vez del mes.
   selectEmployeesView(): void {
     this.calendarApi?.changeView("dayGridDay", this.selectedDate);
     this.setViewMode("employees");
@@ -330,12 +353,23 @@ export class CalendarPage implements OnDestroy {
     this.onEmployeesDateChange(this.calendarApi.getDate());
   }
 
-  // Refleja en los botones "Mes"/"Día" cuál es el viewMode activo.
+  // Refleja en los botones "Mes"/"Día"/"Empleados" cuál es la vista activa.
+  // "Mes" y "Día" comparten viewMode "day" (ambas son vistas nativas de
+  // FullCalendar); se distinguen por el tipo de vista actual del calendarApi.
   private updateViewButtonsActiveState(): void {
     const monthButton = document.querySelector(".fc-monthButton-button");
     const dayButton = document.querySelector(".fc-dayButton-button");
-    monthButton?.classList.toggle("fc-button-active", this.viewMode === "day");
-    dayButton?.classList.toggle("fc-button-active", this.viewMode === "employees");
+    const employeesButton = document.querySelector(".fc-employeesButton-button");
+    const currentViewType = this.calendarApi?.view?.type;
+    monthButton?.classList.toggle(
+      "fc-button-active",
+      this.viewMode === "day" && currentViewType !== "timeGridDay",
+    );
+    dayButton?.classList.toggle(
+      "fc-button-active",
+      this.viewMode === "day" && currentViewType === "timeGridDay",
+    );
+    employeesButton?.classList.toggle("fc-button-active", this.viewMode === "employees");
   }
 
   selectedDayAppointments: Appointment[] = [];

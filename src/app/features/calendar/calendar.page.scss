@@ -53,9 +53,10 @@
   }
 }
 
-// Estilo para los botones "Mes"/"Día" (sustituyen al grupo nativo de vistas)
+// Estilo para los botones "Mes"/"Día"/"Empleados" (sustituyen al grupo nativo de vistas)
 ::ng-deep .fc-monthButton-button,
-::ng-deep .fc-dayButton-button {
+::ng-deep .fc-dayButton-button,
+::ng-deep .fc-employeesButton-button {
   cursor: pointer;
   transition: all 0.2s ease;
   opacity: 0.6;
@@ -93,35 +94,35 @@
 // actual" y 📅 desproporcionadamente grandes en móvil.
 @media screen and (max-width: 768px) {
   ::ng-deep .fc-monthPicker-button {
-    font-size: 1.05em !important;
-    padding: 0.35em 0.55em !important;
+    font-size: 1.15em !important;
+    padding: 0.5em 0.75em !important;
   }
 
   ::ng-deep .fc-todayButton-button {
-    font-size: 0.95em !important;
-    padding: 0.4em 0.8em !important;
+    font-size: 1em !important;
+    padding: 0.5em 0.9em !important;
   }
 
   ::ng-deep .fc-prevButton-button,
   ::ng-deep .fc-nextButton-button {
-    padding: 0.4em 0.6em;
+    padding: 0.55em 0.8em;
   }
 }
 
 @media screen and (max-width: 480px) {
   ::ng-deep .fc-monthPicker-button {
-    font-size: 0.9em !important;
-    padding: 0.3em 0.5em !important;
+    font-size: 1.05em !important;
+    padding: 0.45em 0.7em !important;
   }
 
   ::ng-deep .fc-todayButton-button {
-    font-size: 0.8em !important;
-    padding: 0.35em 0.6em !important;
+    font-size: 0.95em !important;
+    padding: 0.5em 0.8em !important;
   }
 
   ::ng-deep .fc-prevButton-button,
   ::ng-deep .fc-nextButton-button {
-    padding: 0.35em 0.5em;
+    padding: 0.5em 0.75em;
   }
 }
 
@@ -221,6 +222,51 @@
 
     .event-pill {
       height: 0.6rem;
+    }
+  }
+
+  // Variante para la vista de columnas por empleado: en vez de la rejilla
+  // mensual, columnas verticales con franjas horarias (como el propio
+  // org-employees-columns-view), para que el skeleton se parezca a lo que
+  // va a cargar en cada modo en vez de mostrar siempre el mes.
+  &--columns {
+    .calendar-skeleton__columns {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .employee-col {
+      flex: 1 1 160px;
+      min-width: 140px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      &__header {
+        width: 65%;
+        height: 1rem;
+        border-radius: 6px;
+        --border-radius: 6px;
+        margin-bottom: 4px;
+      }
+
+      &__slot {
+        border-radius: 6px;
+        --border-radius: 6px;
+
+        &--empty {
+          opacity: 0.25;
+        }
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .employee-col {
+        flex-basis: 120px;
+        min-width: 110px;
+      }
     }
   }
 }
