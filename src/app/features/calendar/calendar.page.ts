@@ -676,8 +676,7 @@ export class CalendarPage implements OnDestroy {
     // Abrir modal (uso de import estático del componente)
     const modal = await this.modalController.create({
       component: CalendarDayEventsModalComponent,
-      initialBreakpoint: 0.5,
-      breakpoints: [0, 0.25, 0.5, 0.75, 1],
+      ...this.desktopDialogOrSheetOptions(0.5, [0, 0.25, 0.5, 0.75, 1]),
       componentProps: {
         date: dateObj,
         events: eventsForDay,
@@ -910,6 +909,21 @@ export class CalendarPage implements OnDestroy {
     });
   }
 
+  // En móvil estos modales se presentan como "sheet" arrastrable desde abajo
+  // (gesto táctil, cómodo con el dedo). En escritorio arrastrar con el ratón
+  // para verlo entero resulta incómodo, así que ahí se presentan como un
+  // diálogo centrado normal (ver .modal-desktop-dialog en global.scss).
+  private desktopDialogOrSheetOptions(
+    mobileInitialBreakpoint: number,
+    mobileBreakpoints: number[],
+  ): { initialBreakpoint?: number; breakpoints?: number[]; cssClass?: string } {
+    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+    if (isDesktop) {
+      return { cssClass: "modal-desktop-dialog" };
+    }
+    return { initialBreakpoint: mobileInitialBreakpoint, breakpoints: mobileBreakpoints };
+  }
+
   private async openAppointmentFormModal(
     day: Day,
     startTime: Date,
@@ -917,8 +931,7 @@ export class CalendarPage implements OnDestroy {
   ): Promise<void> {
     const modal = await this.modalController.create({
       component: CalendarAppointmentModalComponent,
-      initialBreakpoint: 1,
-      breakpoints: [0, 0.25, 0.5, 0.75, 1],
+      ...this.desktopDialogOrSheetOptions(1, [0, 0.25, 0.5, 0.75, 1]),
       componentProps: {
         day,
         startTime: DateTime.fromJSDate(startTime, { zone: "system" }).toISO(),
@@ -987,8 +1000,7 @@ export class CalendarPage implements OnDestroy {
     const baseDate = DateTime.fromJSDate(this.selectedDate, { zone: "system" });
     const modal = await this.modalController.create({
       component: CalendarAppointmentModalComponent,
-      initialBreakpoint: 1,
-      breakpoints: [0, 0.25, 0.5, 0.75, 1],
+      ...this.desktopDialogOrSheetOptions(1, [0, 0.25, 0.5, 0.75, 1]),
       componentProps: {
         day: this.selectedDate,
         startTime: baseDate.set({ hour: 9, minute: 0, second: 0, millisecond: 0 }).toISO(),
@@ -1014,8 +1026,7 @@ export class CalendarPage implements OnDestroy {
 
     const modal = await this.modalController.create({
       component: CalendarAppointmentModalComponent,
-      initialBreakpoint: 0.5,
-      breakpoints: [0, 0.25, 0.5, 0.75],
+      ...this.desktopDialogOrSheetOptions(0.5, [0, 0.25, 0.5, 0.75]),
       componentProps: {
         day: this.selectedDate,
         startTime: original.start_time,

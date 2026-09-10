@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { Component, EventEmitter, Input, Output } from "@angular/core";
 import { IonButton } from "@ionic/angular/standalone";
-import { LucideAngularModule, Pencil, Trash } from "lucide-angular";
+import { LucideAngularModule, ChevronDown, Pencil, Trash } from "lucide-angular";
 import { AtomTimelineDotComponent } from "../../atoms/atom-timeline-dot/atom-timeline-dot.component";
 
 type DayEventClient = {
@@ -45,10 +45,20 @@ export class MolDayEventItemComponent {
   // En vistas que abarcan varios días (p.ej. historial de citas), hace falta mostrar
   // la fecha de cada cita, no solo la hora.
   @Input() showDate: boolean = false;
+  // En vistas muy compactas (p.ej. columnas por empleado), la tarjeta puede no
+  // tener alto suficiente para mostrar servicio/teléfono/nota. Con collapsible
+  // activo, esas líneas solo se muestran cuando `expanded` es true; el padre
+  // controla ese estado (p.ej. al hacer click en la tarjeta).
+  @Input() collapsible: boolean = false;
+  @Input() expanded: boolean = false;
 
   @Output() delete = new EventEmitter<DayEventItem>();
   @Output() edit = new EventEmitter<DayEventItem>();
   @Output() dragStart = new EventEmitter<DayEventItem>();
+
+  get showDetails(): boolean {
+    return !this.collapsible || this.expanded;
+  }
 
   handleDragStart(nativeEvent: DragEvent): void {
     nativeEvent.dataTransfer?.setData("text/plain", this.event?.id ?? "");
@@ -58,6 +68,7 @@ export class MolDayEventItemComponent {
 
   readonly Trash = Trash;
   readonly Pencil = Pencil;
+  readonly ChevronDown = ChevronDown;
 
   get startTimeLabel(): string {
     return this.toTimeLabel(this.event?.start_time);

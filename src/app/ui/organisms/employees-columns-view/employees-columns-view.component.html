@@ -51,24 +51,37 @@
     </div>
 
     <div
-      *ngFor="let row of column.rows; let rowIndex = index"
-      class="schedule-cell"
+      *ngIf="column.hasEvents"
+      class="schedule-track"
       [class.drag-over]="dragOverColumnKey === column.key"
       [style.grid-column]="colIndex + 2"
-      [style.grid-row]="rowIndex + 3"
+      [style.grid-row]="'3 / span ' + timeSlots.length"
       (dragover)="handleDragOver($event, column.key)"
       (dragleave)="handleDragLeave(column.key)"
       (drop)="handleDrop($event, column.employeeId)"
     >
-      <mol-day-event-item
-        *ngFor="let event of row"
-        [event]="event"
-        [draggable]="true"
-        [showTimelineDot]="false"
-        (edit)="handleEdit($event)"
-        (delete)="handleDelete($event)"
-        (dragStart)="handleDragStart($event)"
-      ></mol-day-event-item>
+      <div
+        *ngFor="let event of column.events"
+        class="event-slot"
+        [class.event-slot--expanded]="expandedEventId === event.id"
+        [style.top.%]="event.topPercent"
+        [style.height.%]="event.heightPercent"
+        [style.left]="'calc(' + event.leftPercent + '% + 2px)'"
+        [style.width]="'calc(' + event.widthPercent + '% - 4px)'"
+        [style.border-left-color]="event.service_color || 'var(--ion-color-primary)'"
+        (click)="toggleExpanded(event.id)"
+      >
+        <mol-day-event-item
+          [event]="event"
+          [draggable]="true"
+          [showTimelineDot]="false"
+          [collapsible]="true"
+          [expanded]="expandedEventId === event.id"
+          (edit)="handleEdit($event)"
+          (delete)="handleDelete($event)"
+          (dragStart)="handleDragStart($event)"
+        ></mol-day-event-item>
+      </div>
     </div>
   </ng-container>
 </div>
