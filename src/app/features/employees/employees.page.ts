@@ -10,6 +10,7 @@ import { Employee } from "../../providers/employees/models/employee";
 import { AuthService } from "../../services/auth.service";
 import { AlertService } from "../../services/alert.service";
 import { EventService } from "../../services/event.service";
+import { TabBarVisibilityService } from "../../services/tab-bar-visibility.service";
 import { EmployeeFormPage } from "../../ui/organisms/employee-form/employee-form.page";
 
 @Component({
@@ -32,7 +33,12 @@ export class EmployeesPage implements OnDestroy {
     private alertService: AlertService,
     private modalCtrl: ModalController,
     private events: EventService,
+    private tabBarVisibility: TabBarVisibilityService,
   ) {}
+
+  onIonScroll(ev: CustomEvent): void {
+    this.tabBarVisibility.onScroll(ev.detail.scrollTop);
+  }
 
   async ionViewDidEnter(): Promise<void> {
     this.subscribeToEvents();

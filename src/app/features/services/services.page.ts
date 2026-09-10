@@ -23,6 +23,7 @@ import { ClientsStateService } from "../../services/clients-state.service";
 import { AuthService } from "../../services/auth.service";
 import { AlertService } from "../../services/alert.service";
 import { EventService } from "../../services/event.service";
+import { TabBarVisibilityService } from "../../services/tab-bar-visibility.service";
 import { ServiceFormPage } from "../../ui/organisms/service-form/service-form.page";
 import { ColorTheme, ThemeService } from "src/app/services/theme.service";
 
@@ -116,7 +117,12 @@ export class ServicesPage implements AfterViewInit, OnDestroy {
     private modalCtrl: ModalController,
     private events: EventService,
     private themeService: ThemeService,
+    private tabBarVisibility: TabBarVisibilityService,
   ) {}
+
+  onIonScroll(ev: CustomEvent): void {
+    this.tabBarVisibility.onScroll(ev.detail.scrollTop);
+  }
 
   async ngAfterViewInit(): Promise<void> {
     this.subscribeToEvents();

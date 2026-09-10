@@ -1,3 +1,6 @@
-<ion-tabs style="max-height: calc(100% - var(--app-segment-height, 69px));"></ion-tabs>
+<ion-tabs
+  [style.max-height]="tabBarVisibility.visible() ? 'calc(100% - var(--app-segment-height, 69px))' : '100%'"
+  [style.transition]="'max-height 0.25s ease'"
+></ion-tabs>
 
 <app-segment></app-segment>

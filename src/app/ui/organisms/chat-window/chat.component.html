@@ -9,7 +9,7 @@
     </button>
   </div>
 
-  <div class="messages-container">
+  <div class="messages-container" (scroll)="onScroll($event)">
     <div *ngFor="let message of messages" 
          [ngClass]="{'message-sent': message.sent, 'message-received': !message.sent}"
          class="message-bubble">

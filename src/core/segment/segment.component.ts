@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../app/modules/shared.module';
 import { EventService } from '../../app/services/event.service';
+import { TabBarVisibilityService } from '../../app/services/tab-bar-visibility.service';
 import { MessageCircle, UsersRound, CalendarDays, DollarSign, UserRound } from 'lucide-angular';
 
 @Component({
@@ -17,7 +18,7 @@ export class SegmentComponent implements OnInit {
   readonly CalendarDays = CalendarDays;
   readonly DollarSign = DollarSign;
   readonly UserRound = UserRound;
-    
+
     selectedSegment: string = 'home';
     chatMessages: { sender: string, message: string }[] = [];
     newMessage: string = '';
@@ -27,7 +28,8 @@ export class SegmentComponent implements OnInit {
         private route: ActivatedRoute,
         private router: Router,
         private events: EventService,
-        private http: HttpClient
+        private http: HttpClient,
+        public tabBarVisibility: TabBarVisibilityService
     ) {
     }
 

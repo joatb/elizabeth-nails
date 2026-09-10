@@ -4,7 +4,7 @@
   (logout)="authService.logout()"
 ></org-clients-toolbar>
 
-<ion-content [fullscreen]="true" class="ion-padding employees-content">
+<ion-content [fullscreen]="true" class="ion-padding employees-content" [scrollEvents]="true" (ionScroll)="onIonScroll($event)">
   <ion-card>
     <ion-card-header>
       <ion-card-title>Empleados - {{employees.length}}</ion-card-title>

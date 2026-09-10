@@ -14,6 +14,7 @@ import { FormsModule } from "@angular/forms";
 import { Subscription } from "rxjs";
 import { ChatProvider } from "../../../providers/chat/chat.provider";
 import { WhatsAppService } from "../../../services/whatsapp.service";
+import { TabBarVisibilityService } from "../../../services/tab-bar-visibility.service";
 import { Client } from "../../../providers/clients/models/client";
 import { ChatMessage } from "./models/chat-message";
 import {
@@ -58,7 +59,13 @@ export class ChatComponent
   constructor(
     private whatsAppService: WhatsAppService,
     private chatProvider: ChatProvider,
+    private tabBarVisibility: TabBarVisibilityService,
   ) {}
+
+  onScroll(ev: Event): void {
+    const target = ev.target as HTMLElement;
+    this.tabBarVisibility.onScroll(target.scrollTop);
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     const nextClient = changes["selectedClient"]?.currentValue as Client | null;
