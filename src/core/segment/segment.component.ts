@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SharedModule } from '../../app/modules/shared.module';
 import { EventService } from '../../app/services/event.service';
 import { TabBarVisibilityService } from '../../app/services/tab-bar-visibility.service';
-import { MessageCircle, UsersRound, CalendarDays, DollarSign, UserRound } from 'lucide-angular';
+import { MessageCircle, UsersRound, CalendarDays, DollarSign, UserRound, Settings, Clock, Palette } from 'lucide-angular';
 
 @Component({
     selector: 'app-segment',
@@ -18,6 +18,11 @@ export class SegmentComponent implements OnInit {
   readonly CalendarDays = CalendarDays;
   readonly DollarSign = DollarSign;
   readonly UserRound = UserRound;
+  readonly Settings = Settings;
+  readonly Clock = Clock;
+  readonly Palette = Palette;
+
+  readonly ajustesButtonId = "openAjustesMenu";
 
     selectedSegment: string = 'home';
     chatMessages: { sender: string, message: string }[] = [];
@@ -46,6 +51,14 @@ export class SegmentComponent implements OnInit {
 
     add(){
         this.events.push('add.event', true);
+    }
+
+    openSchedule(): void {
+        this.events.push('open-schedule-modal', true);
+    }
+
+    openTheme(): void {
+        this.events.push('open-config-modal', true);
     }
 
     getRoute() {

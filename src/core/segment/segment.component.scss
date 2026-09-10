@@ -1,3 +1,6 @@
+// Barra "flotante": mismo lenguaje que el header (degradado de marca,
+// esquinas redondeadas, sombra elevada), pero con las esquinas y la sombra
+// hacia arriba al ser una barra inferior.
 .footer {
     width: 100%;
     position: absolute;
@@ -5,6 +8,9 @@
     bottom: 0;
     left: 0;
     height: 69px;
+    background: var(--app-gradient-primary);
+    border-radius: 22px 22px 0 0;
+    box-shadow: 0 -8px 20px rgba(15, 23, 42, 0.22);
     transition: transform 0.25s ease, opacity 0.25s ease;
 
     &.hidden {
@@ -16,13 +22,23 @@
         pointer-events: none;
     }
 
-    .img {
-        position: absolute;
-        height: 100%;
-        object-fit: cover;
-        width: 100%;
-        filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
-        -webkit-filter: drop-shadow(1px 1px 8px rgba(158, 158, 158, 0.3));
+    // En pantallas grandes deja de ocupar todo el ancho: se convierte en una
+    // barra flotante compacta y centrada, separada del borde inferior, en vez
+    // de una barra edge-to-edge pensada para móvil.
+    @media screen and (min-width: 768px) {
+        left: 50%;
+        right: auto;
+        bottom: 16px;
+        // Con 3 items a cada lado (Calendario/Clientes/Empleados a la izquierda,
+        // Servicios/Chat/Ajustes a la derecha) + el FAB central, 480px se
+        // quedaba corto y el último elemento ("Ajustes") acababa cortado.
+        width: min(680px, calc(100% - 2rem));
+        border-radius: 22px;
+        transform: translateX(-50%);
+
+        &.hidden {
+            transform: translateX(-50%) translateY(150%);
+        }
     }
 
     div.footer-content {
@@ -33,18 +49,28 @@
         width: 100%;
         height: 100%;
 
-        .left, .right, .center {
+        // .left/.right/.center declaraban width:100% cada uno dentro del mismo
+        // flex row: al pedir 300% del ancho disponible entre los tres, flexbox
+        // los encogía a la fuerza (flex-shrink) hasta desbordar, cortando el
+        // último item ("Ajustes"). Con flex+min-width:0 se reparten el ancho
+        // real sin pelearse por él.
+        .left, .right {
             display: flex;
             flex-direction: row;
-            justify-content: space-evenly;
+            // space-between (no space-evenly): así el primer/último item queda
+            // pegado al borde real de la barra, imprescindible para que su
+            // esquina redondeada coincida con la esquina de la barra cuando
+            // está activo (ver reglas :first-child/:last-child más abajo).
+            justify-content: space-between;
             align-items: center;
-            width: 100%;
+            flex: 1 1 0;
+            min-width: 0;
             height: 100%;
             font-size: 30px;
         }
 
         .item i-lucide, .item ion-icon {
-            font-size: 2.1rem;
+            font-size: 1.7rem;
             transition: font-size 0.2s;
         }
         @media (max-width: 600px) {
@@ -54,7 +80,7 @@
             .center ion-fab-button {
                 height: 54px;
                 width: 54px;
-                margin-top: -62px;
+                margin-top: -58px;
             }
             .center ion-fab-button ion-icon {
                 font-size: 30px;
@@ -62,22 +88,30 @@
         }
 
         .center {
-            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 0 0 96px;
 
             ion-fab-button {
+                // Degradado de marca (como antes), pero con un anillo blanco
+                // para que no se funda con la barra, que ahora usa el mismo
+                // degradado de fondo.
                 --background: var(--app-gradient-primary);
-                --border-radius: 50%;
-                margin-top: -90px;
-                height: 78px;
-                width: 78px;
-
                 --background-activated: var(--app-gradient-primary);
                 --background-focused: var(--app-gradient-primary);
                 --background-hover: var(--app-gradient-primary);
+                --border-radius: 50%;
+                margin-top: -84px;
+                height: 78px;
+                width: 78px;
+                border: 4px solid var(--ion-color-light);
+                border-radius: 50%;
+                box-shadow: 0 8px 16px rgba(15, 23, 42, 0.3);
 
                 ion-icon {
-                    color: white;
-                    font-size: 55px;
+                    color: var(--ion-color-primary-contrast);
+                    font-size: 40px;
                     transition: font-size 0.2s;
                 }
             }
@@ -88,13 +122,32 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            gap: 2px;
             z-index: 2;
-            width: 100%;
+            width: auto;
+            min-width: 44px;
+            // A toda la altura de la barra (no solo el contenido centrado):
+            // así, cuando el item es el primero/último, su esquina exterior
+            // coincide exactamente con la esquina de la barra en vez de
+            // quedar un hueco o un trocito de esquina recta asomando.
+            height: 100%;
+            padding: 0 16px;
+            box-sizing: border-box;
             cursor: pointer;
+            border-radius: 14px;
+            transition: background-color 0.2s ease;
+
+            i-lucide, ion-icon {
+                color: var(--ion-color-primary-contrast);
+                opacity: 0.7;
+                transition: opacity 0.2s;
+            }
+
             ion-label {
-                font-size: 1rem;
+                font-size: 0.8rem;
                 font-weight: 400;
-                color: var(--ion-color-primary);
+                color: var(--ion-color-primary-contrast);
+                opacity: 0.7;
                 transition: opacity 0.2s;
             }
             @media (max-width: 600px) {
@@ -104,23 +157,40 @@
             }
 
             &.active {
+                background: rgba(255, 255, 255, 0.16);
+
                 ion-label {
                     font-weight: 600;
+                    opacity: 1;
                 }
-                i-lucide {
-                    font-weight: 600;
+                i-lucide, ion-icon {
+                    opacity: 1;
                 }
             }
         }
+
+        // El primer item (Calendario) y el último (Ajustes) tocan las esquinas
+        // de la barra: cuando están activos, su radio exterior debe coincidir
+        // con el de la barra (22px), no con el radio genérico del chip (14px).
+        // Solo se redondean las esquinas superiores en móvil (la barra ahí solo
+        // redondea arriba); en el modo flotante de escritorio se redondean las
+        // cuatro, así que también se redondean las inferiores del item.
+        .left .item:first-child.active {
+            border-top-left-radius: 22px;
+        }
+        .right .item:last-child.active {
+            border-top-right-radius: 22px;
+        }
+
+        @media screen and (min-width: 768px) {
+            .left .item:first-child.active {
+                border-bottom-left-radius: 22px;
+            }
+            .right .item:last-child.active {
+                border-bottom-right-radius: 22px;
+            }
+        }
     }
-}
-
-ion-icon {
-    color: var(--ion-color-primary);
-}
-
-i-lucide {
-    color: var(--ion-color-primary);
 }
 
 .profile-icon {

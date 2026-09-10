@@ -33,7 +33,7 @@ import {
   ModalController,
 } from "@ionic/angular";
 
-import { LogOut, Clock, EllipsisVertical, MoreVertical } from "lucide-angular";
+import { LogOut } from "lucide-angular";
 import { DateTime } from "luxon";
 import { Subscription } from "rxjs";
 
@@ -56,15 +56,12 @@ import { TabBarVisibilityService } from "../../services/tab-bar-visibility.servi
 import {
   CalendarAppointmentModalComponent,
   CalendarEventInfoComponent,
-  CalendarScheduleModalComponent,
   CalendarToolbarComponent,
   MonthPickerModalComponent,
   EmployeesColumnsViewComponent,
 } from "../../ui";
 import { CalendarDayEventsModalComponent } from "../../ui/organisms/day-events-modal/calendar-day-events-modal";
 import { DayEventItem } from "../../ui/molecules/mol-day-event-item/mol-day-event-item.component";
-
-import { ConfigModalComponent } from "../../components/modals/config-modal/config-modal.component";
 
 @Component({
   selector: "app-calendar",
@@ -76,16 +73,11 @@ import { ConfigModalComponent } from "../../components/modals/config-modal/confi
     FullCalendarModule,
     CalendarToolbarComponent,
     MonthPickerModalComponent,
-    CalendarScheduleModalComponent,
-    ConfigModalComponent,
     EmployeesColumnsViewComponent,
   ],
 })
 export class CalendarPage implements OnDestroy {
   readonly LogOut = LogOut;
-  readonly Clock = Clock;
-  readonly EllipsisVertical = EllipsisVertical;
-  readonly MoreVertical = MoreVertical;
 
   // Placeholders del skeleton de carga: imitan la rejilla de 5 semanas x 7 días
   // del mes con anchos variados (deterministas, no random) para que las "citas"

@@ -1,5 +1,4 @@
 <div class="footer" [class.hidden]="!tabBarVisibility.visible()">
-    <img class="img" src="assets/svgs/footer.svg">
     <div class="footer-content">
         <div class="left">
             <div class="item" [class.active]="selectedSegment === 'calendar'" (click)="onChangeSegment('calendar')">
@@ -29,6 +28,25 @@
                 <i-lucide [img]="MessageCircle"></i-lucide>
                 <ion-label>Chat</ion-label>
             </div>
+            <div class="item" [id]="ajustesButtonId">
+                <i-lucide [img]="Settings"></i-lucide>
+                <ion-label>Ajustes</ion-label>
+            </div>
         </div>
     </div>
+
+    <ion-popover [trigger]="ajustesButtonId" dismissOnSelect="true">
+        <ng-template>
+            <ion-list>
+                <ion-item button="true" (click)="openSchedule()">
+                    <i-lucide [img]="Clock" slot="start"></i-lucide>
+                    <ion-label>Horarios</ion-label>
+                </ion-item>
+                <ion-item button="true" (click)="openTheme()">
+                    <i-lucide [img]="Palette" slot="start"></i-lucide>
+                    <ion-label>Tema</ion-label>
+                </ion-item>
+            </ion-list>
+        </ng-template>
+    </ion-popover>
 </div>
