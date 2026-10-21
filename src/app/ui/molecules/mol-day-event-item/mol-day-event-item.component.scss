@@ -80,6 +80,10 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  // La hora nunca se parte en dos líneas ("11:00 -" / "12:30"), aunque la
+  // tarjeta sea estrecha: se recorta el nombre en su lugar.
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .collapse-chevron {
@@ -110,6 +114,47 @@
 
   .timeline-title {
     font-size: 1em;
+  }
+}
+
+// Modo compacto (citas muy cortas): hora · nombre en una sola fila, con
+// menos padding y botones más pequeños, para caber en ~48px de alto.
+.timeline-event.compact {
+  align-items: center;
+
+  .timeline-content {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+  }
+
+  .timeline-time {
+    margin-bottom: 0;
+  }
+
+  .timeline-title {
+    font-size: 0.95em;
+    min-width: 0;
+
+    &::before {
+      content: "·";
+      margin-right: 6px;
+      color: var(--ion-color-medium);
+    }
+  }
+
+  ion-button {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    margin-left: 0;
+    margin-top: 0;
+    --padding-start: 4px;
+    --padding-end: 4px;
+    --padding-top: 4px;
+    --padding-bottom: 4px;
   }
 }
 
