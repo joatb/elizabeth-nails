@@ -1,6 +1,6 @@
 // Alto fijo de una franja horaria: es la unidad contra la que se calcula la
 // posición/altura en % de cada cita (ver layoutEvents() en el componente).
-$hour-row-height: 60px;
+$hour-row-height: 96px;
 
 .schedule-grid {
   display: grid;
@@ -98,7 +98,9 @@ $hour-row-height: 60px;
   // left/width se fijan por evento vía [style.left]/[style.width] (en % del
   // ancho de la columna) para repartir en sub-columnas las citas que se
   // solapan en el tiempo — ver assignOverlapColumns() en el componente.
-  min-height: 46px;
+  // 24px = 15 min (MIN_EVENT_MINUTES) con $hour-row-height: así la tarjeta
+  // nunca es más alta que su duración real y no tapa la cita siguiente.
+  min-height: 24px;
   overflow: hidden;
   border-radius: 8px;
   cursor: pointer;

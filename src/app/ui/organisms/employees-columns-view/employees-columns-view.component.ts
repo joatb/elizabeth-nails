@@ -12,6 +12,9 @@ const DEFAULT_END_HOUR = 20;
 // Duración mínima "visual" de una cita muy corta, para que su altura en % no
 // desaparezca del todo (se complementa con un min-height en CSS).
 const MIN_EVENT_MINUTES = 15;
+// Citas de esta duración o menos se pintan en modo compacto (una sola línea),
+// porque su alto proporcional no da para hora + nombre en dos líneas.
+const COMPACT_MAX_MINUTES = 45;
 
 // Cita ya posicionada dentro de la columna de su empleado: top/height en %
 // respecto al rango de horas visible, calculados a partir de start/end_time
@@ -23,6 +26,11 @@ type PositionedDayEvent = DayEventItem & {
   heightPercent: number;
   leftPercent: number;
   widthPercent: number;
+  // Cita corta (ver COMPACT_MAX_MINUTES): hora + nombre en una sola línea.
+  compact: boolean;
+  // Comparte ancho con otras citas solapadas: sin hueco para los botones de
+  // editar/borrar hasta que se expande (y pasa a ocupar toda la columna).
+  narrow: boolean;
 };
 
 // Intervalo auxiliar usado solo para calcular el layout de solapamiento.
@@ -287,6 +295,8 @@ export class EmployeesColumnsViewComponent {
           heightPercent: interval.heightPercent,
           leftPercent: (column / columnCount) * 100,
           widthPercent: 100 / columnCount,
+          compact: interval.endMinutes - interval.startMinutes <= COMPACT_MAX_MINUTES,
+          narrow: columnCount > 1,
         });
       }
 

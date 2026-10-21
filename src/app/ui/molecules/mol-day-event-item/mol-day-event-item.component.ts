@@ -51,10 +51,18 @@ export class MolDayEventItemComponent {
   // controla ese estado (p.ej. al hacer click en la tarjeta).
   @Input() collapsible: boolean = false;
   @Input() expanded: boolean = false;
+  // Para citas muy cortas (p.ej. 30 min en columnas por empleado): hora y nombre
+  // en una sola fila y botones más pequeños, para caber en su alto proporcional.
+  // Al expandir se vuelve a la tarjeta normal.
+  @Input() compact: boolean = false;
 
   @Output() delete = new EventEmitter<DayEventItem>();
   @Output() edit = new EventEmitter<DayEventItem>();
   @Output() dragStart = new EventEmitter<DayEventItem>();
+
+  get isCompact(): boolean {
+    return this.compact && !this.expanded;
+  }
 
   get showDetails(): boolean {
     return !this.collapsible || this.expanded;
